@@ -1,3 +1,6 @@
+# Reference databases (large binary files)
+references/
+
 # Nextflow work directory and cache
 work/
 .nextflow/
