@@ -25,9 +25,12 @@ workflow VIROME {
     if (!params.star_index)  error "params.star_index is required"
     if (!params.kraken2_db)  error "params.kraken2_db is required"
 
-    ch_star_index  = file(params.star_index,  checkIfExists: true)
-    ch_kraken2_db  = file(params.kraken2_db,  checkIfExists: true)
-    ch_adapters    = file(params.adapters,     checkIfExists: true)
+    ch_star_index    = file(params.star_index,  checkIfExists: true)
+    ch_kraken2_db    = file(params.kraken2_db,  checkIfExists: true)
+    ch_adapters      = file(params.adapters,     checkIfExists: true)
+    ch_artifact_list = params.artifact_list
+        ? file(params.artifact_list, checkIfExists: true)
+        : file("$projectDir/assets/NO_FILE")
 
     // -------------------------------------------------------------------------
     // Step 1 — QC on raw reads
@@ -58,7 +61,7 @@ workflow VIROME {
     // -------------------------------------------------------------------------
     // Step 5 — Filter low-confidence / low-count taxa
     // -------------------------------------------------------------------------
-    KRAKEN2_FILTER(ch_kraken2_reports)
+    KRAKEN2_FILTER(ch_kraken2_reports, ch_artifact_list)
     ch_filtered = KRAKEN2_FILTER.out.filtered
 
     // -------------------------------------------------------------------------

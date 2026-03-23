@@ -37,6 +37,7 @@ kraken2_extra_args:  ""
 
 # --- Filtering ---
 min_reads_per_taxon: 5       # discard taxa with fewer than this many reads per sample
+artifact_list: null          # set to path of artifact_taxa.tsv to enable exclusion, or leave null
 
 # --- Reporting ---
 multiqc_title: "Virome QC Report"

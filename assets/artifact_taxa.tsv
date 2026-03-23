@@ -1,0 +1,21 @@
+# Artifact exclusion list for virome pipeline
+# Format: taxon_id <tab> taxon_name <tab> reason
+# Lines starting with # are comments.
+# Add entries here for taxa that are consistently artifactual across samples.
+# This list is versioned with the pipeline — document your reasoning.
+#
+# Categories:
+#   reagent       — contaminant introduced by sequencing kit or library prep
+#   misclass      — host or common environmental reads misclassified as viral
+#   ruminant_bug  — veterinary/agricultural virus with no plausible human tissue origin
+#   insect_virus  — insect-specific virus, likely reagent or environmental
+#   phage         — bacteriophage with no relevance to mammalian tissue virome
+#
+taxon_id	taxon_name	reason
+159150	Shamonda virus	ruminant_bug: orthobunyavirus of ruminants, dominant false positive in human RNA-seq
+3052441	Orthobunyavirus simbuense	ruminant_bug: same Peribunyaviridae family as Shamonda, co-occurs consistently
+56947	Choristoneura fumiferana granulovirus	insect_virus: baculovirus, common Illumina kit reagent contaminant
+67082	BeAn 58058 virus	misclass: unclassified rodent virus, likely host reads misassigned at low confidence
+247080	Ralstonia phage p12J	phage: plant pathogen bacteriophage, no relevance to human tissue
+1815968	Salmonella phage SJ46	phage: enteric bacteriophage, no relevance to human tissue
+2083300	Bracoviriform facetosae	insect_virus: parasitoid wasp-associated virus, reagent contaminant
