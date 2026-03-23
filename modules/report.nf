@@ -1,6 +1,6 @@
 process REPORT {
 
-    container "${projectDir}/containers/python.sif"
+    container "${params.container_dir}/python.sif"
 
     publishDir "${params.outdir}/results", mode: 'copy'
 

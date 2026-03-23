@@ -1,7 +1,7 @@
 process STAR_HOST_REMOVAL {
     tag "${meta.id}"
 
-    container "${projectDir}/containers/star.sif"
+    container "${params.container_dir}/star.sif"
 
     input:
     tuple val(meta), path(r1), path(r2)

@@ -15,8 +15,11 @@ samplesheet: /work/__USER__/pipelines/virome/samplesheet.csv
 outdir: /scratch/juno/__USER__/pipelines/virome/__PROJECT__
 
 # --- References ---
-star_index:  /groups/tprice/pipelines/references/star_index
-kraken2_db:  /groups/tprice/pipelines/references/kraken2_viral_db
+star_index:    /groups/tprice/pipelines/references/star_index
+kraken2_db:    /groups/tprice/pipelines/references/kraken2_viral_db
+
+# --- Containers ---
+container_dir: /groups/tprice/pipelines/containers/virome
 
 # --- Trimmomatic ---
 trim_headcrop:       0

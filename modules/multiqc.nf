@@ -1,6 +1,6 @@
 process MULTIQC {
 
-    container "${projectDir}/containers/multiqc.sif"
+    container "${params.container_dir}/multiqc.sif"
 
     publishDir "${params.outdir}/multiqc", mode: 'copy'
 

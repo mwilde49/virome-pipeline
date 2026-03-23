@@ -2,7 +2,7 @@ process FASTQC {
     tag "${meta.id}"
     label 'process_low'
 
-    container "${projectDir}/containers/fastqc.sif"
+    container "${params.container_dir}/fastqc.sif"
 
     input:
     tuple val(meta), path(r1), path(r2)

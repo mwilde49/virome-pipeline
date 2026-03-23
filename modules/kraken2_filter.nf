@@ -1,7 +1,7 @@
 process KRAKEN2_FILTER {
     tag "${meta.id}"
 
-    container "${projectDir}/containers/python.sif"
+    container "${params.container_dir}/python.sif"
 
     input:
     tuple val(meta), path(report)

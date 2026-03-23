@@ -1,7 +1,7 @@
 process TRIMMOMATIC {
     tag "${meta.id}"
 
-    container "${projectDir}/containers/trimmomatic.sif"
+    container "${params.container_dir}/trimmomatic.sif"
 
     input:
     tuple val(meta), path(r1), path(r2)

@@ -1,7 +1,7 @@
 process KRAKEN2_CLASSIFY {
     tag "${meta.id}"
 
-    container "${projectDir}/containers/kraken2.sif"
+    container "${params.container_dir}/kraken2.sif"
 
     input:
     tuple val(meta), path(r1), path(r2)
