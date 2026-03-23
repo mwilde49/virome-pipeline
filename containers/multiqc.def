@@ -1,22 +1,14 @@
 Bootstrap: docker
-From: python:3.11-slim
+From: quay.io/biocontainers/multiqc:1.21--pyhdfd78af_0
 
 %labels
     tool    MultiQC
     version 1.21
-    purpose Aggregate QC metrics across all pipeline steps
-
-%post
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update -qq && apt-get install -y --no-install-recommends \
-        && rm -rf /var/lib/apt/lists/*
-
-    pip install --no-cache-dir multiqc==1.21
+    source  quay.io/biocontainers/multiqc:1.21--pyhdfd78af_0
 
 %environment
     export LC_ALL=C
     export PYTHONNOUSERSITE=1
-    export PATH=/usr/local/bin:$PATH
 
 %runscript
     exec multiqc "$@"

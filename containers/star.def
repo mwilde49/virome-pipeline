@@ -1,26 +1,14 @@
 Bootstrap: docker
-From: ubuntu:22.04
+From: quay.io/biocontainers/star:2.7.11b--h43eeafb_0
 
 %labels
     tool    STAR
     version 2.7.11b
-    purpose Align reads to host genome; unmapped reads go to viral classification
-
-%post
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update -qq && apt-get install -y --no-install-recommends \
-        wget \
-        && rm -rf /var/lib/apt/lists/*
-
-    cd /opt
-    wget -q https://github.com/alexdobin/STAR/releases/download/2.7.11b/STAR_2.7.11b.zip
-    unzip STAR_2.7.11b.zip
-    cp STAR_2.7.11b/Linux_x86_64_static/STAR /usr/local/bin/
-    rm -rf STAR_2.7.11b STAR_2.7.11b.zip
+    source  quay.io/biocontainers/star:2.7.11b--h43eeafb_0
 
 %environment
     export LC_ALL=C
-    export PATH=/usr/local/bin:$PATH
+    export PYTHONNOUSERSITE=1
 
 %runscript
     exec STAR "$@"

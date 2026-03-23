@@ -40,7 +40,7 @@ for name in "${CONTAINERS[@]}"; do
     fi
 
     log "Building ${name}.sif ..."
-    sudo apptainer build "${sif}" "${def}"
+    apptainer build --fakeroot "${sif}" "${def}"
     log "Done: ${name}.sif ($(du -sh "${sif}" | cut -f1))"
 done
 
