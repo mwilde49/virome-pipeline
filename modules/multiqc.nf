@@ -18,6 +18,7 @@ process MULTIQC {
     multiqc \\
         ${config} \\
         ${title} \\
+        --filename multiqc_report.html \\
         --force \\
         .
     """
