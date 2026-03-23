@@ -71,7 +71,11 @@ workflow VIROME {
         .map { meta, tsv -> tsv }
         .collect()
 
-    AGGREGATE(ch_all_filtered)
+    ch_all_star_logs = ch_star_logs
+        .map { meta, log -> log }
+        .collect()
+
+    AGGREGATE(ch_all_filtered, ch_all_star_logs)
 
     // -------------------------------------------------------------------------
     // Step 7 — MultiQC and final report
