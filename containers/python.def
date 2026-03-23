@@ -9,6 +9,7 @@ From: python:3.11-slim
 %post
     export DEBIAN_FRONTEND=noninteractive
     apt-get update -qq && apt-get install -y --no-install-recommends \
+        procps \
         && rm -rf /var/lib/apt/lists/*
 
     pip install --no-cache-dir \
