@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nextflow DSL2 pipeline for systematic profiling of the human dorsal root ganglion (DRG) virome from paired-end bulk RNA-seq data. Runs on the Juno HPC cluster (UT Dallas, TJP group) via SLURM and Apptainer. Lives as a git submodule at `containers/virome` within `github.com/mwilde49/hpc`.
 
-Current version: **0.2.0** — validated end-to-end on muscle tissue cohort (5 samples).
+Current version: **0.3.0** — multi-stage filtering with enhanced reporting. Validated on muscle tissue cohort (5 samples).
 
 ## Running the pipeline
 
@@ -69,11 +69,31 @@ bash scripts/pull_results.sh /scratch/juno/maw210003/virome_test results/muscle_
 
 ## Architecture
 
-**Data flow** (7 steps):
+**Data flow** (v0.3.0, 7 steps + multi-stage aggregation):
 ```
-raw FASTQs → FASTQC → TRIMMOMATIC → STAR_HOST_REMOVAL → KRAKEN2_CLASSIFY → KRAKEN2_FILTER → AGGREGATE → REPORT
-                                                                                           └──────────────→ MULTIQC
+raw FASTQs → FASTQC → TRIMMOMATIC → STAR_HOST_REMOVAL → KRAKEN2_CLASSIFY → BRACKEN → KRAKEN2_FILTER ─┬→ AGGREGATE(final)       ─┐
+                                                                                                       ├→ AGGREGATE(minreads)    ─┼→ REPORT
+                                                                                                       └→ AGGREGATE(bracken_raw) ─┘
+                                                                                      └──────────────────────────────────────────→ MULTIQC
 ```
+
+**KRAKEN2_FILTER emits 5 channels per sample:**
+- `filtered` → `{id}.filtered.tsv` — final output (min_reads + artifact exclusion)
+- `bracken_raw` → `{id}.bracken_raw.tsv` — all viral species, no threshold
+- `minreads` → `{id}.minreads.tsv` — after min_reads, before artifact exclusion
+- `summary` → `{id}.filter_summary.tsv` — per-stage taxa/read counts
+- `artifacts` → `{id}.artifacts_removed.tsv` — taxa removed by artifact exclusion
+
+**Three abundance matrices are produced** (all in `results/`):
+- `viral_abundance_matrix.tsv` — final filtered (the primary output)
+- `minreads_matrix.tsv` — after min_reads threshold only
+- `bracken_raw_matrix.tsv` — all viral species from Bracken (baseline)
+
+**Report (`virome_report/summary.html`) includes:**
+- Diversity table (richness, Shannon, total reads)
+- Filtering funnel chart (taxa count per stage per sample)
+- Read attrition chart (reads retained per stage per sample)
+- Top-N abundance heatmap and prevalence bar (final matrix)
 
 **Key architectural decisions:**
 
@@ -135,9 +155,9 @@ sample,fastq_r1,fastq_r2
 
 ### Near-term
 - **`conf/test.config`** — minimal test profile with synthetic data for CI/smoke testing
-- **Bracken abundance re-estimation** — post-Kraken2 step to convert read counts to species-level abundance estimates with confidence intervals
 - **Kraken2 confidence tuning** — expose per-run confidence threshold; DRG samples may need higher stringency than muscle tissue
 - **Host removal QC metric** — emit percent unmapped reads per sample to MultiQC for cross-cohort monitoring
+- **MultiQC custom content** — inject filter_summary TSV into MultiQC for per-sample filtering stats in the QC report
 
 ### Medium-term
 - **PathSeq validation module** — optional GATK PathSeq step for orthogonal validation of high-confidence hits; stub exists in params (`run_pathseq`)

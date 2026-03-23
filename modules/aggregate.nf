@@ -5,12 +5,13 @@ process AGGREGATE {
     publishDir "${params.outdir}/results", mode: 'copy'
 
     input:
-    path filtered_tsvs  // collection of all per-sample filtered TSVs
-    path star_logs      // collection of all per-sample STAR Log.final.out files
+    val   output_name   // e.g. 'viral_abundance_matrix', 'bracken_raw_matrix', 'minreads_matrix'
+    path  filtered_tsvs // collection of per-sample TSVs
+    path  star_logs     // collection of per-sample STAR Log.final.out files
 
     output:
-    path "viral_abundance_matrix.tsv", emit: matrix
-    path "viral_abundance_matrix.csv", emit: matrix_csv
+    path "${output_name}.tsv", emit: matrix
+    path "${output_name}.csv", emit: matrix_csv
 
     script:
     def input_args    = filtered_tsvs instanceof List
@@ -23,6 +24,6 @@ process AGGREGATE {
     aggregate_virome.py \\
         ${input_args} \\
         ${star_log_args} \\
-        --output viral_abundance_matrix
+        --output ${output_name}
     """
 }

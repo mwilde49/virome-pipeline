@@ -2,20 +2,27 @@
 """
 filter_kraken2_report.py
 
-Filter a Kraken2 report to retain only viral taxa above a minimum read count.
-Optionally excludes known artifact taxa from a curated exclusion list.
-Outputs a TSV with columns: taxon_id, taxon_name, rank, reads, percent.
+Filter a Bracken/Kraken2 report through three progressive stages and emit
+intermediate TSVs so that each filtering step can be tracked in the report.
+
+Outputs (all written automatically alongside --output):
+  {id}.bracken_raw.tsv        — all viral ranks, no read-count threshold
+  {id}.minreads.tsv           — after min-reads filter, before artifact exclusion
+  {id}.filtered.tsv           — final: min-reads + artifact exclusion (= --output)
+  {id}.filter_summary.tsv     — per-stage counts table
+  {id}.artifacts_removed.tsv  — taxa removed by artifact exclusion (may be empty)
 """
 
 import click
 import pandas as pd
+from pathlib import Path
 
 
 KRAKEN2_REPORT_COLS = [
     'percent', 'reads_clade', 'reads_direct', 'rank', 'taxon_id', 'taxon_name'
 ]
 
-VIRAL_RANKS = {'S', 'S1', 'S2', 'G', 'G1', 'F'}  # species and below are most relevant
+VIRAL_RANKS = {'S', 'S1', 'S2', 'G', 'G1', 'F'}
 
 
 def load_artifact_taxa(artifact_list):
@@ -35,43 +42,59 @@ def load_artifact_taxa(artifact_list):
 
 
 @click.command()
-@click.option('--report',        required=True,  type=click.Path(exists=True), help='Kraken2 report file')
-@click.option('--min-reads',     default=5,      show_default=True,            help='Minimum direct reads to retain a taxon')
-@click.option('--artifact-list', default=None,   type=click.Path(exists=True), help='TSV of artifact taxon IDs to exclude')
-@click.option('--output',        required=True,                                 help='Output TSV path')
-def main(report, min_reads, artifact_list, output):
-    df = pd.read_csv(
-        report,
-        sep='\t',
-        header=None,
-        names=KRAKEN2_REPORT_COLS
-    )
+@click.option('--report',     required=True,  type=click.Path(exists=True), help='Kraken2/Bracken report file')
+@click.option('--sample-id',  required=True,                                help='Sample identifier (used in filter_summary.tsv)')
+@click.option('--min-reads',  default=5,      show_default=True,            help='Minimum direct reads to retain a taxon')
+@click.option('--artifact-list', default=None, type=click.Path(exists=True), help='TSV of artifact taxon IDs to exclude')
+@click.option('--output',     required=True,                                 help='Final filtered output TSV path ({id}.filtered.tsv)')
+def main(report, sample_id, min_reads, artifact_list, output):
+    # Derive output prefix (strip .filtered.tsv or use stem)
+    out_path = Path(output)
+    prefix = str(out_path.parent / out_path.name.replace('.filtered.tsv', ''))
 
-    # Strip leading whitespace from taxon_name (Kraken2 indents by clade depth)
+    df = pd.read_csv(report, sep='\t', header=None, names=KRAKEN2_REPORT_COLS)
     df['taxon_name'] = df['taxon_name'].str.strip()
 
-    viral_df = df[
-        (df['reads_direct'] >= min_reads) &
+    # ── Stage 1: bracken_raw — viral ranks only, no threshold ────────────────
+    bracken_raw = df[
         (df['rank'].isin(VIRAL_RANKS)) &
         (df['taxon_id'] != 0)
     ].copy()
-
-    viral_df = viral_df[['taxon_id', 'taxon_name', 'rank', 'reads_direct', 'percent']].rename(
+    bracken_raw = bracken_raw[['taxon_id', 'taxon_name', 'rank', 'reads_direct', 'percent']].rename(
         columns={'reads_direct': 'reads'}
-    )
+    ).sort_values('reads', ascending=False)
+    bracken_raw.to_csv(f"{prefix}.bracken_raw.tsv", sep='\t', index=False)
 
-    # Apply artifact exclusion list
+    # ── Stage 2: minreads — apply read-count threshold ────────────────────────
+    minreads_df = bracken_raw[bracken_raw['reads'] >= min_reads].copy()
+    minreads_df.to_csv(f"{prefix}.minreads.tsv", sep='\t', index=False)
+
+    # ── Stage 3: final — apply artifact exclusion ──────────────────────────────
+    artifacts_df = pd.DataFrame(columns=['taxon_id', 'taxon_name', 'rank', 'reads'])
+    final_df = minreads_df.copy()
     if artifact_list:
         excluded_ids = load_artifact_taxa(artifact_list)
-        before = len(viral_df)
-        viral_df = viral_df[~viral_df['taxon_id'].isin(excluded_ids)]
-        removed = before - len(viral_df)
-        if removed:
-            print(f"Excluded {removed} artifact taxa")
+        mask = final_df['taxon_id'].isin(excluded_ids)
+        artifacts_df = final_df[mask].copy()
+        final_df = final_df[~mask].copy()
+        if len(artifacts_df):
+            print(f"Excluded {len(artifacts_df)} artifact taxa")
 
-    viral_df = viral_df.sort_values('reads', ascending=False)
-    viral_df.to_csv(output, sep='\t', index=False)
-    print(f"Retained {len(viral_df)} taxa with >= {min_reads} reads → {output}")
+    final_df.to_csv(output, sep='\t', index=False)
+    artifacts_df.to_csv(f"{prefix}.artifacts_removed.tsv", sep='\t', index=False)
+
+    # ── Filter summary ─────────────────────────────────────────────────────────
+    summary = pd.DataFrame([
+        {'sample_id': sample_id, 'stage': 'bracken_raw',
+         'taxa_kept': len(bracken_raw),    'reads_retained': int(bracken_raw['reads'].sum())},
+        {'sample_id': sample_id, 'stage': 'minreads',
+         'taxa_kept': len(minreads_df),    'reads_retained': int(minreads_df['reads'].sum())},
+        {'sample_id': sample_id, 'stage': 'final',
+         'taxa_kept': len(final_df),       'reads_retained': int(final_df['reads'].sum())},
+    ])
+    summary.to_csv(f"{prefix}.filter_summary.tsv", sep='\t', index=False)
+
+    print(f"bracken_raw={len(bracken_raw)} | minreads={len(minreads_df)} | final={len(final_df)} → {output}")
 
 
 if __name__ == '__main__':

@@ -12,6 +12,8 @@ include { KRAKEN2_CLASSIFY  } from '../modules/kraken2_classify'
 include { BRACKEN           } from '../modules/bracken'
 include { KRAKEN2_FILTER    } from '../modules/kraken2_filter'
 include { AGGREGATE         } from '../modules/aggregate'
+include { AGGREGATE as AGGREGATE_BRACKEN  } from '../modules/aggregate'
+include { AGGREGATE as AGGREGATE_MINREADS } from '../modules/aggregate'
 include { MULTIQC           } from '../modules/multiqc'
 include { REPORT            } from '../modules/report'
 
@@ -65,23 +67,36 @@ workflow VIROME {
     BRACKEN(ch_kraken2_reports, ch_kraken2_db)
 
     // -------------------------------------------------------------------------
-    // Step 5 — Filter low-confidence / low-count taxa (on Bracken report)
+    // Step 5 — Filter through three stages (bracken_raw → minreads → artifacts)
     // -------------------------------------------------------------------------
     KRAKEN2_FILTER(BRACKEN.out.report, ch_artifact_list)
-    ch_filtered = KRAKEN2_FILTER.out.filtered
 
     // -------------------------------------------------------------------------
-    // Step 6 — Aggregate across samples into abundance matrix
+    // Step 6 — Aggregate each stage into its own abundance matrix
     // -------------------------------------------------------------------------
-    ch_all_filtered = ch_filtered
-        .map { meta, tsv -> tsv }
-        .collect()
-
     ch_all_star_logs = ch_star_logs
         .map { meta, log -> log }
         .collect()
 
-    AGGREGATE(ch_all_filtered, ch_all_star_logs)
+    ch_all_bracken_raw = KRAKEN2_FILTER.out.bracken_raw
+        .map { meta, tsv -> tsv }
+        .collect()
+
+    ch_all_minreads = KRAKEN2_FILTER.out.minreads
+        .map { meta, tsv -> tsv }
+        .collect()
+
+    ch_all_filtered = KRAKEN2_FILTER.out.filtered
+        .map { meta, tsv -> tsv }
+        .collect()
+
+    ch_all_filter_summaries = KRAKEN2_FILTER.out.summary
+        .map { meta, tsv -> tsv }
+        .collect()
+
+    AGGREGATE_BRACKEN( 'bracken_raw_matrix',      ch_all_bracken_raw, ch_all_star_logs)
+    AGGREGATE_MINREADS('minreads_matrix',          ch_all_minreads,    ch_all_star_logs)
+    AGGREGATE(         'viral_abundance_matrix',   ch_all_filtered,    ch_all_star_logs)
 
     // -------------------------------------------------------------------------
     // Step 7 — MultiQC and final report
@@ -99,7 +114,10 @@ workflow VIROME {
     MULTIQC(ch_multiqc_inputs)
 
     REPORT(
+        AGGREGATE_BRACKEN.out.matrix,
+        AGGREGATE_MINREADS.out.matrix,
         AGGREGATE.out.matrix,
+        ch_all_filter_summaries,
         file(params.samplesheet)
     )
 
