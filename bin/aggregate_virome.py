@@ -45,7 +45,7 @@ def main(input, star_log, output):
 
     frames = []
     for tsv_path in input:
-        sample_id = Path(tsv_path).stem.replace('.filtered', '')
+        sample_id = Path(tsv_path).name.split('.')[0]
         df = pd.read_csv(tsv_path, sep='\t')
         df = df[['taxon_id', 'taxon_name', 'rank', 'reads']].copy()
 

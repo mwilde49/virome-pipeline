@@ -14,6 +14,7 @@
 taxon_id	taxon_name	reason
 159150	Shamonda virus	ruminant_bug: orthobunyavirus of ruminants, dominant false positive in human RNA-seq
 3052441	Orthobunyavirus simbuense	ruminant_bug: same Peribunyaviridae family as Shamonda, co-occurs consistently
+3052437	Orthobunyavirus schmallenbergense	ruminant_bug: Schmallenberg virus, ruminant orthobunyavirus, top false positive in muscle tissue cohort
 56947	Choristoneura fumiferana granulovirus	insect_virus: baculovirus, common Illumina kit reagent contaminant
 67082	BeAn 58058 virus	misclass: unclassified rodent virus, likely host reads misassigned at low confidence
 247080	Ralstonia phage p12J	phage: plant pathogen bacteriophage, no relevance to human tissue
