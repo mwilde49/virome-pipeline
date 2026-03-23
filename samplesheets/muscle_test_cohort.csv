@@ -1,0 +1,6 @@
+sample,fastq_r1,fastq_r2
+Sample_19,/scratch/juno/maw210003/fastq/Sample_19_1_paired.fastq.gz,/scratch/juno/maw210003/fastq/Sample_19_2_paired.fastq.gz
+Sample_20,/scratch/juno/maw210003/fastq/Sample_20_1_paired.fastq.gz,/scratch/juno/maw210003/fastq/Sample_20_2_paired.fastq.gz
+Sample_21,/scratch/juno/maw210003/fastq/Sample_21_1_paired.fastq.gz,/scratch/juno/maw210003/fastq/Sample_21_2_paired.fastq.gz
+Sample_22,/scratch/juno/maw210003/fastq/Sample_22_1_paired.fastq.gz,/scratch/juno/maw210003/fastq/Sample_22_2_paired.fastq.gz
+Sample_23,/scratch/juno/maw210003/fastq/Sample_23_1_paired.fastq.gz,/scratch/juno/maw210003/fastq/Sample_23_2_paired.fastq.gz
