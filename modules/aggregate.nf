@@ -12,9 +12,12 @@ process AGGREGATE {
     path "viral_abundance_matrix.csv", emit: matrix_csv
 
     script:
+    def input_args = filtered_tsvs instanceof List
+        ? filtered_tsvs.collect { "--input $it" }.join(' \\\n        ')
+        : "--input ${filtered_tsvs}"
     """
     aggregate_virome.py \\
-        --input ${filtered_tsvs} \\
+        ${input_args} \\
         --output viral_abundance_matrix
     """
 }
