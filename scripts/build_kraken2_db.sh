@@ -1,17 +1,20 @@
 #!/bin/bash
-#SBATCH --job-name=kraken2_build
+#SBATCH --job-name=kraken2_db
 #SBATCH --partition=normal
 #SBATCH --account=tprice
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=64G
-#SBATCH --time=08:00:00
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+#SBATCH --time=02:00:00
 #SBATCH --output=logs/kraken2_build_%j.log
 #SBATCH --error=logs/kraken2_build_%j.err
 
 # =============================================================================
-# Build Kraken2 viral database from NCBI RefSeq
+# Download pre-built Kraken2 viral database (Langmead Lab / AWS)
 #
-# Run once on Juno to populate the shared references directory.
+# Avoids building from NCBI directly (rsync API is unreliable).
+# Database is pre-built, tested, and updated regularly.
+# Source: https://benlangmead.github.io/aws-indexes/k2
+#
 # Usage:
 #   mkdir -p logs
 #   sbatch scripts/build_kraken2_db.sh
@@ -25,46 +28,33 @@ set -euo pipefail
 module load apptainer
 
 DB_DIR="/groups/tprice/pipelines/references/kraken2_viral_db"
-THREADS=${SLURM_CPUS_PER_TASK:-16}
-KRAKEN2_CONTAINER="/groups/tprice/pipelines/containers/virome/kraken2.sif"
+DB_URL="https://genome-idx.s3.amazonaws.com/kraken/k2_viral_20240904.tar.gz"
+TMP_DIR="/scratch/juno/${USER}/kraken2_db_tmp"
 
-echo "=== Kraken2 DB Build ==="
+echo "=== Kraken2 DB Download ==="
 echo "Job ID  : ${SLURM_JOB_ID}"
 echo "Node    : $(hostname)"
 echo "DB dir  : ${DB_DIR}"
-echo "Threads : ${THREADS}"
+echo "Source  : ${DB_URL}"
 echo "Started : $(date)"
 echo ""
 
-mkdir -p "${DB_DIR}"
+mkdir -p "${DB_DIR}" "${TMP_DIR}"
 
-# Run all kraken2-build steps inside the container
-apptainer exec \
-    --cleanenv \
-    --bind "${DB_DIR}:${DB_DIR}" \
-    "${KRAKEN2_CONTAINER}" \
-    bash -c "
-        set -euo pipefail
+TARBALL="${TMP_DIR}/k2_viral.tar.gz"
 
-        echo '[1/3] Downloading NCBI taxonomy...'
-        kraken2-build --download-taxonomy --db ${DB_DIR}
+echo "[1/2] Downloading pre-built viral database (~500 MB)..."
+wget --progress=dot:giga -O "${TARBALL}" "${DB_URL}"
 
-        echo '[2/3] Downloading viral library from NCBI RefSeq...'
-        kraken2-build --download-library viral --db ${DB_DIR}
+echo "[2/2] Extracting to ${DB_DIR}..."
+tar -xzf "${TARBALL}" -C "${DB_DIR}"
 
-        echo '[3/3] Building database (this is the slow step)...'
-        kraken2-build \
-            --build \
-            --db ${DB_DIR} \
-            --threads ${THREADS}
-
-        echo 'Cleaning up intermediate files...'
-        kraken2-build --clean --db ${DB_DIR}
-
-        echo 'Done.'
-    "
+echo "Cleaning up temp files..."
+rm -rf "${TMP_DIR}"
 
 echo ""
-echo "=== Build complete ==="
+echo "=== Download complete ==="
 echo "Finished : $(date)"
 echo "DB size  : $(du -sh ${DB_DIR} | cut -f1)"
+echo "Contents :"
+ls -lh "${DB_DIR}"
