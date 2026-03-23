@@ -22,6 +22,8 @@
 
 set -euo pipefail
 
+module load apptainer
+
 DB_DIR="/groups/tprice/pipelines/references/kraken2_viral_db"
 THREADS=${SLURM_CPUS_PER_TASK:-16}
 KRAKEN2_CONTAINER="/groups/tprice/pipelines/containers/virome/kraken2.sif"
