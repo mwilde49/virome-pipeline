@@ -1,6 +1,0 @@
-Module	Section	Sample Name	Source
-STAR	SummaryLog	Sample_19	/groups/tprice/pipelines/containers/virome/work/7e/51eef1d14d59e4ce8c2fad0ce91c98/Sample_19_Log.final.out
-Kraken	all_sections	Sample_19	/groups/tprice/pipelines/containers/virome/work/7e/51eef1d14d59e4ce8c2fad0ce91c98/Sample_19.kraken2.report
-Trimmomatic	all_sections	Sample_19_trimmomatic	/groups/tprice/pipelines/containers/virome/work/7e/51eef1d14d59e4ce8c2fad0ce91c98/Sample_19_trimmomatic.log
-FastQC	all_sections	Sample_19_2_paired	/groups/tprice/pipelines/containers/virome/work/7e/51eef1d14d59e4ce8c2fad0ce91c98/Sample_19_2_paired_fastqc.zip
-FastQC	all_sections	Sample_19_1_paired	/groups/tprice/pipelines/containers/virome/work/7e/51eef1d14d59e4ce8c2fad0ce91c98/Sample_19_1_paired_fastqc.zip

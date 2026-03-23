@@ -1,5 +1,0 @@
-Sample	STAR_mqc-generalstats-star-uniquely_mapped_percent	STAR_mqc-generalstats-star-uniquely_mapped	Kraken_mqc-generalstats-kraken-pct_top_one	Kraken_mqc-generalstats-kraken-pct_top_n	Kraken_mqc-generalstats-kraken-pct_unclassified	Trimmomatic_mqc-generalstats-trimmomatic-dropped_pct	FastQC_mqc-generalstats-fastqc-percent_duplicates	FastQC_mqc-generalstats-fastqc-percent_gc	FastQC_mqc-generalstats-fastqc-avg_sequence_length	FastQC_mqc-generalstats-fastqc-median_sequence_length	FastQC_mqc-generalstats-fastqc-percent_fails	FastQC_mqc-generalstats-fastqc-total_sequences
-Sample_19	94.49	16512412.0	0.40800301688733687	0.6973969014913963	99.28793193406241							
-Sample_19_1_paired							60.76419675780171	51.0	129.5264797990884	151	18.181818181818183	17475548.0
-Sample_19_1_paired_Sample_19_2_paired						0.0						
-Sample_19_2_paired							63.836772271407035	51.0	129.63653757810627	151	18.181818181818183	17475548.0

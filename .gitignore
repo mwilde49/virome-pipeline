@@ -1,6 +1,10 @@
 # Reference databases (large binary files)
 references/
 
+# Local test results
+test_results/
+results/
+
 # Nextflow work directory and cache
 work/
 .nextflow/
