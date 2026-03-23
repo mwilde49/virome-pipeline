@@ -1,0 +1,2 @@
+Sample	input_read_pairs	surviving	surviving_pct	forward_only_surviving	forward_only_surviving_pct	reverse_only_surviving	reverse_only_surviving_pct	dropped	dropped_pct
+Sample_19_1_paired_Sample_19_2_paired	17475548.0	17474967.0	100.0	14.0	0.0	345.0	0.0	222.0	0.0
