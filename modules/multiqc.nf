@@ -8,8 +8,8 @@ process MULTIQC {
     path qc_files  // collection: FastQC zips, Trimmomatic logs, STAR logs, Kraken2 reports
 
     output:
-    path "multiqc_report.html", emit: report
-    path "multiqc_data/",       emit: data
+    path "multiqc_report.html",      emit: report
+    path "multiqc_report_data/",     emit: data
 
     script:
     def config = params.multiqc_config ? "--config ${params.multiqc_config}" : ''
