@@ -1,0 +1,39 @@
+# ============================================================
+# Virome Pipeline Configuration
+# ============================================================
+# Fill in all required fields before running.
+# Paths must be absolute (no symlinks — Apptainer bind requirement).
+
+# --- Project ---
+project_name: my_project        # used for output directory naming
+user: __USER__                  # your Juno username
+
+# --- Input ---
+samplesheet: /work/__USER__/pipelines/virome/samplesheet.csv
+
+# --- Output ---
+outdir: /scratch/juno/__USER__/pipelines/virome/__PROJECT__
+
+# --- References ---
+star_index:  /groups/tprice/pipelines/references/star_index
+kraken2_db:  /groups/tprice/pipelines/references/kraken2_viral_db
+
+# --- Trimmomatic ---
+trim_headcrop:       0
+trim_leading:        3
+trim_trailing:       3
+trim_slidingwindow:  "4:15"
+trim_minlen:         36
+
+# --- Host Removal (STAR) ---
+star_extra_args: ""
+
+# --- Kraken2 Classification ---
+kraken2_confidence:  0.1     # 0.0–1.0; higher = more specific, lower = more sensitive
+kraken2_extra_args:  ""
+
+# --- Filtering ---
+min_reads_per_taxon: 5       # discard taxa with fewer than this many reads per sample
+
+# --- Reporting ---
+multiqc_title: "Virome QC Report"

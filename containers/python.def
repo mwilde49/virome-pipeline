@@ -1,0 +1,36 @@
+Bootstrap: docker
+From: python:3.11-slim
+
+%labels
+    tool    Python
+    version 3.11
+    purpose Kraken2 filtering, aggregation, and reporting scripts
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -qq && apt-get install -y --no-install-recommends \
+        && rm -rf /var/lib/apt/lists/*
+
+    pip install --no-cache-dir \
+        pandas==2.2.2 \
+        numpy==1.26.4 \
+        matplotlib==3.9.0 \
+        seaborn==0.13.2 \
+        scipy==1.13.1 \
+        click==8.1.7
+
+    # Install pipeline scripts
+    mkdir -p /opt/virome/bin
+
+%files
+    ../bin/filter_kraken2_report.py  /opt/virome/bin/filter_kraken2_report.py
+    ../bin/aggregate_virome.py       /opt/virome/bin/aggregate_virome.py
+    ../bin/virome_report.py          /opt/virome/bin/virome_report.py
+
+%environment
+    export LC_ALL=C
+    export PATH=/opt/virome/bin:$PATH
+    export PYTHONNOUSERSITE=1
+
+%runscript
+    exec python "$@"

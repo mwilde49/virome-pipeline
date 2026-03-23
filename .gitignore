@@ -1,0 +1,21 @@
+# Nextflow work directory and cache
+work/
+.nextflow/
+.nextflow.log*
+
+# Built container images
+containers/*.sif
+
+# Output directories
+results/
+pipeline_info/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Editor / OS
+.DS_Store
+*.swp

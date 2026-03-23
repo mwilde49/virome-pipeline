@@ -1,0 +1,33 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+%labels
+    tool    Trimmomatic
+    version 0.39
+    purpose Adapter trimming and quality filtering (PE mode)
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -qq && apt-get install -y --no-install-recommends \
+        wget \
+        openjdk-11-jre-headless \
+        && rm -rf /var/lib/apt/lists/*
+
+    cd /opt
+    wget -q http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip
+    unzip Trimmomatic-0.39.zip
+    rm Trimmomatic-0.39.zip
+
+    # Create a wrapper so it can be called as 'trimmomatic'
+    cat > /usr/local/bin/trimmomatic <<'EOF'
+#!/bin/bash
+exec java -jar /opt/Trimmomatic-0.39/trimmomatic-0.39.jar "$@"
+EOF
+    chmod +x /usr/local/bin/trimmomatic
+
+%environment
+    export LC_ALL=C
+    export PATH=/usr/local/bin:$PATH
+
+%runscript
+    exec trimmomatic "$@"
