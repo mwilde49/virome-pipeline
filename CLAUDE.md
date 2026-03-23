@@ -29,6 +29,8 @@ nextflow run main.nf -profile standard \
 
 Always set `NXF_JVM_ARGS="-Xms256m -Xmx512m"` on Juno — the login node has limited memory and the JVM will OOM without it.
 
+The `slurm` profile automatically sets `workDir = /scratch/juno/$USER/nf_work`. Never run with `-profile slurm` from the groups filesystem work dir — STAR BAM files and `stageInMode = 'copy'` will exhaust the groups quota fast.
+
 ## Building containers
 
 Containers must be built before the pipeline runs. `.sif` files are gitignored.
