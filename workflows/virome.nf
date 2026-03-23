@@ -9,6 +9,7 @@ include { FASTQC            } from '../modules/fastqc'
 include { TRIMMOMATIC       } from '../modules/trimmomatic'
 include { STAR_HOST_REMOVAL } from '../modules/star_host_removal'
 include { KRAKEN2_CLASSIFY  } from '../modules/kraken2_classify'
+include { BRACKEN           } from '../modules/bracken'
 include { KRAKEN2_FILTER    } from '../modules/kraken2_filter'
 include { AGGREGATE         } from '../modules/aggregate'
 include { MULTIQC           } from '../modules/multiqc'
@@ -59,9 +60,14 @@ workflow VIROME {
     ch_kraken2_reports = KRAKEN2_CLASSIFY.out.report
 
     // -------------------------------------------------------------------------
-    // Step 5 — Filter low-confidence / low-count taxa
+    // Step 4b — Bracken abundance re-estimation
     // -------------------------------------------------------------------------
-    KRAKEN2_FILTER(ch_kraken2_reports, ch_artifact_list)
+    BRACKEN(ch_kraken2_reports, ch_kraken2_db)
+
+    // -------------------------------------------------------------------------
+    // Step 5 — Filter low-confidence / low-count taxa (on Bracken report)
+    // -------------------------------------------------------------------------
+    KRAKEN2_FILTER(BRACKEN.out.report, ch_artifact_list)
     ch_filtered = KRAKEN2_FILTER.out.filtered
 
     // -------------------------------------------------------------------------
@@ -83,9 +89,10 @@ workflow VIROME {
     ch_multiqc_inputs = ch_fastqc_raw_zip
         .map { meta, zips -> zips }
         .mix(
-            ch_trim_logs.map  { meta, log -> log },
-            ch_star_logs.map  { meta, log -> log },
-            ch_kraken2_reports.map { meta, report -> report }
+            ch_trim_logs.map             { meta, log    -> log    },
+            ch_star_logs.map             { meta, log    -> log    },
+            ch_kraken2_reports.map       { meta, report -> report },
+            BRACKEN.out.bracken_output.map { meta, out  -> out    }
         )
         .collect()
 
