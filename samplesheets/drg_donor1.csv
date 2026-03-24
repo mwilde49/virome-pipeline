@@ -1,0 +1,3 @@
+sample,fastq_r1,fastq_r2
+donor1_L5,/scratch/juno/maw210003/fastq/drg/donor1-L5_S13_L002_R1_001.fastq.gz,/scratch/juno/maw210003/fastq/drg/donor1-L5_S13_L002_R2_001.fastq.gz
+donor1_T12,/scratch/juno/maw210003/fastq/drg/donor1-T12_S14_L002_R1_001.fastq.gz,/scratch/juno/maw210003/fastq/drg/donor1-T12_S14_L002_R2_001.fastq.gz
