@@ -1,10 +1,6 @@
 # Reference databases (large binary files)
 references/
 
-# Local test results
-test_results/
-results/
-
 # Nextflow work directory and cache
 work/
 .nextflow/
@@ -13,8 +9,10 @@ work/
 # Built container images
 containers/*.sif
 
-# Output directories
+# Pipeline outputs and local results
 results/
+test_results/
+test_data/
 pipeline_info/
 
 # Python

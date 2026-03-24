@@ -20,3 +20,4 @@ taxon_id	taxon_name	reason
 247080	Ralstonia phage p12J	phage: plant pathogen bacteriophage, no relevance to human tissue
 1815968	Salmonella phage SJ46	phage: enteric bacteriophage, no relevance to human tissue
 2083300	Bracoviriform facetosae	insect_virus: parasitoid wasp-associated virus, reagent contaminant
+3051997	Betabaculovirus chofumiferanae	insect_virus: baculovirus, present in all muscle and DRG samples at high RPM, confirmed reagent contaminant
