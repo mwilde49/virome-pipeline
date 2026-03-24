@@ -1,0 +1,8 @@
+sample,fastq_r1,fastq_r2
+Sample_19,/scratch/juno/maw210003/fastq/Sample_19_1_paired.fastq.gz,/scratch/juno/maw210003/fastq/Sample_19_2_paired.fastq.gz
+Sample_20,/scratch/juno/maw210003/fastq/Sample_20_1_paired.fastq.gz,/scratch/juno/maw210003/fastq/Sample_20_2_paired.fastq.gz
+Sample_21,/scratch/juno/maw210003/fastq/Sample_21_1_paired.fastq.gz,/scratch/juno/maw210003/fastq/Sample_21_2_paired.fastq.gz
+Sample_22,/scratch/juno/maw210003/fastq/Sample_22_1_paired.fastq.gz,/scratch/juno/maw210003/fastq/Sample_22_2_paired.fastq.gz
+Sample_23,/scratch/juno/maw210003/fastq/Sample_23_1_paired.fastq.gz,/scratch/juno/maw210003/fastq/Sample_23_2_paired.fastq.gz
+donor1_L5,/scratch/juno/maw210003/fastq/drg/donor1-L5_S13_L002_R1_001.fastq.gz,/scratch/juno/maw210003/fastq/drg/donor1-L5_S13_L002_R2_001.fastq.gz
+donor1_T12,/scratch/juno/maw210003/fastq/drg/donor1-T12_S14_L002_R1_001.fastq.gz,/scratch/juno/maw210003/fastq/drg/donor1-T12_S14_L002_R2_001.fastq.gz
