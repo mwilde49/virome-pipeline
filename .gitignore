@@ -19,6 +19,8 @@ pipeline_info/
 research/figures/
 research/stage_plots/
 research/all_cohort_plots/
+research/paper1/figures/
+research/paper2/figures/
 
 # Python
 __pycache__/
