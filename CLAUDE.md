@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nextflow DSL2 pipeline for systematic profiling of the human dorsal root ganglion (DRG) virome from paired-end bulk RNA-seq data. Runs on the Juno HPC cluster (UT Dallas, TJP group) via SLURM and Apptainer. Lives as a git submodule at `containers/virome` within `github.com/mwilde49/hpc`.
 
-Current version: **1.1.0** — artifact exclusion list expanded to 22 entries (7 new: phiX174, Betafusellovirus yellowstonense, Colossusvirus PW, Ruthyvirus dumpsterdude, Steinhofvirus JWX, Chalconvirus acg2014i, Oceanusvirus kaneohense); `research/` directory added with analysis scripts and publication planning. Validated on 21-sample all-cohort run: 5 muscle + 6 DRG donor1 + 5 AIG1390 (duplicate, excluded) + 5 Saad (Saad_2 failed library, excluded).
+Current version: **1.2.0** — taxon display name remapping implemented (`assets/taxon_remap.tsv`, `--taxon-remap` flag); artifact list at 22 entries; `research/` directory with analysis scripts and publication planning.
 
 ## Running the pipeline
 
@@ -119,7 +119,10 @@ sample,fastq_r1,fastq_r2
 - `<sample>_rpm` — reads per million trimmed reads (normalized via STAR input read count)
 
 **Artifact exclusion:**
-`assets/artifact_taxa.tsv` — curated TSV of taxon IDs to exclude from all samples. 15 entries covering: ruminant orthobunyaviruses, insect baculoviruses, phages, environmental metagenome viruses (DRG k-mer cross-mapping), avian herpesviruses, and giant amoeba viruses. Enabled by default via `params.artifact_list`. Set to `null` to disable.
+`assets/artifact_taxa.tsv` — curated TSV of taxon IDs to exclude from all samples. 22 entries covering: ruminant orthobunyaviruses, insect baculoviruses, phages, environmental metagenome viruses (DRG k-mer cross-mapping), avian herpesviruses, and giant amoeba viruses. Enabled by default via `params.artifact_list`. Set to `null` to disable.
+
+**Taxon display name remapping:**
+`assets/taxon_remap.tsv` — curated TSV mapping taxon_id → display_name for taxa whose Kraken2/NCBI label is misleading in human tissue context (e.g. cross-species k-mer assignments). Applied after artifact exclusion to all three output stages; taxon_id is preserved for traceability. Current entry: 3050337 (*Cytomegalovirus papiinebeta3*) → `Human CMV (HHV-5) [proxy]`. Enabled by default via `params.taxon_remap`. Set to `null` to disable.
 
 **ICTV taxonomy reclassification caveat**: ICTV updates periodically assign new taxon IDs to previously named species, causing taxa to escape exclusion filtering. Confirmed example: Ralstonia phage p12J (247080) reclassified as Porrectionivirus p12J (2956327). When adding entries, verify whether the taxon ID has been superseded; list both old and new IDs if applicable. Audit the list after database updates.
 
@@ -160,7 +163,7 @@ sample,fastq_r1,fastq_r2
 ## Planned features / roadmap
 
 ### Near-term
-- **`assets/taxon_remap.tsv` + relabeling step** — rename known cross-reactive taxa to their correct biological identity in reports (e.g., Cytomegalovirus papiinebeta3/2169863 → "Human CMV (HHV-5)"); analogous to artifact_taxa.tsv but renames rather than removes
+- **`assets/taxon_remap.tsv` + relabeling step** — ✓ implemented in v1.2.0
 - **`conf/test.config`** — minimal test profile with synthetic data for CI/smoke testing
 - **Host removal QC metric** — emit percent unmapped reads per sample to MultiQC for cross-cohort monitoring
 - **MultiQC custom content** — inject filter_summary TSV into MultiQC for per-sample filtering stats in the QC report

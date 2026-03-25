@@ -6,6 +6,7 @@ process KRAKEN2_FILTER {
     input:
     tuple val(meta), path(report)
     path artifact_list
+    path taxon_remap
 
     output:
     tuple val(meta), path("${meta.id}.filtered.tsv"),          emit: filtered
@@ -16,12 +17,14 @@ process KRAKEN2_FILTER {
 
     script:
     def artifacts = artifact_list.name != 'NO_FILE' ? "--artifact-list ${artifact_list}" : ''
+    def remap     = taxon_remap.name   != 'NO_FILE' ? "--taxon-remap ${taxon_remap}"     : ''
     """
     filter_kraken2_report.py \\
         --report       ${report} \\
         --sample-id    ${meta.id} \\
         --min-reads    ${params.min_reads_per_taxon} \\
         ${artifacts} \\
+        ${remap} \\
         --output       ${meta.id}.filtered.tsv
     """
 }

@@ -1,0 +1,21 @@
+# Taxon display name remapping for virome pipeline
+# Format: taxon_id <tab> display_name <tab> reason
+# Lines starting with # are comments.
+#
+# Use this file to rename taxa whose Kraken2/NCBI label is misleading in the
+# context of human tissue samples — e.g. cross-species k-mer assignments where
+# human reads map to a non-human reference due to reference database imbalance.
+#
+# This remap is applied AFTER artifact exclusion, to all three output stages
+# (bracken_raw, minreads, filtered). It changes taxon_name only; taxon_id is
+# preserved so the original assignment remains traceable.
+#
+# Documented example:
+#   Human CMV (HHV-5) reads assign to Cytomegalovirus papiinebeta3 (3050337)
+#   because the Langmead viral DB contains only baboon CMV (NC_055235.1) under
+#   taxon 2169863 (child of 3050337), with no direct HHV-5 Merlin genome at
+#   the 3050337 node. Human CMV reads roll up to 3050337 via LCA. See:
+#   research/cmv_taxonomy_investigation.md
+#
+taxon_id	display_name	reason
+3050337	Human CMV (HHV-5) [proxy]	Database imbalance: human CMV reads assign to baboon CMV reference (NC_055235.1) via LCA; true identity is HHV-5. Awaiting alignment-based validation.

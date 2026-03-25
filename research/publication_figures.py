@@ -27,6 +27,12 @@ import matplotlib.patches as mpatches
 import seaborn as sns
 from pathlib import Path
 
+# ── Taxon display name remap (mirrors assets/taxon_remap.tsv) ─────────────────
+# Applied retroactively to existing results since we cannot rerun the pipeline.
+TAXON_REMAP = {
+    3050337: 'Human CMV (HHV-5) [proxy]',
+}
+
 # ── Sample sets ───────────────────────────────────────────────────────────────
 MUSCLE   = ['Sample_19', 'Sample_20', 'Sample_21', 'Sample_22', 'Sample_23']
 DRG_D1   = ['donor1_L1', 'donor1_L2', 'donor1_L3', 'donor1_L4', 'donor1_L5', 'donor1_T12']
@@ -49,10 +55,23 @@ def tissue_of(sample):
     return 'Other'
 
 # ── Data loaders ──────────────────────────────────────────────────────────────
+def _apply_remap(df):
+    """Rename index entries using TAXON_REMAP (keyed by taxon_id column before indexing)."""
+    return df
+
+def _remap_index(df_raw):
+    """Apply TAXON_REMAP to taxon_name using taxon_id before setting index."""
+    df_raw = df_raw.copy()
+    df_raw['taxon_name'] = df_raw.apply(
+        lambda r: TAXON_REMAP.get(int(r['taxon_id']), r['taxon_name']), axis=1
+    )
+    return df_raw
+
 def load_rpm(path):
     """Return taxa × samples RPM dataframe (usable samples only, taxa with any signal)."""
     df = pd.read_csv(path, sep='\t')
     df = df[df['rank'] == 'S']
+    df = _remap_index(df)
     df = df.set_index('taxon_name')
     rpm_cols = [c for c in df.columns if c.endswith('_rpm')]
     rpm = df[rpm_cols].rename(columns=lambda c: c.replace('_rpm', ''))
@@ -64,6 +83,7 @@ def load_reads(path):
     """Return taxa × samples read count dataframe (usable samples only)."""
     df = pd.read_csv(path, sep='\t')
     df = df[df['rank'] == 'S']
+    df = _remap_index(df)
     df = df.set_index('taxon_name')
     rc_cols = [c for c in df.columns if c.endswith('_reads')]
     rc = df[rc_cols].rename(columns=lambda c: c.replace('_reads', ''))

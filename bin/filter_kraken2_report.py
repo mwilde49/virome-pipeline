@@ -41,19 +41,52 @@ def load_artifact_taxa(artifact_list):
     return excluded
 
 
+def load_taxon_remap(remap_file):
+    """Load taxon_id → display_name mapping from a TSV file, ignoring comment lines."""
+    remap = {}
+    with open(remap_file) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            parts = line.split('\t')
+            if len(parts) < 2:
+                continue
+            try:
+                remap[int(parts[0])] = parts[1]
+            except (ValueError, IndexError):
+                pass
+    return remap
+
+
+def apply_remap(df, remap):
+    """Replace taxon_name for any taxon_id present in remap dict."""
+    if remap:
+        df = df.copy()
+        df['taxon_name'] = df.apply(
+            lambda r: remap.get(r['taxon_id'], r['taxon_name']), axis=1
+        )
+    return df
+
+
 @click.command()
-@click.option('--report',     required=True,  type=click.Path(exists=True), help='Kraken2/Bracken report file')
-@click.option('--sample-id',  required=True,                                help='Sample identifier (used in filter_summary.tsv)')
-@click.option('--min-reads',  default=5,      show_default=True,            help='Minimum direct reads to retain a taxon')
-@click.option('--artifact-list', default=None, type=click.Path(exists=True), help='TSV of artifact taxon IDs to exclude')
-@click.option('--output',     required=True,                                 help='Final filtered output TSV path ({id}.filtered.tsv)')
-def main(report, sample_id, min_reads, artifact_list, output):
+@click.option('--report',       required=True,  type=click.Path(exists=True), help='Kraken2/Bracken report file')
+@click.option('--sample-id',    required=True,                                help='Sample identifier (used in filter_summary.tsv)')
+@click.option('--min-reads',    default=5,      show_default=True,            help='Minimum direct reads to retain a taxon')
+@click.option('--artifact-list', default=None,  type=click.Path(exists=True), help='TSV of artifact taxon IDs to exclude')
+@click.option('--taxon-remap',  default=None,   type=click.Path(exists=True), help='TSV of taxon_id → display_name substitutions')
+@click.option('--output',       required=True,                                help='Final filtered output TSV path ({id}.filtered.tsv)')
+def main(report, sample_id, min_reads, artifact_list, taxon_remap, output):
     # Derive output prefix (strip .filtered.tsv or use stem)
     out_path = Path(output)
     prefix = str(out_path.parent / out_path.name.replace('.filtered.tsv', ''))
 
     df = pd.read_csv(report, sep='\t', header=None, names=KRAKEN2_REPORT_COLS)
     df['taxon_name'] = df['taxon_name'].str.strip()
+
+    remap = load_taxon_remap(taxon_remap) if taxon_remap else {}
+    if remap:
+        print(f"Loaded {len(remap)} taxon name remappings")
 
     # ── Stage 1: bracken_raw — viral ranks only, no threshold ────────────────
     bracken_raw = df[
@@ -63,6 +96,7 @@ def main(report, sample_id, min_reads, artifact_list, output):
     bracken_raw = bracken_raw[['taxon_id', 'taxon_name', 'rank', 'reads_direct', 'percent']].rename(
         columns={'reads_direct': 'reads'}
     ).sort_values('reads', ascending=False)
+    bracken_raw = apply_remap(bracken_raw, remap)
     bracken_raw.to_csv(f"{prefix}.bracken_raw.tsv", sep='\t', index=False)
 
     # ── Stage 2: minreads — apply read-count threshold ────────────────────────

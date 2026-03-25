@@ -35,6 +35,10 @@ workflow VIROME {
         ? file(params.artifact_list, checkIfExists: true)
         : file("$projectDir/assets/NO_FILE")
 
+    ch_taxon_remap = params.taxon_remap
+        ? file(params.taxon_remap, checkIfExists: true)
+        : file("$projectDir/assets/NO_FILE")
+
     // -------------------------------------------------------------------------
     // Step 1 — QC on raw reads
     // -------------------------------------------------------------------------
@@ -69,7 +73,7 @@ workflow VIROME {
     // -------------------------------------------------------------------------
     // Step 5 — Filter through three stages (bracken_raw → minreads → artifacts)
     // -------------------------------------------------------------------------
-    KRAKEN2_FILTER(BRACKEN.out.report, ch_artifact_list)
+    KRAKEN2_FILTER(BRACKEN.out.report, ch_artifact_list, ch_taxon_remap)
 
     // -------------------------------------------------------------------------
     // Step 6 — Aggregate each stage into its own abundance matrix
