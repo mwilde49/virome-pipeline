@@ -34,3 +34,9 @@ taxon_id	taxon_name	reason
 2845070	Kinglevirus lutadaptatum	env_virus: environmental metagenome virus, no vertebrate host; same DRG-specific k-mer cross-mapping pattern as Gihfavirus pelohabitans
 3050267	Mardivirus columbidalpha1	avian_virus: pigeon/columbid alphaherpesvirus, no human tropism; cross-mapping from human herpesvirus reads to conserved herpesvirus k-mers
 2107708	Pandoravirus neocaledonia	giant_virus: Acanthamoeba-infecting giant virus (~2.5 Mb genome); eukaryotic HGT gene content causes sporadic k-mer cross-mapping with human transcripts
+10847	Sinsheimervirus phiX174	reagent: Illumina sequencing spike-in control; presence is a direct marker of library failure or contamination
+693629	Betafusellovirus yellowstonense	env_virus: archaeal virus infecting Sulfolobus in geothermal environments; no human relevance; high RPM in Saad_2 failed library
+2734195	Colossusvirus PW	phage: Paenibacillus (soil bacterium) phage; environmental contaminant; sporadic low-level k-mer matches
+2844665	Ruthyvirus dumpsterdude	env_virus: environmental metagenome phage; Saad_2 failed library only
+1982229	Steinhofvirus JWX	phage: environmental siphovirus; Saad_2 failed library only
+2955603	Chalconvirus acg2014i	env_virus: insect-associated phage from caterpillar metagenomics (Costa Rica); Saad_2 failed library only

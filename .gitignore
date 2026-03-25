@@ -15,6 +15,11 @@ test_results/
 test_data/
 pipeline_info/
 
+# Research outputs — version scripts and docs, not generated figures/plots
+research/figures/
+research/stage_plots/
+research/all_cohort_plots/
+
 # Python
 __pycache__/
 *.pyc

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nextflow DSL2 pipeline for systematic profiling of the human dorsal root ganglion (DRG) virome from paired-end bulk RNA-seq data. Runs on the Juno HPC cluster (UT Dallas, TJP group) via SLURM and Apptainer. Lives as a git submodule at `containers/virome` within `github.com/mwilde49/hpc`.
 
-Current version: **1.0.0** — stable release. Validated on full 11-sample cohort: 5 muscle (Sample_19–23) + 6 DRG (donor1 L1–L5, T12). Artifact exclusion list at 15 entries covering muscle and DRG tissue types.
+Current version: **1.1.0** — artifact exclusion list expanded to 22 entries (7 new: phiX174, Betafusellovirus yellowstonense, Colossusvirus PW, Ruthyvirus dumpsterdude, Steinhofvirus JWX, Chalconvirus acg2014i, Oceanusvirus kaneohense); `research/` directory added with analysis scripts and publication planning. Validated on 21-sample all-cohort run: 5 muscle + 6 DRG donor1 + 5 AIG1390 (duplicate, excluded) + 5 Saad (Saad_2 failed library, excluded).
 
 ## Running the pipeline
 
