@@ -25,7 +25,7 @@ Fig 4 (HERV-K) moves to supplementary or is dropped — it supports the internal
 | Item | Status | Notes |
 |------|--------|-------|
 | taxon_remap.tsv implemented | ✓ Done (v1.2.0) | CMV now shows as "Human CMV (HHV-5) [proxy]" |
-| Hantavirus BLAST | In progress | scripts/extract_hantavirus_reads.sh ready; run on Juno |
+| Hantavirus characterization | ✓ Resolved as artifact | Per-read Kraken2 analysis: Oxbow virus (660954) present in ALL samples across all tissue types at 22–197 reads; ruled out by universal cross-tissue signal. 3052491 + 660954 added to artifact list (v1.2.1). No BLAST needed. |
 | Zenodo DOI | In progress | Tag v1.2.0 pushed; enable Zenodo integration at zenodo.org |
 | SRA accession | In progress | Metadata template ready in sra_submission/; needs IRB check |
 | AIG1390 excluded from paper | ✓ Done | 15 usable samples documented |
