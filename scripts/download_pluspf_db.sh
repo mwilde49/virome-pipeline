@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=dl_pluspf
 #SBATCH --output=logs/dl_pluspf_%j.log
-#SBATCH --time=06:00:00
+#SBATCH --time=24:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
