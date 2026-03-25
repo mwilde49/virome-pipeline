@@ -29,8 +29,10 @@ Fig 4 (HERV-K) moves to supplementary or is dropped — it supports the internal
 | Zenodo DOI | In progress | Tag v1.2.0 pushed; enable Zenodo integration at zenodo.org |
 | SRA accession | In progress | Metadata template ready in sra_submission/; needs IRB check |
 | AIG1390 excluded from paper | ✓ Done | 15 usable samples documented |
-| PlusPF database download | In progress | scripts/download_pluspf_db.sh ready; sbatch on Juno |
-| PlusPF subset run | Pending download | samplesheets/pluspf_subset.csv + assets/config_pluspf.yaml ready |
+| Dual-DB pipeline implementation | ✓ Done (v1.3.0) | KRAKEN2_CLASSIFY_DB2 + BRACKEN_DB2 + KRAKEN2_FILTER_DB2 + COMPARE_DATABASES wired in; `kraken2_db2 = null` by default |
+| python.sif rebuild | Pending | compare_db_results.py added in v1.3.0 not yet in deployed container; must rebuild before first dual-DB run |
+| PlusPF database download | In progress | Job 162458 running on Juno; ~8h remaining as of 2026-03-25; log at /groups/tprice/pipelines/containers/virome/logs/dl_pluspf_162458.log |
+| PlusPF subset run | Pending download + rebuild | samplesheets/pluspf_subset.csv + assets/config_pluspf.yaml ready |
 | PlusPF comparison figure | Pending run | research/paper1/pluspf_comparison.py ready to run after results |
 
 ## Submission checklist

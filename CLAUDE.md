@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nextflow DSL2 pipeline for systematic profiling of the human dorsal root ganglion (DRG) virome from paired-end bulk RNA-seq data. Runs on the Juno HPC cluster (UT Dallas, TJP group) via SLURM and Apptainer. Lives as a git submodule at `containers/virome` within `github.com/mwilde49/hpc`.
 
-Current version: **1.3.0** — artifact list expanded to 24 entries; added Orthohantavirus oxbowense (3052491) and Oxbow virus (660954) confirmed as k-mer cross-mapping artifact by per-read Kraken2 analysis across all cohorts and tissue types.
+Current version: **1.3.0** — dual-database parallel classification (viral-only + PlusPF) added as optional branch; artifact list expanded to 24 entries; taxon display name remapping (CMV) added in v1.2.0.
 
 ## Running the pipeline
 
@@ -71,13 +71,15 @@ bash scripts/pull_results.sh /scratch/juno/maw210003/virome_test results/muscle_
 
 ## Architecture
 
-**Data flow** (v0.3.0, 7 steps + multi-stage aggregation):
+**Data flow** (v1.3.0, 7 steps + multi-stage aggregation + optional dual-DB branch):
 ```
-raw FASTQs → FASTQC → TRIMMOMATIC → STAR_HOST_REMOVAL → KRAKEN2_CLASSIFY → BRACKEN → KRAKEN2_FILTER ─┬→ AGGREGATE(final)       ─┐
-                                                                                                       ├→ AGGREGATE(minreads)    ─┼→ REPORT
-                                                                                                       └→ AGGREGATE(bracken_raw) ─┘
-                                                                                      └──────────────────────────────────────────→ MULTIQC
+raw FASTQs → FASTQC → TRIMMOMATIC → STAR_HOST_REMOVAL → KRAKEN2_CLASSIFY (DB1) → BRACKEN → KRAKEN2_FILTER ─┬→ AGGREGATE(final)       ─┐
+                                                      └→ KRAKEN2_CLASSIFY (DB2) → BRACKEN → KRAKEN2_FILTER ─┼→ AGGREGATE(pluspf)      ─┼→ COMPARE_DATABASES → plot
+                                                                                                             ├→ AGGREGATE(minreads)    ─┼→ REPORT
+                                                                                                             └→ AGGREGATE(bracken_raw) ─┘
+                                                                                         └──────────────────────────────────────────→ MULTIQC
 ```
+DB2 branch is inactive by default (`params.kraken2_db2 = null`). One-line activation: set `kraken2_db2` in your params file.
 
 **KRAKEN2_FILTER emits 5 channels per sample:**
 - `filtered` → `{id}.filtered.tsv` — final output (min_reads + artifact exclusion)
@@ -96,6 +98,16 @@ raw FASTQs → FASTQC → TRIMMOMATIC → STAR_HOST_REMOVAL → KRAKEN2_CLASSIFY
 - Filtering funnel chart (taxa count per stage per sample)
 - Read attrition chart (reads retained per stage per sample)
 - Top-N abundance heatmap and prevalence bar (final matrix)
+- Dual-DB comparison plot (Tier 1/2/3 breakdown per sample; only present when `kraken2_db2` is set)
+
+**Dual-database comparison outputs** (in `results/db_comparison/`, only when `kraken2_db2` is set):
+- `db_comparison.tsv` — full per-taxon tier classification
+- `consensus_matrix.tsv` — Tier 1 taxa only (detected in both DBs; use for biology)
+- `false_positive_candidates.tsv` — Tier 2 taxa (viral-only DB only; inspect before interpreting)
+- `db_comparison_summary.tsv` — per-sample tier counts
+- `db_comparison.png` — stacked bar chart embedded in HTML report
+
+Three tiers: **Tier 1** = shared (both DBs agree, high confidence); **Tier 2** = viral-only only (FP candidates); **Tier 3** = PlusPF only (warrants investigation).
 
 **Key architectural decisions:**
 
@@ -119,7 +131,7 @@ sample,fastq_r1,fastq_r2
 - `<sample>_rpm` — reads per million trimmed reads (normalized via STAR input read count)
 
 **Artifact exclusion:**
-`assets/artifact_taxa.tsv` — curated TSV of taxon IDs to exclude from all samples. 22 entries covering: ruminant orthobunyaviruses, insect baculoviruses, phages, environmental metagenome viruses (DRG k-mer cross-mapping), avian herpesviruses, and giant amoeba viruses. Enabled by default via `params.artifact_list`. Set to `null` to disable.
+`assets/artifact_taxa.tsv` — curated TSV of taxon IDs to exclude from all samples. 24 entries covering: ruminant orthobunyaviruses, insect baculoviruses, phages, environmental metagenome viruses (DRG k-mer cross-mapping), avian herpesviruses, giant amoeba viruses, and hantaviruses (Orthohantavirus oxbowense 3052491 + Oxbow virus 660954 — confirmed k-mer cross-mapping artifact present in all tissue types). Enabled by default via `params.artifact_list`. Set to `null` to disable.
 
 **Taxon display name remapping:**
 `assets/taxon_remap.tsv` — curated TSV mapping taxon_id → display_name for taxa whose Kraken2/NCBI label is misleading in human tissue context (e.g. cross-species k-mer assignments). Applied after artifact exclusion to all three output stages; taxon_id is preserved for traceability. Current entry: 3050337 (*Cytomegalovirus papiinebeta3*) → `Human CMV (HHV-5) [proxy]`. Enabled by default via `params.taxon_remap`. Set to `null` to disable.
@@ -177,5 +189,15 @@ sample,fastq_r1,fastq_r2
 ### Longer-term
 - **Metadata integration** — accept a metadata TSV (sample type, neuropathy status, donor ID) and incorporate into report groupings and plots
 - **Assembly-based discovery** — de novo viral assembly on host-depleted reads using SPAdes/MEGAHIT for detection of novel/divergent viruses below Kraken2's k-mer threshold
-- **Multi-database classification** — run against both viral and complete standard Kraken2 DB to catch non-viral contaminants and improve specificity
+- **Multi-database classification** — ✓ implemented in v1.3.0 (dual-DB parallel branch with three-tier output)
 - **Longitudinal tracking** — compare virome profiles across timepoints for the same donor
+
+## ⚠ Deployment note
+
+`python.sif` must be rebuilt before running any dual-DB pipeline job (`--kraken2_db2`). v1.3.0 added `bin/compare_db_results.py` which is baked into the container at build time. The container on Juno predates v1.3.0 and does not contain this script.
+
+Rebuild sequence:
+```bash
+apptainer build --fakeroot --force containers/python.sif containers/python.def
+rsync -avP containers/python.sif maw210003@juno.hpcre.utdallas.edu:/groups/tprice/pipelines/containers/virome/
+```
