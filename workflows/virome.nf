@@ -1,21 +1,31 @@
 /*
  * workflows/virome.nf
  * Main VIROME workflow — connects all modules in sequence.
+ *
+ * Dual-database mode: set params.kraken2_db2 to a PlusPF database path to
+ * run a parallel classification branch. Produces a consensus matrix (taxa
+ * detected in both DBs) and a false-positive candidate list (taxa detected
+ * only in the viral-only DB). Single-DB behavior is unchanged when db2 is null.
  */
 
 nextflow.enable.dsl = 2
 
-include { FASTQC            } from '../modules/fastqc'
-include { TRIMMOMATIC       } from '../modules/trimmomatic'
-include { STAR_HOST_REMOVAL } from '../modules/star_host_removal'
-include { KRAKEN2_CLASSIFY  } from '../modules/kraken2_classify'
-include { BRACKEN           } from '../modules/bracken'
-include { KRAKEN2_FILTER    } from '../modules/kraken2_filter'
-include { AGGREGATE         } from '../modules/aggregate'
-include { AGGREGATE as AGGREGATE_BRACKEN  } from '../modules/aggregate'
-include { AGGREGATE as AGGREGATE_MINREADS } from '../modules/aggregate'
-include { MULTIQC           } from '../modules/multiqc'
-include { REPORT            } from '../modules/report'
+include { FASTQC                              } from '../modules/fastqc'
+include { TRIMMOMATIC                         } from '../modules/trimmomatic'
+include { STAR_HOST_REMOVAL                   } from '../modules/star_host_removal'
+include { KRAKEN2_CLASSIFY                    } from '../modules/kraken2_classify'
+include { KRAKEN2_CLASSIFY as KRAKEN2_CLASSIFY_DB2 } from '../modules/kraken2_classify'
+include { BRACKEN                             } from '../modules/bracken'
+include { BRACKEN         as BRACKEN_DB2      } from '../modules/bracken'
+include { KRAKEN2_FILTER                      } from '../modules/kraken2_filter'
+include { KRAKEN2_FILTER  as KRAKEN2_FILTER_DB2 } from '../modules/kraken2_filter'
+include { AGGREGATE                           } from '../modules/aggregate'
+include { AGGREGATE       as AGGREGATE_BRACKEN  } from '../modules/aggregate'
+include { AGGREGATE       as AGGREGATE_MINREADS } from '../modules/aggregate'
+include { AGGREGATE       as AGGREGATE_DB2      } from '../modules/aggregate'
+include { COMPARE_DATABASES                   } from '../modules/compare_databases'
+include { MULTIQC                             } from '../modules/multiqc'
+include { REPORT                              } from '../modules/report'
 
 workflow VIROME {
 
@@ -60,23 +70,23 @@ workflow VIROME {
     ch_star_logs      = STAR_HOST_REMOVAL.out.log
 
     // -------------------------------------------------------------------------
-    // Step 4 — Viral classification with Kraken2
+    // Step 4 — Viral classification (DB 1: viral-only)
     // -------------------------------------------------------------------------
     KRAKEN2_CLASSIFY(ch_unmapped_reads, ch_kraken2_db)
     ch_kraken2_reports = KRAKEN2_CLASSIFY.out.report
 
     // -------------------------------------------------------------------------
-    // Step 4b — Bracken abundance re-estimation
+    // Step 4b — Bracken abundance re-estimation (DB 1)
     // -------------------------------------------------------------------------
     BRACKEN(ch_kraken2_reports, ch_kraken2_db)
 
     // -------------------------------------------------------------------------
-    // Step 5 — Filter through three stages (bracken_raw → minreads → artifacts)
+    // Step 5 — Filter through three stages (DB 1)
     // -------------------------------------------------------------------------
     KRAKEN2_FILTER(BRACKEN.out.report, ch_artifact_list, ch_taxon_remap)
 
     // -------------------------------------------------------------------------
-    // Step 6 — Aggregate each stage into its own abundance matrix
+    // Step 6 — Aggregate each stage into its own abundance matrix (DB 1)
     // -------------------------------------------------------------------------
     ch_all_star_logs = ch_star_logs
         .map { meta, log -> log }
@@ -98,9 +108,35 @@ workflow VIROME {
         .map { meta, tsv -> tsv }
         .collect()
 
-    AGGREGATE_BRACKEN( 'bracken_raw_matrix',      ch_all_bracken_raw, ch_all_star_logs)
-    AGGREGATE_MINREADS('minreads_matrix',          ch_all_minreads,    ch_all_star_logs)
-    AGGREGATE(         'viral_abundance_matrix',   ch_all_filtered,    ch_all_star_logs)
+    AGGREGATE_BRACKEN( 'bracken_raw_matrix',    ch_all_bracken_raw, ch_all_star_logs)
+    AGGREGATE_MINREADS('minreads_matrix',        ch_all_minreads,    ch_all_star_logs)
+    AGGREGATE(         'viral_abundance_matrix', ch_all_filtered,    ch_all_star_logs)
+
+    // -------------------------------------------------------------------------
+    // Step 4–6 (DB 2: PlusPF) — optional parallel branch
+    // -------------------------------------------------------------------------
+    ch_comparison_plot = Channel.value(file("$projectDir/assets/NO_FILE"))
+
+    if (params.kraken2_db2) {
+
+        ch_kraken2_db2 = file(params.kraken2_db2, checkIfExists: true)
+
+        KRAKEN2_CLASSIFY_DB2(ch_unmapped_reads, ch_kraken2_db2)
+
+        BRACKEN_DB2(KRAKEN2_CLASSIFY_DB2.out.report, ch_kraken2_db2)
+
+        KRAKEN2_FILTER_DB2(BRACKEN_DB2.out.report, ch_artifact_list, ch_taxon_remap)
+
+        ch_all_filtered_db2 = KRAKEN2_FILTER_DB2.out.filtered
+            .map { meta, tsv -> tsv }
+            .collect()
+
+        AGGREGATE_DB2('pluspf_abundance_matrix', ch_all_filtered_db2, ch_all_star_logs)
+
+        COMPARE_DATABASES(AGGREGATE.out.matrix, AGGREGATE_DB2.out.matrix)
+
+        ch_comparison_plot = COMPARE_DATABASES.out.plot
+    }
 
     // -------------------------------------------------------------------------
     // Step 7 — MultiQC and final report
@@ -122,7 +158,8 @@ workflow VIROME {
         AGGREGATE_MINREADS.out.matrix,
         AGGREGATE.out.matrix,
         ch_all_filter_summaries,
-        file(params.samplesheet)
+        file(params.samplesheet),
+        ch_comparison_plot
     )
 
     emit:

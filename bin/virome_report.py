@@ -181,7 +181,8 @@ def _funnel_rows(summary_df):
 
 
 def build_html(outdir, top_n, sample_cols, diversity, summary_df,
-               heatmap_path, prev_path, funnel_path, attrition_path):
+               heatmap_path, prev_path, funnel_path, attrition_path,
+               comparison_plot=None):
     plots_html = ''
     for path, caption in [
         (heatmap_path,   f'Top {top_n} Taxa — Abundance Heatmap (Final)'),
@@ -208,6 +209,18 @@ def build_html(outdir, top_n, sample_cols, diversity, summary_df,
 </table>
 """
 
+    db_comparison_html = ''
+    if comparison_plot and os.path.exists(comparison_plot):
+        db_comparison_html = f"""
+<h2>Dual-Database Comparison (viral-only vs PlusPF)</h2>
+<p>Taxa are classified into three tiers based on detection across both Kraken2 databases:
+<span style="color:#4CBF7A;font-weight:bold">&#9632; Shared</span> — detected in both databases (high-confidence signal);
+<span style="color:#E8824C;font-weight:bold">&#9632; Viral-only</span> — detected only in viral-only DB (false positive candidates);
+<span style="color:#9B59B6;font-weight:bold">&#9632; PlusPF only</span> — detected only in PlusPF DB (warrants investigation).
+Full comparison table and consensus matrix in <code>results/db_comparison/</code>.</p>
+{img_tag(comparison_plot)}
+"""
+
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><title>Virome Report</title>
@@ -232,6 +245,8 @@ def build_html(outdir, top_n, sample_cols, diversity, summary_df,
 
 {funnel_table}
 
+{db_comparison_html}
+
 {plots_html}
 </body></html>
 """
@@ -240,14 +255,15 @@ def build_html(outdir, top_n, sample_cols, diversity, summary_df,
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
 @click.command()
-@click.option('--matrix',          required=True,  type=click.Path(exists=True), help='Final viral abundance matrix TSV')
-@click.option('--bracken-matrix',  required=True,  type=click.Path(exists=True), help='Bracken-raw abundance matrix TSV')
-@click.option('--minreads-matrix', required=True,  type=click.Path(exists=True), help='Min-reads filtered abundance matrix TSV')
-@click.option('--filter-summary',  multiple=True,  type=click.Path(exists=True), help='Per-sample filter_summary.tsv files (repeatable)')
-@click.option('--metadata',        required=True,  type=click.Path(exists=True), help='Samplesheet CSV')
-@click.option('--outdir',          required=True,                                 help='Output directory')
-@click.option('--top-n',           default=TOP_N,  show_default=True,             help='Number of top taxa in heatmap')
-def main(matrix, bracken_matrix, minreads_matrix, filter_summary, metadata, outdir, top_n):
+@click.option('--matrix',           required=True,  type=click.Path(exists=True), help='Final viral abundance matrix TSV')
+@click.option('--bracken-matrix',   required=True,  type=click.Path(exists=True), help='Bracken-raw abundance matrix TSV')
+@click.option('--minreads-matrix',  required=True,  type=click.Path(exists=True), help='Min-reads filtered abundance matrix TSV')
+@click.option('--filter-summary',   multiple=True,  type=click.Path(exists=True), help='Per-sample filter_summary.tsv files (repeatable)')
+@click.option('--metadata',         required=True,  type=click.Path(exists=True), help='Samplesheet CSV')
+@click.option('--comparison-plot',  default=None,   type=click.Path(exists=True), help='db_comparison.png from dual-DB run (optional)')
+@click.option('--outdir',           required=True,                                 help='Output directory')
+@click.option('--top-n',            default=TOP_N,  show_default=True,             help='Number of top taxa in heatmap')
+def main(matrix, bracken_matrix, minreads_matrix, filter_summary, metadata, comparison_plot, outdir, top_n):
     Path(outdir).mkdir(parents=True, exist_ok=True)
 
     final_df   = pd.read_csv(matrix,          sep='\t')
@@ -292,6 +308,7 @@ def main(matrix, bracken_matrix, minreads_matrix, filter_summary, metadata, outd
         heatmap_path, prev_path,
         funnel_path    if (summary_df is not None and os.path.exists(funnel_path))    else None,
         attrition_path if (summary_df is not None and os.path.exists(attrition_path)) else None,
+        comparison_plot,
     )
     with open(os.path.join(outdir, 'summary.html'), 'w') as f:
         f.write(html)
