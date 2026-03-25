@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nextflow DSL2 pipeline for systematic profiling of the human dorsal root ganglion (DRG) virome from paired-end bulk RNA-seq data. Runs on the Juno HPC cluster (UT Dallas, TJP group) via SLURM and Apptainer. Lives as a git submodule at `containers/virome` within `github.com/mwilde49/hpc`.
 
-Current version: **1.0.0** — stable release. Validated on muscle tissue cohort (5 samples) and DRG donor1 (L5 + T12). Initial testing release for larger and more diverse sample sets.
+Current version: **1.0.0** — stable release. Validated on full 11-sample cohort: 5 muscle (Sample_19–23) + 6 DRG (donor1 L1–L5, T12). Artifact exclusion list at 15 entries covering muscle and DRG tissue types.
 
 ## Running the pipeline
 
@@ -48,7 +48,7 @@ sbatch scripts/build_containers.sh
 
 After building locally, rsync to Juno:
 ```bash
-rsync -avP containers/*.sif maw210003@juno.utdallas.edu:/groups/tprice/pipelines/containers/virome/
+rsync -avP containers/*.sif maw210003@juno.hpcre.utdallas.edu:/groups/tprice/pipelines/containers/virome/
 ```
 
 When only `bin/*.py` scripts change, only `python.sif` needs to be rebuilt and rsynced.
@@ -119,7 +119,11 @@ sample,fastq_r1,fastq_r2
 - `<sample>_rpm` — reads per million trimmed reads (normalized via STAR input read count)
 
 **Artifact exclusion:**
-`assets/artifact_taxa.tsv` — curated TSV of taxon IDs to exclude from all samples. Contains ruminant viruses, insect viruses, and phages that are consistent false positives in human RNA-seq. Enabled by default via `params.artifact_list`. Set to `null` in config to disable.
+`assets/artifact_taxa.tsv` — curated TSV of taxon IDs to exclude from all samples. 15 entries covering: ruminant orthobunyaviruses, insect baculoviruses, phages, environmental metagenome viruses (DRG k-mer cross-mapping), avian herpesviruses, and giant amoeba viruses. Enabled by default via `params.artifact_list`. Set to `null` to disable.
+
+**ICTV taxonomy reclassification caveat**: ICTV updates periodically assign new taxon IDs to previously named species, causing taxa to escape exclusion filtering. Confirmed example: Ralstonia phage p12J (247080) reclassified as Porrectionivirus p12J (2956327). When adding entries, verify whether the taxon ID has been superseded; list both old and new IDs if applicable. Audit the list after database updates.
+
+**DRG-specific cross-mapping**: Environmental metagenome-derived viruses (Gihfavirus, Kinglevirus) produce DRG-exclusive signals due to tissue-specific transcripts (neuronal ion channels, neuropeptides, lncRNAs) generating k-mer matches. Any novel "DRG-specific virus" finding requires read-level BLAST validation before biological interpretation.
 
 **Profiles:**
 - `slurm` — production use on Juno
@@ -156,15 +160,15 @@ sample,fastq_r1,fastq_r2
 ## Planned features / roadmap
 
 ### Near-term
+- **`assets/taxon_remap.tsv` + relabeling step** — rename known cross-reactive taxa to their correct biological identity in reports (e.g., Cytomegalovirus papiinebeta3/2169863 → "Human CMV (HHV-5)"); analogous to artifact_taxa.tsv but renames rather than removes
 - **`conf/test.config`** — minimal test profile with synthetic data for CI/smoke testing
-- **Kraken2 confidence tuning** — expose per-run confidence threshold; DRG samples may need higher stringency than muscle tissue
 - **Host removal QC metric** — emit percent unmapped reads per sample to MultiQC for cross-cohort monitoring
 - **MultiQC custom content** — inject filter_summary TSV into MultiQC for per-sample filtering stats in the QC report
 
 ### Medium-term
+- **Kraken2 confidence tuning** — expose per-run confidence threshold; DRG samples may benefit from higher stringency
 - **PathSeq validation module** — optional GATK PathSeq step for orthogonal validation of high-confidence hits; stub exists in params (`run_pathseq`)
-- **Reads-per-kilobase (RPKM) normalization** — normalize by viral genome length in addition to library size
-- **Reference augmentation** — re-map Kraken2 hits back to viral reference genomes using minimap2 for depth-of-coverage validation
+- **Reference augmentation** — re-map Kraken2 hits back to viral reference genomes using minimap2 for depth-of-coverage validation; add human CMV strain diversity (Toledo, TB40/E) to database to fix HHV-5 cross-mapping at source
 - **Cohort-level statistical module** — DESeq2-style differential abundance testing between sample groups (neuropathy vs. control, donor vs. cultured)
 
 ### Longer-term

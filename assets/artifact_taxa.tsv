@@ -10,6 +10,13 @@
 #   ruminant_bug  — veterinary/agricultural virus with no plausible human tissue origin
 #   insect_virus  — insect-specific virus, likely reagent or environmental
 #   phage         — bacteriophage with no relevance to mammalian tissue virome
+#   env_virus     — environmental/metagenome-derived virus, no vertebrate host range; DRG-specific k-mer cross-mapping from tissue-specific transcripts
+#   avian_virus   — bird-specific virus; cross-mapping from human herpesvirus reads to conserved herpesvirus k-mers
+#   giant_virus   — giant DNA virus infecting amoeba; eukaryotic HGT gene content causes k-mer cross-mapping with human sequences
+#
+# NOTE on taxonomy reclassification: ICTV taxonomy updates periodically assign new taxon IDs to previously
+# classified species. When adding entries, check whether the old taxon ID has been superseded. Example:
+# Ralstonia phage p12J (247080) was reclassified as Porrectionivirus p12J (2956327) — both are listed here.
 #
 taxon_id	taxon_name	reason
 159150	Shamonda virus	ruminant_bug: orthobunyavirus of ruminants, dominant false positive in human RNA-seq
@@ -18,6 +25,12 @@ taxon_id	taxon_name	reason
 56947	Choristoneura fumiferana granulovirus	insect_virus: baculovirus, common Illumina kit reagent contaminant
 67082	BeAn 58058 virus	misclass: unclassified rodent virus, likely host reads misassigned at low confidence
 247080	Ralstonia phage p12J	phage: plant pathogen bacteriophage, no relevance to human tissue
+2956327	Porrectionivirus p12J	phage: ICTV reclassification of Ralstonia phage p12J (247080) under new genus; same entity, new taxon ID
 1815968	Salmonella phage SJ46	phage: enteric bacteriophage, no relevance to human tissue
+3060432	Oceanusvirus kaneohense	phage: marine bacteriophage, no biological relevance to human tissue; noise-floor k-mer matches
 2083300	Bracoviriform facetosae	insect_virus: parasitoid wasp-associated virus, reagent contaminant
 3051997	Betabaculovirus chofumiferanae	insect_virus: baculovirus, present in all muscle and DRG samples at high RPM, confirmed reagent contaminant
+2844652	Gihfavirus pelohabitans	env_virus: soil/sediment metagenome virus, no vertebrate host; DRG-exclusive pattern is k-mer cross-mapping from DRG-specific transcripts (confirmed in 5-muscle/6-DRG cohort: 0/5 muscle, 6/6 DRG, reads scale with library size)
+2845070	Kinglevirus lutadaptatum	env_virus: environmental metagenome virus, no vertebrate host; same DRG-specific k-mer cross-mapping pattern as Gihfavirus pelohabitans
+3050267	Mardivirus columbidalpha1	avian_virus: pigeon/columbid alphaherpesvirus, no human tropism; cross-mapping from human herpesvirus reads to conserved herpesvirus k-mers
+2107708	Pandoravirus neocaledonia	giant_virus: Acanthamoeba-infecting giant virus (~2.5 Mb genome); eukaryotic HGT gene content causes sporadic k-mer cross-mapping with human transcripts

@@ -16,7 +16,7 @@ set -euo pipefail
 REPO_DIR="$(realpath "$(dirname "$0")/..")"
 SIF_DIR="${REPO_DIR}/containers"
 JUNO_USER="maw210003"
-JUNO_HOST="juno.utdallas.edu"
+JUNO_HOST="juno.hpcre.utdallas.edu"
 JUNO_DEST="/groups/tprice/pipelines/containers/virome"
 
 CONTAINERS=(fastqc trimmomatic star kraken2 python multiqc)

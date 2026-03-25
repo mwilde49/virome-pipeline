@@ -13,7 +13,7 @@
 set -euo pipefail
 
 JUNO_USER="maw210003"
-JUNO_HOST="juno.utdallas.edu"
+JUNO_HOST="juno.hpcre.utdallas.edu"
 JUNO_OUTDIR="${1:?Usage: pull_results.sh <juno_outdir> <local_outdir>}"
 LOCAL_OUTDIR="${2:?Usage: pull_results.sh <juno_outdir> <local_outdir>}"
 
