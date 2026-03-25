@@ -40,3 +40,5 @@ taxon_id	taxon_name	reason
 2844665	Ruthyvirus dumpsterdude	env_virus: environmental metagenome phage; Saad_2 failed library only
 1982229	Steinhofvirus JWX	phage: environmental siphovirus; Saad_2 failed library only
 2955603	Chalconvirus acg2014i	env_virus: insect-associated phage from caterpillar metagenomics (Costa Rica); Saad_2 failed library only
+3052491	Orthohantavirus oxbowense	misclass: North American vole hantavirus (Oxbow virus, taxon 660954 at S1); present at low levels in ALL samples across all tissue types and cohorts (22–197 reads in muscle and DRG), with anomalous spikes in Saad_1 (3287 reads) and donor1_L2 (2339 reads) consistent with index hopping. Universal cross-tissue signal rules out genuine infection; k-mer cross-mapping artifact confirmed by Kraken2 per-read output showing direct assignment to child taxon 660954 with 0 direct reads at genus/family level.
+660954	Oxbow virus	misclass: S1 child of Orthohantavirus oxbowense (3052491); this is the taxon receiving direct Kraken2 read assignments before Bracken redistribution to parent species. Listed alongside 3052491 to catch both assignment levels across pipeline runs.

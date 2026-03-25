@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nextflow DSL2 pipeline for systematic profiling of the human dorsal root ganglion (DRG) virome from paired-end bulk RNA-seq data. Runs on the Juno HPC cluster (UT Dallas, TJP group) via SLURM and Apptainer. Lives as a git submodule at `containers/virome` within `github.com/mwilde49/hpc`.
 
-Current version: **1.2.0** — taxon display name remapping implemented (`assets/taxon_remap.tsv`, `--taxon-remap` flag); artifact list at 22 entries; `research/` directory with analysis scripts and publication planning.
+Current version: **1.2.1** — artifact list expanded to 24 entries; added Orthohantavirus oxbowense (3052491) and Oxbow virus (660954) confirmed as k-mer cross-mapping artifact by per-read Kraken2 analysis across all cohorts and tissue types.
 
 ## Running the pipeline
 
