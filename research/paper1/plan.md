@@ -25,11 +25,13 @@ Fig 4 (HERV-K) moves to supplementary or is dropped — it supports the internal
 | Item | Status | Notes |
 |------|--------|-------|
 | taxon_remap.tsv implemented | ✓ Done (v1.2.0) | CMV now shows as "Human CMV (HHV-5) [proxy]" |
-| Hantavirus BLAST | Pending | Drop from paper if unresolved — not needed for methods story |
-| Zenodo DOI | Pending | Required before submission |
-| SRA accession | Pending | Required before submission; ~1–2 week processing |
+| Hantavirus BLAST | In progress | scripts/extract_hantavirus_reads.sh ready; run on Juno |
+| Zenodo DOI | In progress | Tag v1.2.0 pushed; enable Zenodo integration at zenodo.org |
+| SRA accession | In progress | Metadata template ready in sra_submission/; needs IRB check |
 | AIG1390 excluded from paper | ✓ Done | 15 usable samples documented |
-| PlusPF comparison | Optional | Strengthens paper; not blocking |
+| PlusPF database download | In progress | scripts/download_pluspf_db.sh ready; sbatch on Juno |
+| PlusPF subset run | Pending download | samplesheets/pluspf_subset.csv + assets/config_pluspf.yaml ready |
+| PlusPF comparison figure | Pending run | research/paper1/pluspf_comparison.py ready to run after results |
 
 ## Submission checklist
 - [ ] Zenodo DOI assigned to pipeline repo

@@ -1,0 +1,22 @@
+# config_pluspf.yaml — PlusPF database comparison run
+# Use for the 3-sample viral-only vs PlusPF comparison (paper 1)
+#
+# Run from the virome pipeline root on Juno:
+#   export NXF_JVM_ARGS="-Xms256m -Xmx512m"
+#   nextflow run main.nf -profile slurm -params-file assets/config_pluspf.yaml
+
+samplesheet:   "/groups/tprice/pipelines/containers/virome/samplesheets/pluspf_subset.csv"
+outdir:        "/work/maw210003/pipelines/virome/pluspf_comparison"
+
+star_index:    "/groups/tprice/pipelines/references/star_index"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+# Bracken read length — match your sequencing (150 bp)
+bracken_read_length: 150
+
+# Keep the same filtering thresholds as the viral-only run for a fair comparison
+min_reads_per_taxon: 5
+artifact_list:  "/groups/tprice/pipelines/containers/virome/assets/artifact_taxa.tsv"
+taxon_remap:    "/groups/tprice/pipelines/containers/virome/assets/taxon_remap.tsv"
