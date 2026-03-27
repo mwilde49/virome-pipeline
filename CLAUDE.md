@@ -27,7 +27,7 @@ nextflow run main.nf -profile standard \
   --container_dir /path/to/containers/virome
 ```
 
-Always set `NXF_JVM_ARGS="-Xms256m -Xmx512m"` on Juno — the login node has limited memory and the JVM will OOM without it.
+Always set `NXF_JVM_ARGS="-Xms512m -Xmx2g"` on Juno. The login node has limited memory but 512 MB max heap is insufficient when tracking 15+ concurrent SLURM jobs — the Nextflow coordinator JVM will crash mid-run. 2 GB is safe.
 
 The `slurm` profile automatically sets `workDir = /scratch/juno/$USER/nf_work`. Never run with `-profile slurm` from the groups filesystem work dir — STAR BAM files and `stageInMode = 'copy'` will exhaust the groups quota fast.
 
