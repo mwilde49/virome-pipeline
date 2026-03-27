@@ -14,8 +14,11 @@ Current version: **1.3.0** — dual-database parallel classification (viral-only
 # On Juno via the HPC framework (preferred)
 tjp-launch virome
 
-# Directly with Nextflow (SLURM)
-export NXF_JVM_ARGS="-Xms256m -Xmx512m"   # required on Juno login nodes
+# Directly with Nextflow (SLURM) — always run from an interactive compute node, NOT the login node
+# Step 1: get a compute node (login nodes have shared memory exhausted by other users)
+srun --account=tprice --partition=normal --cpus-per-task=2 --mem=4G --time=4:00:00 --pty bash
+# Step 2: once on the compute node:
+export NXF_JVM_ARGS="-Xms512m -Xmx2g"
 nextflow run main.nf -profile slurm -params-file assets/config.yaml
 
 # Locally (no SLURM)
@@ -27,7 +30,7 @@ nextflow run main.nf -profile standard \
   --container_dir /path/to/containers/virome
 ```
 
-Always set `NXF_JVM_ARGS="-Xms512m -Xmx2g"` on Juno. The login node has limited memory but 512 MB max heap is insufficient when tracking 15+ concurrent SLURM jobs — the Nextflow coordinator JVM will crash mid-run. 2 GB is safe.
+Never run Nextflow from the login node — always use `srun` to get an interactive compute node first (see commands above). Login node memory is shared and unpredictably exhausted; the JVM crashes with `Cannot allocate memory` even before starting jobs. Once on a compute node, set `NXF_JVM_ARGS="-Xms512m -Xmx2g"` — 512m max heap is insufficient when tracking 15+ concurrent jobs.
 
 The `slurm` profile automatically sets `workDir = /scratch/juno/$USER/nf_work`. Never run with `-profile slurm` from the groups filesystem work dir — STAR BAM files and `stageInMode = 'copy'` will exhaust the groups quota fast.
 
@@ -117,7 +120,7 @@ Three tiers: **Tier 1** = shared (both DBs agree, high confidence); **Tier 2** =
 - `bin/*.py` scripts are baked into `containers/python.sif` at build time via `%files`. Rebuild the container whenever scripts change. Always run `apptainer build` from the repo root (paths in `%files` are relative to the build invocation directory).
 - `stageInMode = 'copy'` is set in `conf/base.config` — required because Apptainer with `--cleanenv` cannot follow symlinks across work directories.
 - `module load apptainer` is in `conf/slurm.config`'s `beforeScript` — required on Juno compute nodes.
-- `NXF_JVM_ARGS` must be set before running Nextflow on the login node.
+- Never run Nextflow from the login node — always use `srun` first to get an interactive compute node with guaranteed memory.
 - Nextflow is installed at `/groups/tprice/pipelines/bin/nextflow` (not a module).
 
 **Samplesheet format** (CSV, required columns):
