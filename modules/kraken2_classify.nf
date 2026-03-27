@@ -5,7 +5,7 @@ process KRAKEN2_CLASSIFY {
 
     input:
     tuple val(meta), path(r1), path(r2)
-    path  kraken2_db
+    val   kraken2_db
 
     output:
     tuple val(meta), path("${meta.id}.kraken2.output"),  emit: output
