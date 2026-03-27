@@ -123,7 +123,7 @@ fi
 # bin/ scripts executable
 section "bin/ scripts"
 BIN_SCRIPTS=("$PIPELINE_DIR/bin/filter_kraken2_report.py"
-             "$PIPELINE_DIR/bin/aggregate_bracken.py"
+             "$PIPELINE_DIR/bin/aggregate_virome.py"
              "$PIPELINE_DIR/bin/compare_db_results.py"
              "$PIPELINE_DIR/bin/virome_report.py")
 for script in "${BIN_SCRIPTS[@]}"; do
