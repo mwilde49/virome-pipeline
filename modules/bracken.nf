@@ -5,7 +5,7 @@ process BRACKEN {
 
     input:
     tuple val(meta), path(kraken2_report)
-    val   kraken2_db
+    path  kraken2_db
 
     output:
     tuple val(meta), path("${meta.id}.bracken"),        emit: bracken_output

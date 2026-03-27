@@ -39,7 +39,7 @@ workflow VIROME {
     if (!params.kraken2_db)  error "params.kraken2_db is required"
 
     ch_star_index    = file(params.star_index,  checkIfExists: true)
-    ch_kraken2_db    = file(params.kraken2_db,  checkIfExists: true).toString()
+    ch_kraken2_db    = file(params.kraken2_db,  checkIfExists: true)
     ch_adapters      = file(params.adapters,     checkIfExists: true)
     ch_artifact_list = params.artifact_list
         ? file(params.artifact_list, checkIfExists: true)
@@ -119,7 +119,7 @@ workflow VIROME {
 
     if (params.kraken2_db2) {
 
-        ch_kraken2_db2 = file(params.kraken2_db2, checkIfExists: true).toString()
+        ch_kraken2_db2 = file(params.kraken2_db2, checkIfExists: true)
 
         KRAKEN2_CLASSIFY_DB2(ch_unmapped_reads, ch_kraken2_db2)
 
