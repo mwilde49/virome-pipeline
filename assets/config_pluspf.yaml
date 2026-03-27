@@ -9,7 +9,8 @@ samplesheet:   "/groups/tprice/pipelines/containers/virome/samplesheets/pluspf_s
 outdir:        "/work/maw210003/pipelines/virome/pluspf_comparison"
 
 star_index:    "/groups/tprice/pipelines/references/star_index"
-kraken2_db:    "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
+kraken2_db2:   "/groups/tprice/pipelines/references/kraken2_pluspf_db"
 
 container_dir: "/groups/tprice/pipelines/containers/virome"
 
