@@ -4,7 +4,7 @@
 # NOTE: clarify whether 023-028 are healthy controls or a separate disease group
 # NOTE: PD1, PD7, PD8, PD11, PD12, PD13 absent from this delivery — confirm with provider
 
-samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_parkinson_2026_juno.csv"
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheet_parkinson_2026_juno.csv"
 outdir:      "/scratch/juno/maw210003/virome_parkinson_2026"
 
 # References (pre-built on Juno)

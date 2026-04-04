@@ -24,26 +24,26 @@
 
 | Sample | R1 size | R2 size | MD5 status |
 |---|---|---|---|
-| 023 | 2.0 GB | 2.0 GB | pending |
-| 024 | 1.8 GB | 1.8 GB | pending |
-| 025 | 1.4 GB | 1.4 GB | pending |
-| 026 | 1.7 GB | 1.7 GB | pending |
-| 027 | 1.9 GB | 1.8 GB | pending |
-| 028 | 1.8 GB | 1.8 GB | pending |
-| PD2 | 1.4 GB | 1.4 GB | pending |
-| PD3 | 1.5 GB | 1.4 GB | pending |
-| PD4 | 1.7 GB | 1.7 GB | pending |
-| PD5 | 1.7 GB | 1.6 GB | pending |
-| PD6 | 1.6 GB | 1.6 GB | pending |
-| PD9 | 1.6 GB | 1.6 GB | pending |
-| PD10 | 1.8 GB | 1.8 GB | pending |
-| PD14 | 1.8 GB | 1.7 GB | pending |
-| PD15 | 1.5 GB | 1.4 GB | pending |
-| PD16 | 1.9 GB | 1.8 GB | pending |
-| PD17 | 1.6 GB | 1.5 GB | pending |
-| PD18 | 1.5 GB | 1.4 GB | pending |
-| PD19 | 1.7 GB | 1.7 GB | pending |
-| PD20 | 1.4 GB | 1.4 GB | pending |
+| 023 | 2.0 GB | 2.0 GB | ✓ OK |
+| 024 | 1.8 GB | 1.8 GB | ✓ OK |
+| 025 | 1.4 GB | 1.4 GB | ✓ OK |
+| 026 | 1.7 GB | 1.7 GB | ✓ OK |
+| 027 | 1.9 GB | 1.8 GB | ✓ OK |
+| 028 | 1.8 GB | 1.8 GB | ✓ OK |
+| PD2 | 1.4 GB | 1.4 GB | ✓ OK |
+| PD3 | 1.5 GB | 1.4 GB | ✓ OK |
+| PD4 | 1.7 GB | 1.7 GB | ✓ OK |
+| PD5 | 1.7 GB | 1.6 GB | ✓ OK |
+| PD6 | 1.6 GB | 1.6 GB | ✓ OK |
+| PD9 | 1.6 GB | 1.6 GB | ✓ OK |
+| PD10 | 1.8 GB | 1.8 GB | ✓ OK |
+| PD14 | 1.8 GB | 1.7 GB | ✓ OK |
+| PD15 | 1.5 GB | 1.4 GB | ✓ OK |
+| PD16 | 1.9 GB | 1.8 GB | ✓ OK |
+| PD17 | 1.6 GB | 1.5 GB | ✓ OK |
+| PD18 | 1.5 GB | 1.4 GB | ✓ OK |
+| PD19 | 1.7 GB | 1.7 GB | ✓ OK |
+| PD20 | 1.4 GB | 1.4 GB | ✓ OK |
 
 **Total data volume:** ~68 GB (40 files)
 **Library type:** Paired-end, bulk RNA-seq
@@ -55,7 +55,7 @@
 MD5 checksums provided by Psomagen (one .md5 file per sample, two checksums per file: R1 and R2).
 Verification run: `cd <local_dir> && cat *.md5 > all.md5 && md5sum -c all.md5`
 
-**Status:** Running at time of report generation. Update table above once complete.
+**Status:** ✓ COMPLETE — all 40 files passed (verified 2026-04-04). Zero failures.
 After transfer to Juno, re-verify on cluster before starting pipeline run.
 
 ---
@@ -71,7 +71,7 @@ After transfer to Juno, re-verify on cluster before starting pipeline run.
 
 ### Transfer checklist
 
-- [ ] Local MD5 verification complete and all OK
+- [x] Local MD5 verification complete and all OK (2026-04-04, 0 failures)
 - [ ] GitHub auth refreshed (`gh auth login`)
 - [ ] v1.4.0 pushed to origin (`git push origin main --tags`)
 - [ ] FASTQs rsync'd to Juno (`bash scripts/transfer_parkinson_2026.sh`)
