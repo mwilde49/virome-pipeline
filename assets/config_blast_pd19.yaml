@@ -1,0 +1,66 @@
+# BLAST verification run — PD19 HSV-1 confirmation
+# Target: Simplexvirus humanalpha1 (HSV-1, taxon 3050292) detected in PD19
+#         from the 2026 Parkinson's DRG cohort (AN00028264)
+#
+# PREREQUISITE: the kraken2_output and star_unmapped files must exist at the
+# paths in the samplesheet. Two options:
+#
+# Option A (if main pipeline was run with save flags):
+#   Add to your main pipeline params file:
+#     save_kraken2_output: true
+#     save_unmapped_reads: true
+#   Re-run or resume the main pipeline; files will be published to outdir.
+#
+# Option B (find files in existing work directory):
+#   ssh maw210003@juno.hpcre.utdallas.edu
+#   find /scratch/juno/maw210003/nf_work -name "PD19.kraken2.output" 2>/dev/null
+#   find /scratch/juno/maw210003/nf_work -name "PD19_unmapped_R1.fastq.gz" 2>/dev/null
+#   Then update the samplesheet paths, or symlink to the expected locations:
+#     mkdir -p /scratch/juno/maw210003/virome_parkinson_2026/kraken2_output
+#     mkdir -p /scratch/juno/maw210003/virome_parkinson_2026/star_unmapped
+#     cp /scratch/juno/maw210003/nf_work/<hash>/<hash>/PD19.kraken2.output \
+#        /scratch/juno/maw210003/virome_parkinson_2026/kraken2_output/
+#     cp /scratch/juno/maw210003/nf_work/<hash>/<hash>/PD19_unmapped_R1.fastq.gz \
+#        /scratch/juno/maw210003/virome_parkinson_2026/star_unmapped/
+#     cp /scratch/juno/maw210003/nf_work/<hash>/<hash>/PD19_unmapped_R2.fastq.gz \
+#        /scratch/juno/maw210003/virome_parkinson_2026/star_unmapped/
+#
+# Launch command (from an interactive compute node on Juno):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run blast_verify.nf -profile slurm -params-file assets/config_blast_pd19.yaml
+
+samplesheet:     "/groups/tprice/pipelines/containers/virome/assets/samplesheet_blast_pd19.csv"
+outdir:          "/scratch/juno/maw210003/virome_blast_pd19"
+
+# Target taxa: HSV-1 Tier 1 detection from PD19
+# 3050292 = Simplexvirus humanalpha1 (ICTV 2023 name for HSV-1)
+# 10298   = Human herpesvirus 1 (legacy NCBI taxon ID)
+# Both are listed to capture reads classified at either level
+target_taxa:     "3050292,10298"
+
+# BLAST database — local nt on Juno
+# Download: update_blastdb.pl --decompress nt
+# Expected location: /groups/tprice/pipelines/references/blast_nt/
+blast_db_dir:    "/groups/tprice/pipelines/references/blast_nt"
+blast_db_name:   "nt"
+
+# Optional: viral reference genome for minimap2 coverage analysis
+# Place NC_001806.2.fa (HSV-1 strain 17, 152 kb) in this directory:
+# /groups/tprice/pipelines/references/viral_refs/3050292.fa
+# Download: efetch -db nucleotide -id NC_001806.2 -format fasta > 3050292.fa
+viral_refs_dir:  "/groups/tprice/pipelines/references/viral_refs"
+
+# Containers
+container_dir:   "/groups/tprice/pipelines/containers/virome"
+
+# BLAST parameters
+blast_evalue:           1e-5   # E-value threshold for BLAST hits
+blast_max_targets:      10     # max targets per query
+blast_word_size:        28     # word size (reduce to 20 for more sensitive detection of divergent strains)
+blast_perc_identity:    80     # pre-filter % identity
+blast_max_reads:        0      # 0 = no subsampling; set e.g. 200 for quick test
+
+# Confirmation / life cycle thresholds (applied post-BLAST)
+blast_pident_threshold: 90.0   # reads below this identity excluded from lifecycle inference
+blast_evalue_threshold: 1e-5   # reads above this E-value excluded from lifecycle inference
+blast_include_genus:    true   # also extract reads with HSV-1 k-mer evidence in the hit string

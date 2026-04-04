@@ -3,6 +3,12 @@ process STAR_HOST_REMOVAL {
 
     container "${params.container_dir}/star.sif"
 
+    // Publish the host-removed (unmapped) FASTQ files when params.save_unmapped_reads is true.
+    // These files are required by the BLAST verification offshoot pipeline.
+    // Enable with: save_unmapped_reads: true in your params file.
+    publishDir "${params.outdir}/star_unmapped", mode: 'copy', enabled: params.save_unmapped_reads ?: false,
+        saveAs: { fn -> fn.endsWith('_unmapped_R1.fastq.gz') || fn.endsWith('_unmapped_R2.fastq.gz') ? fn : null }
+
     input:
     tuple val(meta), path(r1), path(r2)
     path  star_index

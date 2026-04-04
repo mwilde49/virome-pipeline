@@ -1,0 +1,2 @@
+sample,kraken2_output,fastq_r1,fastq_r2
+PD19,/scratch/juno/maw210003/virome_parkinson_2026/kraken2_output/PD19.kraken2.output,/scratch/juno/maw210003/virome_parkinson_2026/star_unmapped/PD19_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_parkinson_2026/star_unmapped/PD19_unmapped_R2.fastq.gz

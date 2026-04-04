@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nextflow DSL2 pipeline for systematic profiling of the human dorsal root ganglion (DRG) virome from paired-end bulk RNA-seq data. Runs on the Juno HPC cluster (UT Dallas, TJP group) via SLURM and Apptainer. Lives as a git submodule at `containers/virome` within `github.com/mwilde49/hpc`.
 
-Current version: **1.4.0** — manuscript figure generation, conference abstract, lab presentation, and literature review added; v1.3.0 dual-database results validated across full 15-sample cohort (Tier 1=0 confirmed).
+Current version: **1.5.0** — BLAST verification offshoot pipeline added (`blast_verify.nf`); PD19 HSV-1 Tier 1 detection (first ever); min_reads sensitivity analysis; PD vs. non-PD DRG comparison report; pipeline design whitepaper (`docs/pipeline_design_whitepaper.md`).
 
 ## Running the pipeline
 
@@ -56,6 +56,34 @@ rsync -avP containers/*.sif maw210003@juno.hpcre.utdallas.edu:/groups/tprice/pip
 
 When only `bin/*.py` scripts change, only `python.sif` needs to be rebuilt and rsynced.
 
+When `bin/extract_kraken2_reads.py` or `bin/analyze_blast_results.py` change, rebuild `blast.sif` instead.
+
+## BLAST verification offshoot
+
+Confirms identity and infers viral life cycle phase for Tier 1 candidates. Entry point: `blast_verify.nf`.
+
+```bash
+# Prerequisites: locate or publish the per-sample kraken2.output and STAR-unmapped FASTQs
+# For the PD19 HSV-1 case, find in the Juno work directory:
+find /scratch/juno/maw210003/nf_work -name "PD19.kraken2.output" 2>/dev/null
+find /scratch/juno/maw210003/nf_work -name "PD19_unmapped_R1.fastq.gz" 2>/dev/null
+
+# Then copy to the paths expected by the samplesheet, or update the samplesheet paths.
+
+# Launch on Juno (from an interactive compute node):
+export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+nextflow run blast_verify.nf -profile slurm -params-file assets/config_blast_pd19.yaml
+```
+
+**For future runs:** add `save_kraken2_output: true` and `save_unmapped_reads: true` to your main pipeline params file — these will publish the needed intermediate files to outdir automatically.
+
+**Default behavior:** processes all Tier 1 taxa from `params.consensus_matrix`. Override with `params.target_taxa = "3050292,10298"`.
+
+**Required on Juno (one-time setup):**
+- BLAST nt database: `update_blastdb.pl --decompress nt` → `/groups/tprice/pipelines/references/blast_nt/`
+- HSV-1 reference: `efetch -db nucleotide -id NC_001806.2 -format fasta > 3050292.fa` → `/groups/tprice/pipelines/references/viral_refs/3050292.fa`
+- Build container: `apptainer build --fakeroot --force containers/blast.sif containers/blast.def`
+
 ## Kraken2 viral database
 
 Pre-built from Langmead Lab (AWS). Run once on Juno:
@@ -74,13 +102,16 @@ bash scripts/pull_results.sh /scratch/juno/maw210003/virome_test results/muscle_
 
 ## Architecture
 
-**Data flow** (v1.3.0, 7 steps + multi-stage aggregation + optional dual-DB branch):
+**Data flow** (v1.5.0, 7 steps + multi-stage aggregation + optional dual-DB branch + BLAST offshoot):
 ```
 raw FASTQs → FASTQC → TRIMMOMATIC → STAR_HOST_REMOVAL → KRAKEN2_CLASSIFY (DB1) → BRACKEN → KRAKEN2_FILTER ─┬→ AGGREGATE(final)       ─┐
                                                       └→ KRAKEN2_CLASSIFY (DB2) → BRACKEN → KRAKEN2_FILTER ─┼→ AGGREGATE(pluspf)      ─┼→ COMPARE_DATABASES → plot
                                                                                                              ├→ AGGREGATE(minreads)    ─┼→ REPORT
                                                                                                              └→ AGGREGATE(bracken_raw) ─┘
                                                                                          └──────────────────────────────────────────→ MULTIQC
+
+BLAST offshoot (blast_verify.nf — post-hoc, on Tier 1 candidates):
+  [kraken2.output + unmapped FASTQs] → EXTRACT_KRAKEN2_READS → BLAST_VERIFY → BLAST_ANALYZE → lifecycle_report.html
 ```
 DB2 branch is inactive by default (`params.kraken2_db2 = null`). One-line activation: set `kraken2_db2` in your params file.
 
@@ -195,12 +226,22 @@ sample,fastq_r1,fastq_r2
 - **Multi-database classification** — ✓ implemented in v1.3.0 (dual-DB parallel branch with three-tier output)
 - **Longitudinal tracking** — compare virome profiles across timepoints for the same donor
 
-## ⚠ Deployment note
+## ⚠ Deployment notes
 
-`python.sif` must be rebuilt before running any dual-DB pipeline job (`--kraken2_db2`). v1.3.0 added `bin/compare_db_results.py` which is baked into the container at build time. The container on Juno predates v1.3.0 and does not contain this script.
+**v1.3.0 (still applies):** `python.sif` must be rebuilt before running any dual-DB pipeline job (`--kraken2_db2`). v1.3.0 added `bin/compare_db_results.py` which is baked into the container at build time.
 
-Rebuild sequence:
+**v1.5.0 (new):** `blast.sif` must be built before running `blast_verify.nf`. This is a new container.
+
 ```bash
+# Rebuild python.sif (for dual-DB main pipeline)
 apptainer build --fakeroot --force containers/python.sif containers/python.def
 rsync -avP containers/python.sif maw210003@juno.hpcre.utdallas.edu:/groups/tprice/pipelines/containers/virome/
+
+# Build blast.sif (new — for BLAST verification offshoot)
+apptainer build --fakeroot --force containers/blast.sif containers/blast.def
+rsync -avP containers/blast.sif maw210003@juno.hpcre.utdallas.edu:/groups/tprice/pipelines/containers/virome/
 ```
+
+**Optional intermediate file publishing (new params, both default false):**
+- `save_kraken2_output: true` — publishes `{id}.kraken2.output` to `{outdir}/kraken2_output/`; required for BLAST offshoot without work-dir hunting
+- `save_unmapped_reads: true` — publishes STAR-unmapped FASTQs to `{outdir}/star_unmapped/`; required for BLAST offshoot; WARNING: ~2 GB per sample, adds significant outdir size

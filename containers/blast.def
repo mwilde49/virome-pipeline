@@ -1,0 +1,65 @@
+Bootstrap: docker
+From: ncbi/blast:2.15.0
+
+%labels
+    maintainer  mwilde49
+    description BLAST + seqtk + minimap2 + samtools for virome-pipeline BLAST verification offshoot
+    version     1.0.0
+
+%post
+    apt-get update -y && apt-get install -y --no-install-recommends \
+        curl \
+        wget \
+        python3 \
+        python3-pip \
+        procps \
+        zlib1g \
+        libncurses5 \
+        && rm -rf /var/lib/apt/lists/*
+
+    # seqtk — FASTQ/FASTA manipulation (read extraction by ID list)
+    cd /tmp
+    wget -q https://github.com/lh3/seqtk/archive/v1.4.tar.gz
+    tar -xzf v1.4.tar.gz
+    cd seqtk-1.4 && make && cp seqtk /usr/local/bin/
+    cd / && rm -rf /tmp/seqtk*
+
+    # minimap2 — read mapping to viral reference genomes
+    cd /tmp
+    wget -q https://github.com/lh3/minimap2/releases/download/v2.28/minimap2-2.28_x64-linux.tar.bz2
+    tar -xjf minimap2-2.28_x64-linux.tar.bz2
+    cp minimap2-2.28_x64-linux/minimap2 /usr/local/bin/
+    cd / && rm -rf /tmp/minimap2*
+
+    # samtools — BAM manipulation and coverage stats
+    cd /tmp
+    wget -q https://github.com/samtools/samtools/releases/download/1.20/samtools-1.20.tar.bz2
+    tar -xjf samtools-1.20.tar.bz2
+    cd samtools-1.20 && ./configure --prefix=/usr/local && make -j4 && make install
+    cd / && rm -rf /tmp/samtools*
+
+    # Python packages
+    pip3 install --no-cache-dir click pandas
+
+%files
+    # Pipeline scripts baked in at build time
+    # Always run apptainer build from the repo root
+    bin/extract_kraken2_reads.py  /usr/local/bin/extract_kraken2_reads.py
+    bin/analyze_blast_results.py  /usr/local/bin/analyze_blast_results.py
+
+%post
+    chmod +x /usr/local/bin/extract_kraken2_reads.py
+    chmod +x /usr/local/bin/analyze_blast_results.py
+
+%environment
+    export LC_ALL=C
+    export PATH=/usr/local/bin:$PATH
+
+%test
+    blastn -version
+    seqtk 2>&1 | head -1
+    minimap2 --version
+    samtools --version | head -1
+    python3 -c "import click, pandas; print('Python deps OK')"
+    extract_kraken2_reads.py --help
+    analyze_blast_results.py --help
