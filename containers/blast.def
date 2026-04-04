@@ -14,27 +14,35 @@ From: ncbi/blast:2.15.0
         python3-pip \
         procps \
         zlib1g \
+        zlib1g-dev \
         libncurses5 \
+        libncurses5-dev \
+        libbz2-dev \
+        liblzma-dev \
+        libcurl4-openssl-dev \
+        gcc \
+        make \
+        autoconf \
         && rm -rf /var/lib/apt/lists/*
 
     # seqtk — FASTQ/FASTA manipulation (read extraction by ID list)
     cd /tmp
     wget -q https://github.com/lh3/seqtk/archive/v1.4.tar.gz
-    tar -xzf v1.4.tar.gz
+    tar --no-same-owner -xzf v1.4.tar.gz
     cd seqtk-1.4 && make && cp seqtk /usr/local/bin/
     cd / && rm -rf /tmp/seqtk*
 
     # minimap2 — read mapping to viral reference genomes
     cd /tmp
     wget -q https://github.com/lh3/minimap2/releases/download/v2.28/minimap2-2.28_x64-linux.tar.bz2
-    tar -xjf minimap2-2.28_x64-linux.tar.bz2
+    tar --no-same-owner -xjf minimap2-2.28_x64-linux.tar.bz2
     cp minimap2-2.28_x64-linux/minimap2 /usr/local/bin/
     cd / && rm -rf /tmp/minimap2*
 
     # samtools — BAM manipulation and coverage stats
     cd /tmp
     wget -q https://github.com/samtools/samtools/releases/download/1.20/samtools-1.20.tar.bz2
-    tar -xjf samtools-1.20.tar.bz2
+    tar --no-same-owner -xjf samtools-1.20.tar.bz2
     cd samtools-1.20 && ./configure --prefix=/usr/local && make -j4 && make install
     cd / && rm -rf /tmp/samtools*
 
