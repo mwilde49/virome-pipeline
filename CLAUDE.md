@@ -245,3 +245,37 @@ rsync -avP containers/blast.sif maw210003@juno.hpcre.utdallas.edu:/groups/tprice
 **Optional intermediate file publishing (new params, both default false):**
 - `save_kraken2_output: true` — publishes `{id}.kraken2.output` to `{outdir}/kraken2_output/`; required for BLAST offshoot without work-dir hunting
 - `save_unmapped_reads: true` — publishes STAR-unmapped FASTQs to `{outdir}/star_unmapped/`; required for BLAST offshoot; WARNING: ~2 GB per sample, adds significant outdir size
+
+## Framework Integration (Hyperion Compute v6.0.0)
+
+Pinned to v1.4.0 in the parent HPC framework (mwilde49/hpc). Repo is ahead of that pin (now v1.5.0); update the submodule pointer when next deploying to Juno.
+
+### Samplesheet in the HPC framework (v6.0.0)
+
+The parent framework's samplesheet template (`templates/virome/samplesheet.csv`) has extended columns:
+`sample,fastq_r1,fastq_r2,project_id,sample_id,library_id,run_id`
+
+The `project_id`, `sample_id`, `library_id`, and `run_id` columns are Titan metadata fields.
+They are read by `tjp-batch` and stored in PLR-xxxx records — they are NOT passed to Nextflow.
+The `sample,fastq_r1,fastq_r2` portion IS the Nextflow native input and goes directly to `--input`.
+
+### Batch mode
+
+`tjp-batch virome samplesheet.csv` is per-sheet — one SLURM job for all rows.
+The full samplesheet CSV is passed as `--input` to Nextflow. Nextflow handles per-sample parallelism.
+
+### Titan metadata fields in config
+
+The user config YAML may contain:
+- `titan_project_id`, `titan_sample_id`, `titan_library_id`, `titan_run_id`
+
+These are framework-level only. Do NOT consume them inside main.nf or nextflow.config.
+
+### Direct Nextflow invocation (still supported)
+
+Users can run this pipeline directly without the HPC framework:
+```bash
+nextflow run main.nf -profile slurm --input samplesheet.csv --outdir /scratch/...
+```
+The `project_id`/`sample_id` columns in the samplesheet are silently ignored by Nextflow's
+`.splitCsv().map { row -> [row.sample, file(row.fastq_r1), file(row.fastq_r2)] }` pattern.
