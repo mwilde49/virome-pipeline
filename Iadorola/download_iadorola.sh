@@ -2,7 +2,7 @@
 # Downloads Iadorola et al. 2016 human trigeminal ganglia RNA-seq (BioProject SRP113004)
 # 16 samples (TG1–TG22, not contiguous), all paired-end, 125 bp, HiSeq 2500
 # Uses ENA HTTPS mirror — no SRA toolkit required
-# Parallel downloads with 1% progress tracking per file
+# Parallel downloads with progress tracking per file
 # Usage:
 #   nohup bash download_iadorola.sh [outdir] > /scratch/juno/maw210003/iadorola_download.log 2>&1 &
 #   tail -f /scratch/juno/maw210003/iadorola_download.log
@@ -35,20 +35,28 @@ log() { printf "[%s] %s\n" "$(date +%H:%M:%S)" "$*"; }
 
 download_file() {
     local URL=$1 OUT=$2 LABEL=$3
+
+    # || true prevents grep returning no match from killing the subshell
     local TOTAL
-    TOTAL=$(curl -sI "$URL" | grep -i 'content-length' | tail -1 | awk '{print $2}' | tr -d '\r\n')
+    TOTAL=$(curl -sI "$URL" 2>/dev/null | grep -i 'content-length' | tail -1 | awk '{print $2}' | tr -d '\r\n') || true
 
     curl -fsSL -o "$OUT" "$URL" &
-    local DL_PID=$! LAST_PCT=-1
+    local DL_PID=$! LAST_PCT=-1 LAST_LOG=0
 
     while kill -0 "$DL_PID" 2>/dev/null; do
-        if [[ -f "$OUT" && ${TOTAL:-0} -gt 0 ]]; then
-            local CURRENT PCT
+        if [[ -f "$OUT" ]]; then
+            local CURRENT NOW
             CURRENT=$(stat -c%s "$OUT" 2>/dev/null || echo 0)
-            PCT=$(( CURRENT * 100 / TOTAL ))
-            if [[ $PCT -ne $LAST_PCT ]]; then
-                log "${LABEL}: ${PCT}%"
-                LAST_PCT=$PCT
+            NOW=$(date +%s)
+            if [[ -n "${TOTAL:-}" && "$TOTAL" -gt 0 ]]; then
+                local PCT=$(( CURRENT * 100 / TOTAL ))
+                if [[ $PCT -ne $LAST_PCT ]]; then
+                    log "${LABEL}: ${PCT}%"
+                    LAST_PCT=$PCT
+                fi
+            elif (( NOW - LAST_LOG >= 30 )); then
+                log "${LABEL}: $(( CURRENT / 1024 / 1024 )) MB"
+                LAST_LOG=$NOW
             fi
         fi
         sleep 2
@@ -59,7 +67,7 @@ download_file() {
         rm -f "$OUT"
         return 1
     fi
-    log "${LABEL}: 100% done"
+    log "${LABEL}: done"
 }
 
 download_sample() {
