@@ -1,0 +1,17 @@
+sample,fastq_r1,fastq_r2
+TG1,/groups/tprice/data/iadorola_tg/TG1_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG1_2.fastq.gz
+TG2,/groups/tprice/data/iadorola_tg/TG2_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG2_2.fastq.gz
+TG3,/groups/tprice/data/iadorola_tg/TG3_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG3_2.fastq.gz
+TG4,/groups/tprice/data/iadorola_tg/TG4_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG4_2.fastq.gz
+TG5,/groups/tprice/data/iadorola_tg/TG5_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG5_2.fastq.gz
+TG6,/groups/tprice/data/iadorola_tg/TG6_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG6_2.fastq.gz
+TG7,/groups/tprice/data/iadorola_tg/TG7_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG7_2.fastq.gz
+TG8,/groups/tprice/data/iadorola_tg/TG8_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG8_2.fastq.gz
+TG9,/groups/tprice/data/iadorola_tg/TG9_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG9_2.fastq.gz
+TG10,/groups/tprice/data/iadorola_tg/TG10_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG10_2.fastq.gz
+TG11,/groups/tprice/data/iadorola_tg/TG11_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG11_2.fastq.gz
+TG12,/groups/tprice/data/iadorola_tg/TG12_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG12_2.fastq.gz
+TG13,/groups/tprice/data/iadorola_tg/TG13_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG13_2.fastq.gz
+TG14,/groups/tprice/data/iadorola_tg/TG14_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG14_2.fastq.gz
+TG16,/groups/tprice/data/iadorola_tg/TG16_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG16_2.fastq.gz
+TG22,/groups/tprice/data/iadorola_tg/TG22_1.fastq.gz,/groups/tprice/data/iadorola_tg/TG22_2.fastq.gz
