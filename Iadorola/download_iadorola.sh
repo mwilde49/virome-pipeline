@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Downloads Iadorola et al. 2016 human trigeminal ganglia RNA-seq (BioProject SRP113004)
 # 16 samples (TG1–TG22, not contiguous), all paired-end, 125 bp, HiSeq 2500
+# Uses ENA FTP mirror — no SRA toolkit required
 # Run from an interactive compute node on Juno:
 #   srun --account=tprice --partition=normal --cpus-per-task=8 --mem=16G --time=12:00:00 --pty bash
 #   bash /groups/tprice/pipelines/containers/virome/Iadorola/download_iadorola.sh
@@ -8,7 +9,6 @@
 set -euo pipefail
 
 OUTDIR="${1:-/groups/tprice/data/iadorola_tg}"
-THREADS=8
 
 declare -A SAMPLE_MAP=(
     [SRR5850220]=TG8
@@ -42,20 +42,15 @@ for SRR in "${!SAMPLE_MAP[@]}"; do
         continue
     fi
 
-    echo "[download] $SAMPLE ($SRR)"
-    fasterq-dump "$SRR" \
-        --outdir "$OUTDIR" \
-        --threads "$THREADS" \
-        --split-files \
-        --skip-technical \
-        --progress \
-        --temp "$OUTDIR"
+    # ENA FTP path: vol1/fastq/SRR{first6}/0{last2}/{SRR}/
+    PREFIX="${SRR:0:6}"
+    SUBDIR="0${SRR: -2}"
+    BASE="ftp://ftp.sra.ebi.ac.uk/vol1/fastq/${PREFIX}/${SUBDIR}/${SRR}"
 
-    # fasterq-dump outputs uncompressed; pigz for parallel gzip
-    pigz -p "$THREADS" "$OUTDIR/${SRR}_1.fastq" "$OUTDIR/${SRR}_2.fastq"
-    mv "$OUTDIR/${SRR}_1.fastq.gz" "$R1"
-    mv "$OUTDIR/${SRR}_2.fastq.gz" "$R2"
-    echo "[done] $SAMPLE → $(basename $R1), $(basename $R2)"
+    echo "[download] $SAMPLE ($SRR)"
+    wget -q --show-progress -O "$R1" "${BASE}/${SRR}_1.fastq.gz"
+    wget -q --show-progress -O "$R2" "${BASE}/${SRR}_2.fastq.gz"
+    echo "[done] $SAMPLE"
 done
 
 echo ""
