@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 # Downloads Iadorola et al. 2016 human trigeminal ganglia RNA-seq (BioProject SRP113004)
 # 16 samples (TG1–TG22, not contiguous), all paired-end, 125 bp, HiSeq 2500
-# Uses ENA FTP mirror — no SRA toolkit required
-# Run from an interactive compute node on Juno:
-#   srun --account=tprice --partition=normal --cpus-per-task=8 --mem=16G --time=12:00:00 --pty bash
-#   bash /groups/tprice/pipelines/containers/virome/Iadorola/download_iadorola.sh
+# Uses ENA HTTPS mirror — no SRA toolkit required
+# Parallel downloads with 1% progress tracking per file
+# Usage:
+#   nohup bash download_iadorola.sh [outdir] > /scratch/juno/maw210003/iadorola_download.log 2>&1 &
+#   tail -f /scratch/juno/maw210003/iadorola_download.log
 
 set -euo pipefail
 
-OUTDIR="${1:-/groups/tprice/data/iadorola_tg}"
+OUTDIR="${1:-/scratch/juno/maw210003/iadorola_tg}"
+MAX_PARALLEL=4
 
 declare -A SAMPLE_MAP=(
     [SRR5850220]=TG8
@@ -29,30 +31,82 @@ declare -A SAMPLE_MAP=(
     [SRR5850235]=TG5
 )
 
-mkdir -p "$OUTDIR"
-echo "Downloading to: $OUTDIR"
+log() { printf "[%s] %s\n" "$(date +%H:%M:%S)" "$*"; }
 
+download_file() {
+    local URL=$1 OUT=$2 LABEL=$3
+    local TOTAL
+    TOTAL=$(curl -sI "$URL" | grep -i 'content-length' | tail -1 | awk '{print $2}' | tr -d '\r\n')
+
+    curl -fsSL -o "$OUT" "$URL" &
+    local DL_PID=$! LAST_PCT=-1
+
+    while kill -0 "$DL_PID" 2>/dev/null; do
+        if [[ -f "$OUT" && ${TOTAL:-0} -gt 0 ]]; then
+            local CURRENT PCT
+            CURRENT=$(stat -c%s "$OUT" 2>/dev/null || echo 0)
+            PCT=$(( CURRENT * 100 / TOTAL ))
+            if [[ $PCT -ne $LAST_PCT ]]; then
+                log "${LABEL}: ${PCT}%"
+                LAST_PCT=$PCT
+            fi
+        fi
+        sleep 2
+    done
+
+    if ! wait "$DL_PID"; then
+        log "ERROR ${LABEL}: download failed"
+        rm -f "$OUT"
+        return 1
+    fi
+    log "${LABEL}: 100% done"
+}
+
+download_sample() {
+    local SRR=$1 SAMPLE=$2
+    local PREFIX="${SRR:0:6}"
+    local SUBDIR="0${SRR: -2}"
+    local BASE="https://ftp.sra.ebi.ac.uk/vol1/fastq/${PREFIX}/${SUBDIR}/${SRR}"
+
+    download_file "${BASE}/${SRR}_1.fastq.gz" "$OUTDIR/${SAMPLE}_1.fastq.gz" "$SAMPLE R1"
+    download_file "${BASE}/${SRR}_2.fastq.gz" "$OUTDIR/${SAMPLE}_2.fastq.gz" "$SAMPLE R2"
+    log "$SAMPLE: complete"
+}
+
+mkdir -p "$OUTDIR"
+log "Downloading to: $OUTDIR (up to $MAX_PARALLEL parallel)"
+
+PIDS=()
 for SRR in "${!SAMPLE_MAP[@]}"; do
     SAMPLE="${SAMPLE_MAP[$SRR]}"
-    R1="$OUTDIR/${SAMPLE}_1.fastq.gz"
-    R2="$OUTDIR/${SAMPLE}_2.fastq.gz"
 
-    if [[ -f "$R1" && -f "$R2" ]]; then
-        echo "[skip] $SAMPLE already exists"
+    if [[ -f "$OUTDIR/${SAMPLE}_1.fastq.gz" && -f "$OUTDIR/${SAMPLE}_2.fastq.gz" ]]; then
+        log "skip: $SAMPLE already complete"
         continue
     fi
 
-    # ENA FTP path: vol1/fastq/SRR{first6}/0{last2}/{SRR}/
-    PREFIX="${SRR:0:6}"
-    SUBDIR="0${SRR: -2}"
-    BASE="ftp://ftp.sra.ebi.ac.uk/vol1/fastq/${PREFIX}/${SUBDIR}/${SRR}"
+    # Throttle to MAX_PARALLEL
+    while true; do
+        LIVE=()
+        for PID in "${PIDS[@]+"${PIDS[@]}"}"; do
+            kill -0 "$PID" 2>/dev/null && LIVE+=("$PID")
+        done
+        PIDS=("${LIVE[@]+"${LIVE[@]}"}")
+        [[ ${#PIDS[@]} -lt $MAX_PARALLEL ]] && break
+        sleep 2
+    done
 
-    echo "[download] $SAMPLE ($SRR)"
-    wget -q --show-progress -O "$R1" "${BASE}/${SRR}_1.fastq.gz"
-    wget -q --show-progress -O "$R2" "${BASE}/${SRR}_2.fastq.gz"
-    echo "[done] $SAMPLE"
+    log "start: $SAMPLE ($SRR)"
+    download_sample "$SRR" "$SAMPLE" &
+    PIDS+=($!)
 done
 
-echo ""
-echo "All downloads complete: $OUTDIR"
-echo "$(ls "$OUTDIR"/*_1.fastq.gz 2>/dev/null | wc -l) samples present."
+# Wait for remaining jobs
+FAILED=0
+for PID in "${PIDS[@]+"${PIDS[@]}"}"; do
+    wait "$PID" || FAILED=$(( FAILED + 1 ))
+done
+
+PRESENT=$(ls "$OUTDIR"/*_1.fastq.gz 2>/dev/null | wc -l)
+log "Done: ${PRESENT}/16 samples present"
+[[ $FAILED -gt 0 ]] && log "WARNING: ${FAILED} sample(s) failed" || log "All downloads succeeded"
