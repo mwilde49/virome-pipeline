@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Downloads Iadorola et al. 2016 human trigeminal ganglia RNA-seq (BioProject SRP113004)
 # 16 samples (TG1–TG22, not contiguous), all paired-end, 125 bp, HiSeq 2500
-# Uses ENA HTTPS mirror — no SRA toolkit required
+# Uses ENA API to resolve correct FTP URLs — no SRA toolkit required
 # Parallel downloads with progress tracking per file
 # Usage:
 #   nohup bash download_iadorola.sh [outdir] > /scratch/juno/maw210003/iadorola_download.log 2>&1 &
@@ -33,11 +33,16 @@ declare -A SAMPLE_MAP=(
 
 log() { printf "[%s] %s\n" "$(date +%H:%M:%S)" "$*"; }
 
+# Returns two ftp:// URLs (R1 and R2) for a given SRR accession via ENA API
+get_ena_urls() {
+    local SRR=$1
+    curl -s "https://www.ebi.ac.uk/ena/portal/api/filereport?accession=${SRR}&result=read_run&fields=fastq_ftp&format=tsv" \
+        | tail -1 | cut -f2 | tr ';' '\n' | sed 's|^|ftp://|'
+}
+
 download_file() {
     local URL=$1 OUT=$2 LABEL=$3
-
-    # || true prevents grep returning no match from killing the subshell
-    local TOTAL
+    local TOTAL=""
     TOTAL=$(curl -sI "$URL" 2>/dev/null | grep -i 'content-length' | tail -1 | awk '{print $2}' | tr -d '\r\n') || true
 
     curl -fsSL -o "$OUT" "$URL" &
@@ -72,12 +77,18 @@ download_file() {
 
 download_sample() {
     local SRR=$1 SAMPLE=$2
-    local PREFIX="${SRR:0:6}"
-    local SUBDIR="0${SRR: -2}"
-    local BASE="https://ftp.sra.ebi.ac.uk/vol1/fastq/${PREFIX}/${SUBDIR}/${SRR}"
 
-    download_file "${BASE}/${SRR}_1.fastq.gz" "$OUTDIR/${SAMPLE}_1.fastq.gz" "$SAMPLE R1"
-    download_file "${BASE}/${SRR}_2.fastq.gz" "$OUTDIR/${SAMPLE}_2.fastq.gz" "$SAMPLE R2"
+    log "$SAMPLE: resolving URLs via ENA API"
+    local URLS
+    mapfile -t URLS < <(get_ena_urls "$SRR")
+
+    if [[ ${#URLS[@]} -lt 2 ]]; then
+        log "ERROR $SAMPLE: could not resolve ENA URLs (got ${#URLS[@]})"
+        return 1
+    fi
+
+    download_file "${URLS[0]}" "$OUTDIR/${SAMPLE}_1.fastq.gz" "$SAMPLE R1"
+    download_file "${URLS[1]}" "$OUTDIR/${SAMPLE}_2.fastq.gz" "$SAMPLE R2"
     log "$SAMPLE: complete"
 }
 
