@@ -6,7 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nextflow DSL2 pipeline for systematic profiling of the human dorsal root ganglion (DRG) virome from paired-end bulk RNA-seq data. Runs on the Juno HPC cluster (UT Dallas, TJP group) via SLURM and Apptainer. Lives as a git submodule at `containers/virome` within `github.com/mwilde49/hpc`.
 
-Current version: **1.5.0** — BLAST verification offshoot pipeline added (`blast_verify.nf`); PD19 HSV-1 Tier 1 detection (first ever); min_reads sensitivity analysis; PD vs. non-PD DRG comparison report; pipeline design whitepaper (`docs/pipeline_design_whitepaper.md`).
+Current version: **2.0.0** — optional host gene expression quantification arm added (dedup/filter + dual-count the GRCh38-mapped reads STAR_HOST_REMOVAL was previously discarding, via featureCounts and HTSeq), enabling host-vs-viral expression correlation (e.g. antiviral/ISG or neurodegeneration-pathway genes vs. HERV-K/HSV-1 signal). Ported from the `psoma`/`bulkseq` sibling bulk RNA-seq pipelines. Inactive by default (`params.run_host_quant = false`).
+
+Previously, **1.5.0** — BLAST verification offshoot pipeline added (`blast_verify.nf`); PD19 HSV-1 Tier 1 detection (first ever); min_reads sensitivity analysis; PD vs. non-PD DRG comparison report; pipeline design whitepaper (`docs/pipeline_design_whitepaper.md`).
 
 ## Running the pipeline
 
@@ -84,6 +86,54 @@ nextflow run blast_verify.nf -profile slurm -params-file assets/config_blast_pd1
 - HSV-1 reference: `efetch -db nucleotide -id NC_001806.2 -format fasta > 3050292.fa` → `/groups/tprice/pipelines/references/viral_refs/3050292.fa`
 - Build container: `apptainer build --fakeroot --force containers/blast.sif containers/blast.def`
 
+## Host gene expression quantification (optional)
+
+Dedup/filter + dual-count (featureCounts via Rsubread, and HTSeq independently) the
+GRCh38-mapped reads that `STAR_HOST_REMOVAL` produces as a side effect but the main
+pipeline otherwise discards (only the *unmapped* reads feed the viral branch). Enables
+correlating host gene expression against the viral abundance matrices on the same
+sample set and the same RPM denominator (STAR total input reads). Ported from the
+`psoma` (HISAT2) and `bulkseq` (STAR) sibling bulk RNA-seq pipeline repos, which
+validated this exact dedup → filter → dual-count design on real data
+(`psoma/U19joe_counts/`).
+
+**Inactive by default** (`params.run_host_quant = false`) — no change to existing
+outputs or runtime unless explicitly enabled.
+
+```yaml
+# assets/config.yaml additions to enable
+run_host_quant: true
+gtf:            /groups/tprice/pipelines/references/gencode.v48.primary_assembly.annotation.gtf
+blacklist_bed:  /groups/tprice/pipelines/references/blacklist.bed
+exclude_bed:    /groups/tprice/pipelines/references/filter.bed
+```
+
+**Required on Juno (one-time setup) — source files live locally in the `psoma` sibling repo:**
+```bash
+# From the psoma repo checkout, rsync the reference files virome needs:
+rsync -avP psoma/HISAT2_pipeline_files/HISAT2_pipeline_files/gencode.v48.primary_assembly.annotation.gtf \
+    maw210003@juno.hpcre.utdallas.edu:/groups/tprice/pipelines/references/
+rsync -avP psoma/HISAT2_pipeline_files/HISAT2_pipeline_files/blacklist.bed \
+    psoma/HISAT2_pipeline_files/HISAT2_pipeline_files/filter.bed \
+    maw210003@juno.hpcre.utdallas.edu:/groups/tprice/pipelines/references/
+
+# Build the new container (bundles sambamba, bedtools, samtools, R+Rsubread, HTSeq):
+apptainer build --fakeroot --force containers/host_quant.sif containers/host_quant.def
+rsync -avP containers/host_quant.sif maw210003@juno.hpcre.utdallas.edu:/groups/tprice/pipelines/containers/virome/
+```
+
+`assets/gene_id_name_biotype.tsv` (gene_id/gene_name/gene_biotype lookup, ~79k GENCODE
+v48 entries) is committed to the repo — no separate transfer needed. Set
+`params.gene_info = null` to disable gene-name annotation of the output matrix.
+
+**Pipeline steps added** (`DEDUP_FILTER_HOST` → collect all samples → `FEATURECOUNTS` +
+`HTSEQ_COUNT` → `AGGREGATE_HOST_COUNTS`): sambamba dedup (`markdup -r`) → bedtools
+blacklist/exclude-region filtering → featureCounts and HTSeq run independently on the
+full sample set → merged into `host_gene_expression_matrix.tsv` with a per-sample
+featureCounts/HTSeq concordance QC file (`host_gene_expression_matrix_qc_summary.tsv`,
+log1p Pearson + Spearman across all genes — flags samples where the two counters
+disagree before you trust the numbers).
+
 ## Kraken2 viral database
 
 Pre-built from Langmead Lab (AWS). Run once on Juno:
@@ -102,18 +152,22 @@ bash scripts/pull_results.sh /scratch/juno/maw210003/virome_test results/muscle_
 
 ## Architecture
 
-**Data flow** (v1.5.0, 7 steps + multi-stage aggregation + optional dual-DB branch + BLAST offshoot):
+**Data flow** (v2.0.0, 7 steps + multi-stage aggregation + optional dual-DB branch + optional host-quant branch + BLAST offshoot):
 ```
-raw FASTQs → FASTQC → TRIMMOMATIC → STAR_HOST_REMOVAL → KRAKEN2_CLASSIFY (DB1) → BRACKEN → KRAKEN2_FILTER ─┬→ AGGREGATE(final)       ─┐
-                                                      └→ KRAKEN2_CLASSIFY (DB2) → BRACKEN → KRAKEN2_FILTER ─┼→ AGGREGATE(pluspf)      ─┼→ COMPARE_DATABASES → plot
-                                                                                                             ├→ AGGREGATE(minreads)    ─┼→ REPORT
-                                                                                                             └→ AGGREGATE(bracken_raw) ─┘
-                                                                                         └──────────────────────────────────────────→ MULTIQC
+raw FASTQs → FASTQC → TRIMMOMATIC → STAR_HOST_REMOVAL ─┬→ (unmapped) → KRAKEN2_CLASSIFY (DB1) → BRACKEN → KRAKEN2_FILTER ─┬→ AGGREGATE(final)       ─┐
+                                                        │                                     └→ KRAKEN2_CLASSIFY (DB2) → BRACKEN → KRAKEN2_FILTER ─┼→ AGGREGATE(pluspf)      ─┼→ COMPARE_DATABASES → plot
+                                                        │                                                                                            ├→ AGGREGATE(minreads)    ─┼→ REPORT
+                                                        │                                                                                            └→ AGGREGATE(bracken_raw) ─┘
+                                                        │                                                                        └──────────────────────────────────────────→ MULTIQC
+                                                        └→ (mapped, host BAM) → DEDUP_FILTER_HOST → collect ─┬→ FEATURECOUNTS ─┬→ AGGREGATE_HOST_COUNTS → host_gene_expression_matrix.tsv
+                                                                                                              └→ HTSEQ_COUNT  ─┘
 
 BLAST offshoot (blast_verify.nf — post-hoc, on Tier 1 candidates):
   [kraken2.output + unmapped FASTQs] → EXTRACT_KRAKEN2_READS → BLAST_VERIFY → BLAST_ANALYZE → lifecycle_report.html
 ```
 DB2 branch is inactive by default (`params.kraken2_db2 = null`). One-line activation: set `kraken2_db2` in your params file.
+
+Host-quant branch is inactive by default (`params.run_host_quant = false`). See "Host gene expression quantification (optional)" above.
 
 **KRAKEN2_FILTER emits 5 channels per sample:**
 - `filtered` → `{id}.filtered.tsv` — final output (min_reads + artifact exclusion)
@@ -163,6 +217,13 @@ sample,fastq_r1,fastq_r2
 - `taxon_id`, `taxon_name`, `rank` — taxonomy columns
 - `<sample>_reads` — raw Kraken2 direct read counts per sample
 - `<sample>_rpm` — reads per million trimmed reads (normalized via STAR input read count)
+
+**Host gene expression matrix format** (`host_gene_expression_matrix.tsv`, only when `run_host_quant` is enabled):
+- `gene_id`, `gene_name`, `gene_biotype` — annotation columns (from `assets/gene_id_name_biotype.tsv`; omitted if `params.gene_info = null`)
+- `<sample>_fc_reads` / `<sample>_fc_rpm` — featureCounts (Rsubread) raw + RPM
+- `<sample>_htseq_reads` / `<sample>_htseq_rpm` — HTSeq raw + RPM
+- RPM uses the same STAR total-input-reads denominator as the viral matrices, so host gene RPM and viral taxon RPM are directly comparable/correlatable per sample.
+- Companion file `host_gene_expression_matrix_qc_summary.tsv`: per-sample featureCounts/HTSeq concordance (log1p Pearson r, Spearman r) — check this before trusting a sample's counts.
 
 **Artifact exclusion:**
 `assets/artifact_taxa.tsv` — curated TSV of taxon IDs to exclude from all samples. 24 entries covering: ruminant orthobunyaviruses, insect baculoviruses, phages, environmental metagenome viruses (DRG k-mer cross-mapping), avian herpesviruses, giant amoeba viruses, and hantaviruses (Orthohantavirus oxbowense 3052491 + Oxbow virus 660954 — confirmed k-mer cross-mapping artifact present in all tissue types). Enabled by default via `params.artifact_list`. Set to `null` to disable.
@@ -219,6 +280,7 @@ sample,fastq_r1,fastq_r2
 - **PathSeq validation module** — optional GATK PathSeq step for orthogonal validation of high-confidence hits; stub exists in params (`run_pathseq`)
 - **Reference augmentation** — re-map Kraken2 hits back to viral reference genomes using minimap2 for depth-of-coverage validation; add human CMV strain diversity (Toledo, TB40/E) to database to fix HHV-5 cross-mapping at source
 - **Cohort-level statistical module** — DESeq2-style differential abundance testing between sample groups (neuropathy vs. control, donor vs. cultured)
+- **minimap2 alignment arm** (`params.run_minimap2`) — optional third classification arm running minimap2 (`-ax sr --secondary=no -q 10`) on STAR-unmapped reads against a vertebrate viral RefSeq panel (.mmi index), producing `minimap2_matrix.tsv` (RPKM-normalized) alongside the existing Kraken2 matrices. Recovers reads missed by k-mer ambiguity in the LAT region and similar AT-rich/complex viral loci. Validated against Iadorola TG cohort (LaPaglia 2017): binary detection equivalent to Kraken2, but quantification of HSV-1 burden expected to approach MAGIC pipeline's 80.3% viral read fraction. Full implementation plan in Claude memory (`project_minimap2_alignment_arm.md`). Juno reference setup: download NCBI vertebrate-infecting viral RefSeq → combined FASTA → `minimap2 -d` index at `/groups/tprice/pipelines/references/viral_refs_panel/`. New container: `minimap2.sif`. New module: `modules/minimap2_viral_align.nf`. New script: `bin/aggregate_minimap2.py`. ~4–6 days effort.
 
 ### Longer-term
 - **Metadata integration** — accept a metadata TSV (sample type, neuropathy status, donor ID) and incorporate into report groupings and plots
@@ -230,7 +292,9 @@ sample,fastq_r1,fastq_r2
 
 **v1.3.0 (still applies):** `python.sif` must be rebuilt before running any dual-DB pipeline job (`--kraken2_db2`). v1.3.0 added `bin/compare_db_results.py` which is baked into the container at build time.
 
-**v1.5.0 (new):** `blast.sif` must be built before running `blast_verify.nf`. This is a new container.
+**v1.5.0:** `blast.sif` must be built before running `blast_verify.nf`. This is a new container.
+
+**v2.0.0 (new):** `host_quant.sif` is a new container (already built and smoke-tested locally: sambamba 0.6.6, bedtools 2.31.1, samtools 1.24, R 4.5.3 + Rsubread 2.24.0, htseq 2.1.2). `python.sif` was rebuilt to bake in `bin/aggregate_host_counts.py`. Neither is required unless `params.run_host_quant = true`. See "Host gene expression quantification (optional)" above for the Juno reference file setup (GTF, blacklist/exclude BED) and rsync commands — those still need to be run against Juno and haven't been done yet.
 
 ```bash
 # Rebuild python.sif (for dual-DB main pipeline)

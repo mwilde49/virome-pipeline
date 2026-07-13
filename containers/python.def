@@ -27,6 +27,7 @@ From: python:3.11-slim
     bin/filter_kraken2_report.py  /opt/virome/bin/filter_kraken2_report.py
     bin/aggregate_virome.py       /opt/virome/bin/aggregate_virome.py
     bin/virome_report.py          /opt/virome/bin/virome_report.py
+    bin/aggregate_host_counts.py  /opt/virome/bin/aggregate_host_counts.py
 
 %environment
     export LC_ALL=C

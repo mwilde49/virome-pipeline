@@ -16,6 +16,7 @@ process STAR_HOST_REMOVAL {
     output:
     tuple val(meta), path("${meta.id}_unmapped_R1.fastq.gz"), path("${meta.id}_unmapped_R2.fastq.gz"), emit: reads
     tuple val(meta), path("${meta.id}_Log.final.out"),                                                  emit: log
+    tuple val(meta), path("${meta.id}_Aligned.sortedByCoord.out.bam"),                                  emit: bam
 
     script:
     """

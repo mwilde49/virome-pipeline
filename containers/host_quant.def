@@ -1,0 +1,63 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+%labels
+    tool    host_quant
+    purpose Dedup/filter + dual quantification (featureCounts, HTSeq) of STAR host-mapped reads
+    source  ported from mwilde49/psoma (Rsubread) and mwilde49/bulkseq (HTSeq) container recipes
+
+%environment
+    export PATH=/opt/conda/bin:$PATH
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+    export PYTHONNOUSERSITE=1
+    export PATH=/opt/virome/bin:$PATH
+
+%post
+    apt-get update && apt-get install -y --no-install-recommends \
+        wget \
+        ca-certificates \
+        procps \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/*
+
+    wget -q https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh \
+        -O /tmp/miniforge.sh
+    bash /tmp/miniforge.sh -b -p /opt/conda
+    rm /tmp/miniforge.sh
+
+    export PATH=/opt/conda/bin:$PATH
+
+    conda config --add channels defaults
+    conda config --add channels bioconda
+    conda config --add channels conda-forge
+    conda config --set channel_priority strict
+
+    # sambamba/bedtools/samtools: dedup + BED filtering of the host-mapped BAM
+    # r-base/bioconductor-rsubread: featureCounts
+    # htseq: second, independent counter for cross-checking
+    mamba install -y \
+        sambamba \
+        bedtools \
+        samtools \
+        r-base \
+        bioconductor-rsubread \
+        htseq \
+        python=3.12
+
+    conda clean -afy
+    pip cache purge 2>/dev/null || true
+
+    mkdir -p /opt/virome/bin
+
+%files
+    bin/featurecounts_host.R  /opt/virome/bin/featurecounts_host.R
+
+%test
+    export PATH=/opt/conda/bin:$PATH
+    echo -n "sambamba:  " && sambamba --version 2>&1 | head -1
+    echo -n "bedtools:  " && bedtools --version
+    echo -n "samtools:  " && samtools --version | head -1
+    echo -n "R:         " && R --version | head -1
+    echo -n "Rsubread:  " && Rscript -e 'cat(as.character(packageVersion("Rsubread")), "\n")'
+    echo -n "htseq:     " && htseq-count --version 2>&1 | head -1

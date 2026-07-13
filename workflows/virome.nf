@@ -24,6 +24,10 @@ include { AGGREGATE       as AGGREGATE_BRACKEN  } from '../modules/aggregate'
 include { AGGREGATE       as AGGREGATE_MINREADS } from '../modules/aggregate'
 include { AGGREGATE       as AGGREGATE_DB2      } from '../modules/aggregate'
 include { COMPARE_DATABASES                   } from '../modules/compare_databases'
+include { DEDUP_FILTER_HOST                   } from '../modules/dedup_filter_host'
+include { FEATURECOUNTS                       } from '../modules/featurecounts'
+include { HTSEQ_COUNT                         } from '../modules/htseq_count'
+include { AGGREGATE_HOST_COUNTS               } from '../modules/aggregate_host_counts'
 include { MULTIQC                             } from '../modules/multiqc'
 include { REPORT                              } from '../modules/report'
 
@@ -68,6 +72,7 @@ workflow VIROME {
     STAR_HOST_REMOVAL(ch_trimmed_reads, ch_star_index)
     ch_unmapped_reads = STAR_HOST_REMOVAL.out.reads
     ch_star_logs      = STAR_HOST_REMOVAL.out.log
+    ch_star_bam       = STAR_HOST_REMOVAL.out.bam
 
     // -------------------------------------------------------------------------
     // Step 4 — Viral classification (DB 1: viral-only)
@@ -111,6 +116,46 @@ workflow VIROME {
     AGGREGATE_BRACKEN( 'bracken_raw_matrix',    ch_all_bracken_raw, ch_all_star_logs)
     AGGREGATE_MINREADS('minreads_matrix',        ch_all_minreads,    ch_all_star_logs)
     AGGREGATE(         'viral_abundance_matrix', ch_all_filtered,    ch_all_star_logs)
+
+    // -------------------------------------------------------------------------
+    // Step 6b — Host gene expression quantification (optional)
+    // Dedup/filter + dual-count (featureCounts, HTSeq) the STAR host-mapped
+    // reads that the viral branch discards, enabling host-vs-viral correlation.
+    // Inactive by default (params.run_host_quant = false).
+    // -------------------------------------------------------------------------
+    ch_host_expression_matrix = Channel.value(file("$projectDir/assets/NO_FILE"))
+
+    if (params.run_host_quant) {
+
+        if (!params.gtf)           error "params.gtf is required when run_host_quant is true"
+        if (!params.blacklist_bed) error "params.blacklist_bed is required when run_host_quant is true"
+        if (!params.exclude_bed)   error "params.exclude_bed is required when run_host_quant is true"
+
+        ch_gtf           = file(params.gtf,           checkIfExists: true)
+        ch_blacklist_bed = file(params.blacklist_bed, checkIfExists: true)
+        ch_exclude_bed   = file(params.exclude_bed,   checkIfExists: true)
+        ch_gene_info     = params.gene_info
+            ? file(params.gene_info, checkIfExists: true)
+            : file("$projectDir/assets/NO_FILE")
+
+        DEDUP_FILTER_HOST(ch_star_bam, ch_blacklist_bed, ch_exclude_bed)
+
+        ch_all_filtered_bams = DEDUP_FILTER_HOST.out.bam
+            .map { meta, bam, bai -> bam }
+            .collect()
+
+        FEATURECOUNTS(ch_all_filtered_bams, ch_gtf)
+        HTSEQ_COUNT(ch_all_filtered_bams, ch_gtf)
+
+        AGGREGATE_HOST_COUNTS(
+            FEATURECOUNTS.out.matrix,
+            HTSEQ_COUNT.out.matrix,
+            ch_all_star_logs,
+            ch_gene_info
+        )
+
+        ch_host_expression_matrix = AGGREGATE_HOST_COUNTS.out.matrix
+    }
 
     // -------------------------------------------------------------------------
     // Step 4–6 (DB 2: PlusPF) — optional parallel branch
@@ -163,7 +208,8 @@ workflow VIROME {
     )
 
     emit:
-    abundance_matrix = AGGREGATE.out.matrix
-    multiqc_report   = MULTIQC.out.report
-    report_dir       = REPORT.out.report_dir
+    abundance_matrix        = AGGREGATE.out.matrix
+    host_expression_matrix  = ch_host_expression_matrix
+    multiqc_report          = MULTIQC.out.report
+    report_dir              = REPORT.out.report_dir
 }
