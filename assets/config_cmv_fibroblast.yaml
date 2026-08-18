@@ -1,0 +1,53 @@
+# virome-pipeline run config — CMV (HHV-5) fibroblast positive-control cohort
+# Source: Cheng et al. PNAS 2017 (GSE99823/SRP108855), MRC-5 fibroblasts, WT
+# HCMV infection, 12/24/48/72 hpi. Scoped to the 4 WT-only runs (of 49 in the
+# full series) -- see docs/pathseq_and_test_datasets_2026-08-14.md.
+#
+# PURPOSE: this is the pipeline's own designated ground-truth test for the
+# known CMV/HHV-5 taxonomy issue -- Kraken2's viral DB currently proxies human
+# CMV with a non-human Cytomegalovirus taxon (papiinebeta3). ENA's own
+# scientific_name field for these 4 runs is literally "Human betaherpesvirus
+# 5" (i.e. genuine human CMV, taxid 10359) -- run this and check whether the
+# abundance matrix correctly lands on 10359 or still only lights up the
+# papiinebeta3 proxy.
+#
+# save_kraken2_output / save_unmapped_reads are both set true so this run's
+# output can feed BOTH offshoots afterward without a second pipeline run:
+#   blast_verify.nf    -- confirm/reject the CMV call by alignment vs nt
+#   pathseq_verify.nf  -- third-opinion taxonomy-wide corroboration
+#
+# PREREQUISITE: scripts/download_virus_test_datasets.sh (dataset index 5,
+# key=cmv_fibroblast) must have finished -- confirm with:
+#   ls -la /titan/tprice/ingest/virus/cmv_fibroblast/*.fastq.gz
+#
+# Launch command (from an interactive compute node on Juno):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run main.nf -profile slurm -params-file assets/config_cmv_fibroblast.yaml
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_cmv_fibroblast_juno.csv"
+outdir:      "/scratch/juno/maw210003/virome_cmv_fibroblast"
+
+star_index:    "/groups/tprice/pipelines/references/star_index"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
+kraken2_db2:   "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+min_reads:     5
+artifact_list: "/groups/tprice/pipelines/containers/virome/assets/artifact_taxa.tsv"
+taxon_remap:   "/groups/tprice/pipelines/containers/virome/assets/taxon_remap.tsv"
+
+# 150bp Illumina paired-end per the source publication
+trim_adapters: "TruSeq3-PE"
+trim_leading:  3
+trim_trailing: 3
+trim_minlen:   36
+
+kraken2_confidence: 0.1
+bracken_read_len:   150
+bracken_level:      "S"
+
+# Publish intermediates needed by both offshoots (see PURPOSE above) --
+# ~2 GB/sample extra outdir size for save_unmapped_reads, per CLAUDE.md.
+save_kraken2_output: true
+save_unmapped_reads: true

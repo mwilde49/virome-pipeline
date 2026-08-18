@@ -1,9 +1,17 @@
 # virome-pipeline run config — Iadorola et al. human trigeminal ganglia cohort
+# BATCH 1: scoped to the 5 samples confirmed fully downloaded as of 2026-08-16
+# 19:34 (TG13, TG3, TG2, TG12, TG4) while the remaining 11 continue downloading
+# in the background -- lets the pipeline run in parallel with the rest of the
+# download instead of waiting on it. Once more samples land, expand
+# samplesheet_iadorola_tg_juno.csv (or a batch2 subset) and re-run with
+# -resume against the SAME outdir below -- already-completed samples are
+# cached and skipped, only the new ones actually run.
+#
 # Source: BioProject SRP113004 (PMID 28264986); NIMH Human Brain Collection Core
-# 16 samples: TG1–TG22 (not contiguous); all female except TG3, TG11; ages 18–64
+# 16 samples total: TG1–TG22 (not contiguous); all female except TG3, TG11; ages 18–64
 # Platform: Illumina HiSeq 2500, 125 bp paired-end, ~33M spots/sample
 
-samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_iadorola_tg_juno.csv"
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_iadorola_tg_batch1_juno.csv"
 outdir:      "/scratch/juno/maw210003/virome_iadorola_tg"
 
 # References (pre-built on Juno)
@@ -30,9 +38,6 @@ kraken2_confidence: 0.1
 bracken_read_len:   125
 bracken_level:      "S"
 
-# Publish intermediate files needed for the pathseq_verify.nf offshoot --
-# absent from this config's original run (predates this convention), added
-# 2026-08-16 so a re-run has what's needed to select a PathSeq subset from
-# real positive/negative Tier-1 HSV-1 calls rather than guessing donors.
+# Publish intermediate files needed for the pathseq_verify.nf offshoot
 save_kraken2_output: true
 save_unmapped_reads: true

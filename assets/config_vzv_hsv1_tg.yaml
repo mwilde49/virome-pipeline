@@ -1,0 +1,59 @@
+# virome-pipeline run config — VZV+HSV-1 human trigeminal ganglia cohort
+# Source: Depledge et al. Nat Commun 2018 (PRJEB23238), 7 donor TGs + ARPE-19
+# cell-line controls, bait-capture (VZV+HSV-1) enriched RNA-seq. See
+# docs/pathseq_and_test_datasets_2026-08-14.md for full dataset provenance.
+#
+# WHY THIS ONE NEXT: real human ganglion tissue (this pipeline's actual target
+# tissue type), independent cohort from the Iadorola/LaPaglia TG set already
+# used elsewhere in this repo, confirmed VZV+HSV-1 co-positive.
+#
+# CAVEAT: bait-capture/virus-enriched RNA-seq, NOT standard unbiased bulk like
+# the Iadorola cohort or cmv_fibroblast -- expect inflated apparent viral read
+# fraction relative to Kraken2-style unbiased classification. Treat as a
+# confirmed-positive reference/validation run, not a direct RPM-comparable
+# methodological analog.
+#
+# SCALE NOTE: 19 samples (vs. cmv_fibroblast's 4) -- given the QOSMaxJobsPerUserLimit
+# throttling already observed, this will take meaningfully longer / queue more.
+# Consider running a subset first if you want a faster first look -- trim
+# the generated samplesheet the same way the cmv_fibroblast one was trimmed
+# for a partial launch.
+#
+# PREREQUISITE: generate the samplesheet from the downloaded dataset's own
+# manifest (avoids hand-typing 19 accessions):
+#   bash scripts/make_samplesheet.sh vzv_hsv1_tg > assets/samplesheets/samplesheet_vzv_hsv1_tg_juno.csv
+#   wc -l assets/samplesheets/samplesheet_vzv_hsv1_tg_juno.csv   # sanity check count
+#
+# Launch command (from an interactive compute node on Juno):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run main.nf -profile slurm -params-file assets/config_vzv_hsv1_tg.yaml
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_vzv_hsv1_tg_juno.csv"
+outdir:      "/scratch/juno/maw210003/virome_vzv_hsv1_tg"
+
+star_index:    "/groups/tprice/pipelines/references/star_index"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
+kraken2_db2:   "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+min_reads:     5
+artifact_list: "/groups/tprice/pipelines/containers/virome/assets/artifact_taxa.tsv"
+taxon_remap:   "/groups/tprice/pipelines/containers/virome/assets/taxon_remap.tsv"
+
+# read lengths vary by sample per the source paper (2x34bp ARPE-19 controls,
+# 2x76bp TG1-TG2, 2x151bp TG3-TG7) -- bracken_read_len below matches the
+# majority (TG3-TG7, the real donor ganglia); FastQC output will confirm
+# actual per-sample read length if this needs adjusting per-sample later
+trim_adapters: "TruSeq3-PE"
+trim_leading:  3
+trim_trailing: 3
+trim_minlen:   36
+
+kraken2_confidence: 0.1
+bracken_read_len:   151
+bracken_level:      "S"
+
+# Publish intermediates for both offshoots, same as cmv_fibroblast
+save_kraken2_output: true
+save_unmapped_reads: true

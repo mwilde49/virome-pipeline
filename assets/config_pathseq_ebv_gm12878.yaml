@@ -1,0 +1,31 @@
+# PathSeq verification run — EBV GM12878 cohort
+# Companion to assets/config_ebv_gm12878.yaml (the main-pipeline run that just
+# completed 25/25 -- real EBV Tier-1/shared consensus in both replicates,
+# plus a cross-genus analog of the CMV proxy-taxon artifact at ~3% level.
+# See research/cmv_taxonomy_investigation.md and
+# docs/pathseq_validation_results_2026-08-15.md.
+#
+# Same design as config_pathseq_vzv_hsv1_tg.yaml -- uses consensus_matrix
+# (not target_taxa) so PathSeq automatically checks every Tier-1 taxon from
+# this cohort's real dual-DB result: 3050299 (true EBV) AND 3050339 (the
+# baboon Lymphocryptovirus relative), which is exactly the comparison that
+# matters here -- does PathSeq's independently-sourced reference also show
+# the ~3% cross-mapping, or is that specific to this Kraken2 database?
+#
+# PREREQUISITE:
+#   ls -la /scratch/juno/maw210003/virome_ebv_gm12878/star_unmapped/*.fastq.gz
+#
+# Launch command (from an interactive compute node on Juno):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run pathseq_verify.nf -profile slurm -params-file assets/config_pathseq_ebv_gm12878.yaml
+
+samplesheet:      "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_pathseq_ebv_gm12878.csv"
+outdir:           "/scratch/juno/maw210003/virome_pathseq_ebv_gm12878"
+
+consensus_matrix: "/scratch/juno/maw210003/virome_ebv_gm12878/results/db_comparison/consensus_matrix.tsv"
+
+pathseq_microbe_bwa_image: "/groups/tprice/pipelines/references/pathseq/pathseq_microbe.fa.img"
+pathseq_microbe_fasta:     "/groups/tprice/pipelines/references/pathseq/pathseq_microbe.fa"
+pathseq_taxonomy:          "/groups/tprice/pipelines/references/pathseq/pathseq_taxonomy.db"
+
+container_dir:    "/groups/tprice/pipelines/containers/virome"

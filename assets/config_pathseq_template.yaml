@@ -1,0 +1,91 @@
+# PathSeq verification offshoot — example/template params file
+#
+# GATK PathSeq third-opinion validator for publication-critical Tier 1 candidates
+# (e.g. PD19-class novel findings). This is a post-hoc offshoot, structurally a
+# sibling to blast_verify.nf — NOT a routine per-cohort arm and NOT a fourth
+# classification tier feeding the Tier1/2/3 consensus. See docs/pathseq_and_
+# test_datasets_2026-08-14.md Part 1 for the full feasibility writeup and why
+# it's scoped this way.
+#
+# Unlike blast_verify.nf, PathSeq classifies a sample's ENTIRE STAR-unmapped
+# read pool in one run (taxonomy-wide: viral, bacterial, everything) rather
+# than extracting reads per target taxon. Filtering to taxa of interest happens
+# afterward in AGGREGATE_PATHSEQ by looking target_taxa / consensus_matrix taxon
+# IDs up in the resulting scores table.
+#
+# Copy this file, fill in real paths, then launch from an interactive compute
+# node on Juno:
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run pathseq_verify.nf -profile slurm -params-file assets/config_pathseq_<cohort>.yaml
+#
+# PREREQUISITE: STAR-unmapped FASTQs must exist at the paths in the samplesheet.
+# Same as the BLAST offshoot — either re-run/resume the main pipeline with
+# save_unmapped_reads: true, or locate them in the Nextflow work directory:
+#   find /scratch/juno/$USER/nf_work -name "<sample>_unmapped_R1.fastq.gz" 2>/dev/null
+
+# --- Required ---
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheet_pathseq_<cohort>.csv"
+outdir:      "/scratch/juno/maw210003/virome_pathseq_<cohort>"
+
+# Samplesheet CSV format (simpler than blast_verify.nf's — no kraken2_output
+# column, since PathSeq does its own taxonomy-wide classification):
+#   sample,fastq_r1,fastq_r2
+#   PD19,/path/to/PD19_unmapped_R1.fastq.gz,/path/to/PD19_unmapped_R2.fastq.gz
+
+# --- PathSeq microbe/taxonomy reference bundle ("Path A", fast start) ---
+# Skip PathSeq's own host-subtraction step entirely — input is already
+# host-depleted by STAR_HOST_REMOVAL upstream, so no host k-mer file or host
+# BWA image is configured or passed here (GATK's PSFilterArgumentCollection
+# marks host-filter inputs optional; PathSeq is explicitly designed to accept
+# pre-host-depleted input this way).
+#
+# One-time setup on Juno — pull the Broad's public PathSeq reference bundle:
+#   microbe bundle:  94.6 GB (BWA image + companion FASTA/dict)
+#   taxonomy bundle: 6.7 MB
+# into /groups/tprice/pipelines/references/pathseq/
+# CAVEAT: this is RefSeq release 81 (April 2017) — confirmed HSV-1 (taxid
+# 10298) is present, but anything characterized since 2017 will be absent.
+# Rebuilding fresh ("Path B") is 150-300+ GB and reported to take ~14 days to
+# index with BwaMemIndexImageCreator — only worth it if a specific post-2017
+# organism is the target.
+pathseq_microbe_bwa_image: "/groups/tprice/pipelines/references/pathseq/pathseq_microbe.fa.img"
+pathseq_microbe_fasta:     "/groups/tprice/pipelines/references/pathseq/pathseq_microbe.fa"
+pathseq_taxonomy:          "/groups/tprice/pipelines/references/pathseq/pathseq_taxonomy.db"
+
+# NOTE — sequence dictionary: PathSeqPipelineSpark's --microbe-dict wants the
+# FASTA's sequence dictionary, not the raw FASTA itself (fasta file NOT
+# required, per PathSeqPipelineSpark.java's own class-level Javadoc — see
+# modules/pathseq_score.nf for the full source citation). GATK/samtools
+# convention names it by stripping the FASTA's .fasta/.fa/.fna suffix and
+# appending .dict (e.g. pathseq_microbe.fa -> pathseq_microbe.dict), living in
+# the SAME directory as pathseq_microbe_fasta above. As part of the one-time
+# Juno setup, after pulling the Broad's bundle, confirm this file is actually
+# present under that name next to the FASTA:
+#   ls /groups/tprice/pipelines/references/pathseq/pathseq_microbe.dict
+# If it's missing (e.g. the bundle used a different naming convention),
+# generate it before first use:
+#   gatk CreateSequenceDictionary -R pathseq_microbe.fa -O pathseq_microbe.dict
+#   # or: samtools dict pathseq_microbe.fa > pathseq_microbe.dict
+
+# --- Optional: restrict the concordance table's candidate taxa ---
+# PathSeq ALWAYS scores every taxon in the sample's unmapped read pool
+# regardless of these params — neither is required, and there is no error if
+# both are left unset (unlike blast_verify.nf's target_taxa, which really
+# does gate per-taxon read extraction there). Setting one of these only
+# narrows which taxa AGGREGATE_PATHSEQ highlights in pathseq_concordance.tsv;
+# if both are unset, the concordance table falls back to reporting every
+# taxon PathSeq itself detected.
+# Option A: explicit comma-separated taxon IDs
+target_taxa: "3050292,10298"
+# Option B: pull all Tier 1 (consensus) taxa from a prior dual-DB main-pipeline run
+# consensus_matrix: "/scratch/juno/maw210003/virome_parkinson_2026/db_comparison/consensus_matrix.tsv"
+
+# --- Optional: three-way concordance with BLAST offshoot lifecycle calls ---
+# If set, AGGREGATE_PATHSEQ globs
+# <blast_lifecycle_dir>/<sample>.<taxon_id>.lifecycle_inference.tsv
+# and folds those calls into pathseq_concordance.tsv alongside the Kraken2
+# consensus_matrix and PathSeq's own scores. Leave null/commented to skip.
+# blast_lifecycle_dir: "/scratch/juno/maw210003/virome_blast_pd19/blast_verification"
+
+# --- Containers ---
+container_dir: "/groups/tprice/pipelines/containers/virome"

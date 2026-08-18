@@ -1,0 +1,48 @@
+# PathSeq verification run — CMV (HHV-5) fibroblast cohort
+# Companion to assets/config_cmv_fibroblast.yaml (the main-pipeline run that
+# produces this samplesheet's input FASTQs).
+#
+# PURPOSE: this is the pipeline's designated ground-truth test for the known
+# CMV/HHV-5 Kraken2 proxy-taxon issue (see assets/taxon_remap.tsv) — human CMV
+# reads currently get assigned to taxon 3050337 (Cytomegalovirus papiinebeta3,
+# a baboon CMV reference) via LCA rollup, not the true taxon 10359 (Human
+# betaherpesvirus 5). target_taxa below checks BOTH explicitly, so the
+# concordance table shows directly whether PathSeq's BWA-MEM alignment against
+# its own microbe reference also falls for the proxy, or correctly resolves to
+# 10359 where Kraken2 can't.
+#
+# Deliberately uses target_taxa, NOT consensus_matrix -- this lets
+# pathseq_verify.nf launch as soon as STAR_HOST_REMOVAL finishes for all 4
+# samples (which publishes the star_unmapped/ FASTQs below), without waiting
+# for the rest of the main run's dual-DB Kraken2/Bracken/COMPARE_DATABASES
+# stages to also finish.
+#
+# PREREQUISITE: confirm the 4 samples' unmapped FASTQs exist --
+#   ls -la /scratch/juno/maw210003/virome_cmv_fibroblast/star_unmapped/*.fastq.gz
+# (should appear once STAR_HOST_REMOVAL completes, well before the full
+# main-pipeline run finishes)
+#
+# PREREQUISITE: the PathSeq reference bundle must have finished downloading
+# and assets/config_pathseq_pd19.yaml's placeholder-path note applies here too
+# -- confirm real extracted filenames before using pathseq_microbe_bwa_image
+# etc. below (still placeholders, copied from that file, not yet updated).
+#
+# Launch command (from an interactive compute node on Juno):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run pathseq_verify.nf -profile slurm -params-file assets/config_pathseq_cmv_fibroblast.yaml
+
+samplesheet:     "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_pathseq_cmv_fibroblast.csv"
+outdir:          "/scratch/juno/maw210003/virome_pathseq_cmv_fibroblast"
+
+# 10359 = Human betaherpesvirus 5 (true HCMV taxid)
+# 3050337 = Cytomegalovirus papiinebeta3 (Kraken2's current proxy assignment)
+target_taxa:     "10359,3050337"
+
+# --- PathSeq reference bundle -- PLACEHOLDER PATHS, same caveat as
+#     config_pathseq_pd19.yaml -- update after confirming the real extracted
+#     filenames ---
+pathseq_microbe_bwa_image: "/groups/tprice/pipelines/references/pathseq/pathseq_microbe.fa.img"
+pathseq_microbe_fasta:     "/groups/tprice/pipelines/references/pathseq/pathseq_microbe.fa"
+pathseq_taxonomy:          "/groups/tprice/pipelines/references/pathseq/pathseq_taxonomy.db"
+
+container_dir:   "/groups/tprice/pipelines/containers/virome"

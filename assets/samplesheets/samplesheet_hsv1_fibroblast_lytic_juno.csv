@@ -1,0 +1,3 @@
+sample,fastq_r1,fastq_r2
+SRR19779318,/titan/tprice/ingest/virus/hsv1_fibroblast_lytic/SRR19779318_1.fastq.gz,/titan/tprice/ingest/virus/hsv1_fibroblast_lytic/SRR19779318_2.fastq.gz
+SRR19779319,/titan/tprice/ingest/virus/hsv1_fibroblast_lytic/SRR19779319_1.fastq.gz,/titan/tprice/ingest/virus/hsv1_fibroblast_lytic/SRR19779319_2.fastq.gz

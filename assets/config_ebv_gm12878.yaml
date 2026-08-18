@@ -1,0 +1,46 @@
+# virome-pipeline run config — EBV (HHV-4) GM12878 lymphoblastoid cohort
+# Source: ENCODE ENCSR000AEC (GEO GSE78550, SRP013565), GM12878 -- a
+# constitutively EBV-transformed lymphoblastoid cell line (Type III latency).
+# 2 replicates, polyA+ RNA-seq, PE101. See
+# docs/pathseq_and_test_datasets_2026-08-14.md and the 2026-08-15 chat log for
+# how this was found/verified (ENA sample_title explicitly states "Epstein-
+# Barr Virus"; confirmed paired-end directly against ENA, not just ENCODE's
+# own summary).
+#
+# CAVEAT: this is LATENT EBV signal (steady-state Type III latency), not a
+# lytic-reactivation time course -- ebv_lytic_reactivation (single-end,
+# blocked pending SE support) is the dataset for that comparison instead.
+#
+# PREREQUISITE: confirm the download finished --
+#   ls -la /titan/tprice/ingest/virus/ebv_gm12878_encode/*.fastq.gz
+#
+# Launch command (from an interactive compute node on Juno):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run main.nf -profile slurm -params-file assets/config_ebv_gm12878.yaml
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_ebv_gm12878_juno.csv"
+outdir:      "/scratch/juno/maw210003/virome_ebv_gm12878"
+
+star_index:    "/groups/tprice/pipelines/references/star_index"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
+kraken2_db2:   "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+min_reads:     5
+artifact_list: "/groups/tprice/pipelines/containers/virome/assets/artifact_taxa.tsv"
+taxon_remap:   "/groups/tprice/pipelines/containers/virome/assets/taxon_remap.tsv"
+
+# 101bp Illumina paired-end per ENCODE's own metadata
+trim_adapters: "TruSeq3-PE"
+trim_leading:  3
+trim_trailing: 3
+trim_minlen:   36
+
+kraken2_confidence: 0.1
+bracken_read_len:   101
+bracken_level:      "S"
+
+# Publish intermediates for both offshoots
+save_kraken2_output: true
+save_unmapped_reads: true

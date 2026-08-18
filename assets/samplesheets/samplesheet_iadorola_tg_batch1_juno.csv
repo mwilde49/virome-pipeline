@@ -1,0 +1,6 @@
+sample,fastq_r1,fastq_r2
+TG13,/scratch/juno/maw210003/iadorola_tg/TG13_1.fastq.gz,/scratch/juno/maw210003/iadorola_tg/TG13_2.fastq.gz
+TG3,/scratch/juno/maw210003/iadorola_tg/TG3_1.fastq.gz,/scratch/juno/maw210003/iadorola_tg/TG3_2.fastq.gz
+TG2,/scratch/juno/maw210003/iadorola_tg/TG2_1.fastq.gz,/scratch/juno/maw210003/iadorola_tg/TG2_2.fastq.gz
+TG12,/scratch/juno/maw210003/iadorola_tg/TG12_1.fastq.gz,/scratch/juno/maw210003/iadorola_tg/TG12_2.fastq.gz
+TG4,/scratch/juno/maw210003/iadorola_tg/TG4_1.fastq.gz,/scratch/juno/maw210003/iadorola_tg/TG4_2.fastq.gz

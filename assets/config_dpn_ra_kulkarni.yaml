@@ -1,0 +1,29 @@
+# virome-pipeline run config — DPN & RA Kulkarni cohort
+# Source: 2023_rheumatoidArthritis_AshokKulkarni
+# 25 samples: 10 shared healthy controls (DPN dir), 5 DPN cases, 10 RA specimens (5 donors × A/B)
+# Conditions: Healthy (n=8), Healthy_D (n=2), DPN (n=5), RA (n=4), RA_D (n=1 donor, 2 specimens)
+# NOTE: 5 donors in metadata have no fastq files (M4X, L3O, J4N, M3L, T1F — S1/L4 levels, separate batch)
+# NOTE: RA A/B specimens (FL0, 1VY, CA7, 4LI, G1N) — confirm whether A/B = L/R DRG or replicate preps
+# Platform: Illumina, PolyA library prep, 150 bp paired-end (confirm read length from FastQC)
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_dpn_ra_kulkarni_juno.csv"
+outdir:      "/scratch/juno/maw210003/virome_dpn_ra_kulkarni"
+
+star_index:    "/groups/tprice/pipelines/references/star_index"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
+kraken2_db2:   "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+min_reads:     5
+artifact_list: "/groups/tprice/pipelines/containers/virome/assets/artifact_taxa.tsv"
+taxon_remap:   "/groups/tprice/pipelines/containers/virome/assets/taxon_remap.tsv"
+
+trim_adapters: "TruSeq3-PE"
+trim_leading:  3
+trim_trailing: 3
+trim_minlen:   36
+
+kraken2_confidence: 0.1
+bracken_read_len:   150
+bracken_level:      "S"

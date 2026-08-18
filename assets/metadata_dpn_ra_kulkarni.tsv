@@ -1,0 +1,31 @@
+sample_id	code	donor_label	collection_date	spinal_level	prep_type	condition_raw	condition_group	has_fastq	notes
+JE81	JE8	Con2	2016-03-14	L5	SF	Healthy	Healthy	yes
+WE52	WE5	Con4	2016-07-02	L5	RNA	Healthy	Healthy	yes
+PA71	PA7		2016-09-21	L5	RNA	Healthy	Healthy	yes
+J1M2	J1M	Con3	2017-01-22	L5	RNA	Healthy	Healthy	yes
+T0M2	T0M	Con1	2017-06-11	L5	RNA	Healthy	Healthy	yes
+2AC1	2AC	Con6	2017-09-17	L5	RNA	Healthy	Healthy	yes
+1AN1	1AN	Con7	2018-03-08	L5	SF	Healthy	Healthy	yes
+8EN1	8EN	Con5	2018-03-10	L5	SF	Healthy	Healthy	yes
+	M4X		2018-11-03	S1	SF	Control	Healthy	no	no fastq delivered; excluded from all pipeline runs
+	L3O		2018-11-22	S1	SF	Control	Healthy	no	no fastq delivered; excluded from all pipeline runs
+2OE1	2OE	DPN5	2016-09-20	L5	RNA	Diabetic	DPN	yes
+N4N2	N4N	DPN1	2017-12-18	L5	SF	Diabetic	DPN	yes
+ME61	ME6	DPN2	2018-04-23	L5	SF	Diabetic	DPN	yes
+LE41	LE4	DPN3	2018-05-09	L5	SF	Diabetic	DPN	yes
+L1V1	L1V	DPN4	2018-06-16	L5	RNA	Diabetic	DPN	yes
+	J4N		2018-07-14	S1	SF	DPN	DPN	no	no fastq delivered; excluded from all pipeline runs
+	M3L		2020-07-08	L4	SF	DPN	DPN	no	no fastq delivered; excluded from all pipeline runs
+	T1F		2021-05-06	S1	SF	DPN	DPN	no	no fastq delivered; excluded from all pipeline runs
+RO52	RO5		2016-07-03	L5	RNA	Healthy (D)	Healthy_D	yes
+S1D1	S1D		2018-02-01	L5	RNA	Healthy (D)	Healthy_D	yes
+FL0A2	FL0		2016-06-10	L5	SF	RA	RA	yes	A/B specimen pair from one donor; whether A/B = L/R DRG or replicate preps unconfirmed
+FL0B1	FL0		2016-06-10	L5	SF	RA	RA	yes	A/B specimen pair from one donor; whether A/B = L/R DRG or replicate preps unconfirmed
+1VYA1	1VY		2017-03-19	L5	RNA	RA	RA	yes	A/B specimen pair from one donor; whether A/B = L/R DRG or replicate preps unconfirmed
+1VYB2	1VY		2017-03-19	L5	RNA	RA	RA	yes	A/B specimen pair from one donor; whether A/B = L/R DRG or replicate preps unconfirmed
+CA7A2	CA7		2018-05-25	L5	RNA	RA (D)	RA	yes	A/B specimen pair from one donor; whether A/B = L/R DRG or replicate preps unconfirmed
+CA7B1	CA7		2018-05-25	L5	RNA	RA (D)	RA	yes	A/B specimen pair from one donor; whether A/B = L/R DRG or replicate preps unconfirmed
+4LIA1	4LI		2018-10-30	L5	SF	RA	RA	yes	A/B specimen pair from one donor; whether A/B = L/R DRG or replicate preps unconfirmed
+4LIB2	4LI		2018-10-30	L5	SF	RA	RA	yes	A/B specimen pair from one donor; whether A/B = L/R DRG or replicate preps unconfirmed
+G1NA1	G1N		2019-04-05	L5	SF	RA	RA	yes	A/B specimen pair from one donor; whether A/B = L/R DRG or replicate preps unconfirmed
+G1NB2	G1N		2019-04-05	L5	SF	RA	RA	yes	A/B specimen pair from one donor; whether A/B = L/R DRG or replicate preps unconfirmed

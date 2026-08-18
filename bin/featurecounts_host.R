@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 library(Rsubread)
 
 args <- commandArgs(trailingOnly = TRUE)

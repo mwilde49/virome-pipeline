@@ -1,0 +1,5 @@
+sample,fastq_r1,fastq_r2
+SRR5660016,/scratch/juno/maw210003/virome_cmv_fibroblast/star_unmapped/SRR5660016_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_cmv_fibroblast/star_unmapped/SRR5660016_unmapped_R2.fastq.gz
+SRR5660017,/scratch/juno/maw210003/virome_cmv_fibroblast/star_unmapped/SRR5660017_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_cmv_fibroblast/star_unmapped/SRR5660017_unmapped_R2.fastq.gz
+SRR5660018,/scratch/juno/maw210003/virome_cmv_fibroblast/star_unmapped/SRR5660018_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_cmv_fibroblast/star_unmapped/SRR5660018_unmapped_R2.fastq.gz
+SRR5660019,/scratch/juno/maw210003/virome_cmv_fibroblast/star_unmapped/SRR5660019_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_cmv_fibroblast/star_unmapped/SRR5660019_unmapped_R2.fastq.gz

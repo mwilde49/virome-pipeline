@@ -1,0 +1,32 @@
+# PathSeq verification run — Iadorola et al. human trigeminal ganglia cohort
+# BATCH 1: scoped to the same 5 samples as config_iadorola_tg_batch1.yaml
+# (TG13, TG3, TG2, TG12, TG4) -- run ahead of the full 16-sample pipeline so
+# we get real Tier-1 positive/negative status and a first PathSeq
+# cross-validation without waiting on the remaining 11 downloads/pipeline run.
+#
+# Uses consensus_matrix (not target_taxa) -- same pattern as
+# config_pathseq_vzv_hsv1_tg.yaml -- so PathSeq automatically checks every
+# Tier-1 taxon this batch's real dual-DB run found, whatever that turns out
+# to be, rather than guessing HSV-1's taxon ID in advance.
+#
+# PREREQUISITE: confirm config_iadorola_tg_batch1.yaml's main-pipeline run has
+# actually finished and published the unmapped FASTQs for these 5 samples --
+#   ls -la /scratch/juno/maw210003/virome_iadorola_tg/star_unmapped/*.fastq.gz
+#   ls -la /scratch/juno/maw210003/virome_iadorola_tg/results/db_comparison/consensus_matrix.tsv
+#
+# Launch command (from an interactive compute node on Juno):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run pathseq_verify.nf -profile slurm -params-file assets/config_pathseq_iadorola_tg_batch1.yaml
+
+samplesheet:      "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_pathseq_iadorola_tg_batch1.csv"
+outdir:           "/scratch/juno/maw210003/virome_pathseq_iadorola_tg_batch1"
+
+consensus_matrix: "/scratch/juno/maw210003/virome_iadorola_tg/results/db_comparison/consensus_matrix.tsv"
+
+# --- PathSeq reference bundle -- same real paths confirmed working for every
+#     prior cohort, no change needed ---
+pathseq_microbe_bwa_image: "/groups/tprice/pipelines/references/pathseq/pathseq_microbe.fa.img"
+pathseq_microbe_fasta:     "/groups/tprice/pipelines/references/pathseq/pathseq_microbe.fa"
+pathseq_taxonomy:          "/groups/tprice/pipelines/references/pathseq/pathseq_taxonomy.db"
+
+container_dir:    "/groups/tprice/pipelines/containers/virome"

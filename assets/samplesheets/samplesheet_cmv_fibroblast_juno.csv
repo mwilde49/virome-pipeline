@@ -1,0 +1,5 @@
+sample,fastq_r1,fastq_r2
+SRR5660016,/titan/tprice/ingest/virus/cmv_fibroblast/SRR5660016_1.fastq.gz,/titan/tprice/ingest/virus/cmv_fibroblast/SRR5660016_2.fastq.gz
+SRR5660017,/titan/tprice/ingest/virus/cmv_fibroblast/SRR5660017_1.fastq.gz,/titan/tprice/ingest/virus/cmv_fibroblast/SRR5660017_2.fastq.gz
+SRR5660018,/titan/tprice/ingest/virus/cmv_fibroblast/SRR5660018_1.fastq.gz,/titan/tprice/ingest/virus/cmv_fibroblast/SRR5660018_2.fastq.gz
+SRR5660019,/titan/tprice/ingest/virus/cmv_fibroblast/SRR5660019_1.fastq.gz,/titan/tprice/ingest/virus/cmv_fibroblast/SRR5660019_2.fastq.gz

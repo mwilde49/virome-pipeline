@@ -1,0 +1,64 @@
+Bootstrap: docker
+# broadinstitute/gatk:4.6.2.0 reconfirmed current stable tag on Docker Hub
+# (https://hub.docker.com/r/broadinstitute/gatk/tags) 2026-08-14 — also tagged
+# 'latest' at time of check. Bundles GATK4 (PathSeqPipelineSpark) and the
+# Picard toolset (FastqToSam) behind the single `gatk` wrapper on PATH.
+From: broadinstitute/gatk:4.6.2.0
+
+%labels
+    maintainer  mwilde49
+    description GATK4 PathSeq (PathSeqPipelineSpark + Picard FastqToSam) for virome-pipeline PathSeq verification offshoot
+    version     1.0.0
+
+%post
+    apt-get update -y && apt-get install -y --no-install-recommends \
+        curl \
+        wget \
+        python3 \
+        python3-pip \
+        procps \
+        && rm -rf /var/lib/apt/lists/*
+
+    # WARNING (confirmed by building+inspecting this exact image, 2026-08):
+    # unlike containers/blast.def's base (ncbi/blast:2.15.0, a plain Debian
+    # image), broadinstitute/gatk:4.6.2.0's own Dockerfile sets
+    # PATH=$CONDA_PATH/envs/gatk/bin:$CONDA_PATH/bin:$PATH (then /gatk:$PATH
+    # on top), so the bare `python3`/`pip3` commands on PATH resolve to
+    # GATK's bundled conda env (which pins python=3.10.13, pandas=2.1.3,
+    # numpy, scipy, pytorch, pymc per its gatkcondaenv.yml.template — "do not
+    # update without good reason"), NOT the python3/python3-pip apt just
+    # installed to /usr/bin. A bare `pip3 install` here would silently
+    # install into — and risk corrupting — GATK's own managed Python
+    # toolchain (used by Funcotator, the CNV pipeline, etc.) on a future
+    # GATK point-release with different pins. Use the apt-installed
+    # interpreter's absolute path explicitly so this is fully isolated from
+    # GATK's conda env regardless of PATH order.
+    /usr/bin/python3 -m pip install --no-cache-dir click pandas
+
+%files
+    # Pipeline script baked in at build time
+    # Always run apptainer build from the repo root
+    bin/aggregate_pathseq.py  /usr/local/bin/aggregate_pathseq.py
+
+%post
+    chmod +x /usr/local/bin/aggregate_pathseq.py
+
+    # Repoint the shebang at the apt-installed system python3 explicitly
+    # (see WARNING above) instead of the repo-standard `#!/usr/bin/env
+    # python3` — `env python3` would resolve to GATK's conda python3 at
+    # runtime, which does NOT have click installed, since we deliberately
+    # did not install into it.
+    sed -i '1s|^#!.*python3$|#!/usr/bin/python3|' /usr/local/bin/aggregate_pathseq.py
+
+%environment
+    export LC_ALL=C
+    export PATH=/usr/local/bin:$PATH
+
+%test
+    gatk --version
+    gatk PathSeqPipelineSpark --help 2>&1 | head -5
+    gatk FastqToSam --help 2>&1 | head -5
+    # Explicit /usr/bin/python3, not bare `python3` (see WARNING in %post —
+    # bare `python3` on PATH is GATK's conda env, which lacks click).
+    /usr/bin/python3 -c "import click, pandas; print('Python deps OK')"
+    aggregate_pathseq.py --help

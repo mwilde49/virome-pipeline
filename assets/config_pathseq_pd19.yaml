@@ -1,0 +1,48 @@
+# PathSeq verification run — PD19 HSV-1 third-opinion validation
+# Target: Simplexvirus humanalpha1 (HSV-1, taxon 3050292 / legacy 10298)
+#         detected in PD19 from the 2026 Parkinson's DRG cohort (AN00028264).
+# This is the original motivating case for building pathseq_verify.nf at all:
+# a third, independently-implemented alignment engine (GATK BWA-MEM, distinct
+# from both Kraken2's k-mer LCA and BLAST's alignment-vs-nt) corroborating
+# the same Tier 1 call blast_verify.nf already confirmed.
+#
+# PREREQUISITE (same files config_blast_pd19.yaml already depends on -- if
+# that BLAST run's samplesheet still resolves, this one will too):
+#   ls -la /scratch/juno/maw210003/virome_parkinson_2026/star_unmapped/PD19_unmapped_R*.fastq.gz
+# If those are gone (Juno scratch is cleared periodically -- see
+# assets/config_blast_pd19.yaml's header for the two ways to regenerate them:
+# re-run the main pipeline with save_unmapped_reads=true, or hunt the
+# Nextflow work directory), regenerate before launching this.
+#
+# PREREQUISITE (PathSeq-specific, not yet done as of 2026-08-15): the
+# reference bundle must be downloaded and these three paths below updated to
+# match its REAL extracted filenames (not verified/guessed -- see
+# scripts/download_pathseq_reference.sh's header). Placeholder names below.
+#
+# Launch command (from an interactive compute node on Juno):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run pathseq_verify.nf -profile slurm -params-file assets/config_pathseq_pd19.yaml
+
+samplesheet:     "/groups/tprice/pipelines/containers/virome/assets/samplesheet_pathseq_pd19.csv"
+outdir:          "/scratch/juno/maw210003/virome_pathseq_pd19"
+
+# Target taxa: same pair config_blast_pd19.yaml used, to capture reads
+# classified at either the current ICTV name or the legacy NCBI taxon ID.
+target_taxa:     "3050292,10298"
+
+# Fold in the already-completed BLAST offshoot's lifecycle calls for a full
+# three-way (Kraken2 / BLAST / PathSeq) concordance table on this one sample.
+# blast_analyze.nf publishes to outdir/blast_verification/<sample>/<taxon_id>/
+# -- searched recursively by bin/aggregate_pathseq.py, so the directory root
+# is enough.
+blast_lifecycle_dir: "/scratch/juno/maw210003/virome_blast_pd19/blast_verification"
+
+# --- PathSeq reference bundle -- PLACEHOLDER PATHS, update after
+#     scripts/download_pathseq_reference.sh completes and you've confirmed
+#     the real extracted filenames (its final `ls -la` prints them) ---
+pathseq_microbe_bwa_image: "/groups/tprice/pipelines/references/pathseq/pathseq_microbe.fa.img"
+pathseq_microbe_fasta:     "/groups/tprice/pipelines/references/pathseq/pathseq_microbe.fa"
+pathseq_taxonomy:          "/groups/tprice/pipelines/references/pathseq/pathseq_taxonomy.db"
+
+# Containers
+container_dir:   "/groups/tprice/pipelines/containers/virome"

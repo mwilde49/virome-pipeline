@@ -1,0 +1,6 @@
+sample,fastq_r1,fastq_r2
+TG13,/scratch/juno/maw210003/virome_iadorola_tg/star_unmapped/TG13_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_iadorola_tg/star_unmapped/TG13_unmapped_R2.fastq.gz
+TG3,/scratch/juno/maw210003/virome_iadorola_tg/star_unmapped/TG3_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_iadorola_tg/star_unmapped/TG3_unmapped_R2.fastq.gz
+TG2,/scratch/juno/maw210003/virome_iadorola_tg/star_unmapped/TG2_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_iadorola_tg/star_unmapped/TG2_unmapped_R2.fastq.gz
+TG12,/scratch/juno/maw210003/virome_iadorola_tg/star_unmapped/TG12_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_iadorola_tg/star_unmapped/TG12_unmapped_R2.fastq.gz
+TG4,/scratch/juno/maw210003/virome_iadorola_tg/star_unmapped/TG4_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_iadorola_tg/star_unmapped/TG4_unmapped_R2.fastq.gz

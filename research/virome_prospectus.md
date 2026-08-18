@@ -507,7 +507,7 @@ Schmallenberg virus was identified in 2011 as a novel ruminant pathogen in Europ
 
 **Likely source.** The most probable source is bovine-derived reagents in the library preparation or sequencing workflow. Fetal bovine serum (FBS) is widely used in cell culture, and bovine-derived enzymes (e.g., BSA used as a blocking agent) are common in molecular biology kits. Bunyavirus RNA is relatively stable and could persist in lyophilized reagent preparations. Alternatively, these sequences may be present in the Illumina PhiX spike-in stock or in the sequencing flow cell manufacturing process if bovine materials are used.
 
-Cantalupo et al. (2020, *Nature Communications*) documented consistent contamination of GTEx RNA-seq data with tissue-inappropriate viral sequences, strongly associated with sequencing date rather than biological origin. While they did not specifically identify bunyaviruses, the pattern matches.
+Nieuwenhuis et al. (2020, *Nature Communications*, PMID 32321923) documented consistent cross-sample contamination in GTEx RNA-seq data, strongly associated with sequencing date rather than biological or tissue-collection origin. Their study examined highly-expressed, tissue-specific host marker genes (e.g., pancreatic PRSS1/PNLIP/CLPS/CELA3A appearing in non-pancreas samples), not viral sequences — but the underlying mechanism (library-prep-stage cross-sample carryover, correlated with same-day sequencing batch rather than tissue) is the same class of artifact, and the pattern matches.
 
 **Confidence level: HIGH.** The evidence for artifactual origin is strong: (1) ruminant-specific viruses with no human host range; (2) consistent presence across tissues and donors; (3) no epidemiological plausibility; (4) co-occurrence of closely related taxa suggests a single contaminant source.
 
@@ -556,7 +556,7 @@ Bracoviriform facetosae is an endogenous polydnavirus integrated into the genome
 
 Several landmark publications have documented the scope and mechanisms of contamination in sequencing-based viromics:
 
-1. **Cantalupo et al. (2020), "Consistent RNA sequencing contamination in GTEx and other data sets," *Nature Communications*.** Demonstrated that 26 of 48 GTEx tissues showed cross-sample contamination, with contamination strongly correlated with sequencing date. This established that lane-level cross-contamination on Illumina platforms is systematic and can produce reproducible but artifactual signals.
+1. **Nieuwenhuis et al. (2020), "Consistent RNA sequencing contamination in GTEx and other data sets," *Nature Communications* 11:1933. PMID: 32321923.** Demonstrated that 26 of 48 GTEx tissues showed cross-sample contamination of highly-expressed, tissue-specific host marker genes, with contamination strongly correlated with same-day sequencing batch (not tissue-collection date). This established that library-prep-stage cross-sample contamination on Illumina platforms is systematic and can produce reproducible but artifactual signals.
 
 2. **Viera Braga et al. (2020), "Virus expression detection reveals RNA-sequencing contamination in TCGA," *BMC Genomics*.** Identified HeLa-derived HPV18 reads in non-cervical TCGA samples, traced to cross-contamination during library preparation or sequencing. Demonstrated that low-level viral contamination can be persistent and widespread in large consortium datasets.
 
@@ -650,6 +650,10 @@ The following taxa are detected in our data but are NOT in the current exclusion
 **Recommended action.** (1) Extract reads classified to BaCMV and align them to both HCMV and BaCMV reference genomes. Determine whether they map better to one or the other. (2) Check whether HCMV itself is also detected in the same samples. (3) If reads map equally well to both, they likely represent conserved CMV sequences and should be reported as "CMV (species indeterminate)" rather than specifically as BaCMV.
 
 **Provisional classification: LIKELY MISCLASSIFICATION of HCMV or conserved betaherpesvirus reads.** Not necessarily an artifact to exclude, but the species-level assignment should not be trusted.
+
+**A second, distinct contamination hypothesis worth ruling out: reagent/vector-derived contamination, not just k-mer misclassification.** Shnayder et al. (2018, *mBio*, PMID 29535194 — the same study behind this pipeline's GTEx CMV benchmarking numbers, see `docs/sttr_intelligence_digest.md` §"The direct tie to this pipeline") screened 9,416 GTEx bulk RNA-seq samples for HCMV reads and found 101 samples with at least one HCMV-aligned read. Of those, **40 (about 40%) were excluded as contamination** — not because of cross-species k-mer misassignment, but because the reads aligned *only* to a 229 bp region of the CMV Major Immediate-Early Promoter (MIEP), and the specific sequence variant present matched the synthetic promoter cloned into molecular-biology expression vectors (a sequence difference at two fixed genome positions distinguishes vector-derived MIEP from the sequence seen in real clinical HCMV isolates). The CMV MIEP is one of the most widely used promoters in life-science reagents and plasmids, so this is a **reagent/kitome contamination signature**, mechanistically distinct from the LCA/k-mer misassignment mechanism above (see `assets/artifact_taxa.tsv` for this pipeline's existing index-hop and kitome-type artifact entries, and Nieuwenhuis et al. 2020, cited in Section 4.4.1/4.4.2 above, for a third, again-distinct GTEx contamination mechanism — same-day-sequencing-batch cross-sample carryover of highly-expressed host genes, not viral sequence at all).
+
+Before trusting any CMV signal from this pipeline as biological, it is worth checking whether reads cluster narrowly on the MIEP region the way Shnayder's excluded samples did (this pipeline does not currently perform this check). If they do, reagent contamination — not cross-reactive baboon-CMV k-mer assignment — would be the more likely explanation, and the two hypotheses point to different remediation: the k-mer-misassignment hypothesis is resolved by alignment to HCMV vs. BaCMV references (already the "Recommended action" above); the reagent-contamination hypothesis would instead require checking read distribution across the full CMV genome (a signal restricted to the MIEP is suspicious) and, ideally, the specific base-level MIEP sequence variant.
 
 #### 4.4.4 Orthohantavirus oxbowense
 
@@ -1178,7 +1182,7 @@ For publication, the following must be provided:
 - Wood DE, Lu J, Langmead B (2019). Improved metagenomic analysis with Kraken 2. *Genome Biology*.
 - Lu J, et al. (2017). Bracken: estimating species abundance in metagenomics data. *PeerJ Computer Science*.
 - Walker MA, et al. (2018). GATK PathSeq: a customizable computational tool for the discovery and identification of microbial sequences. *Bioinformatics*. PMID: 29982281
-- Cantalupo PG, et al. (2020). Consistent RNA sequencing contamination in GTEx and other data sets. *Nature Communications*. PMID: 32321923
+- Nieuwenhuis TO, et al. (2020). Consistent RNA sequencing contamination in GTEx and other data sets. *Nature Communications* 11:1933. PMID: 32321923
 - Viera Braga FA, et al. (2020). Virus expression detection reveals RNA-sequencing contamination in TCGA. *BMC Genomics*. PMID: 31992194
 - Salter SJ, et al. (2014). Reagent and laboratory contamination can critically impact sequence-based microbiome analyses. *BMC Biology*. [*]
 - Davis NM, et al. (2018). Simple statistical identification and removal of contaminant sequences in marker-gene and metagenomics data. *Microbiome*. [*]

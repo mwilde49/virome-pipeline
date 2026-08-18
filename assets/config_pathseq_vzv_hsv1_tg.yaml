@@ -1,0 +1,44 @@
+# PathSeq verification run — VZV+HSV-1 human trigeminal ganglia cohort (TG3-TG7)
+# Companion to assets/config_vzv_hsv1_tg.yaml (the main-pipeline run that just
+# completed 50/50 -- both HSV-1 and VZV landed Tier 1/shared-consensus in all
+# 5 donors, see chat log 2026-08-15).
+#
+# Unlike config_pathseq_cmv_fibroblast.yaml and config_pathseq_pd19.yaml
+# (which use explicit target_taxa), this one deliberately uses
+# consensus_matrix instead -- we now have a real, freshly-generated Tier 1
+# consensus_matrix.tsv from this exact cohort, so let PathSeq corroborate
+# EVERY shared-tier taxon (HSV-1 3050292, VZV 3050294, plus the smaller
+# shared hits -- Mason-Pfizer monkey virus 11855, Human mastadenovirus C
+# 129951, Valbvirus ValB1MD2 2956629, Varicellovirus bovinealpha1 3050243,
+# Simplexvirus paninealpha3 3050333) rather than manually restricting to the
+# two headline viruses. target_taxa is left unset -- per
+# blast_verification.nf's get_target_taxa() precedence (mirrored here),
+# target_taxa would win over consensus_matrix if both were set, so leave it
+# out to actually exercise the consensus_matrix path for real for the first
+# time.
+#
+# PREREQUISITE: confirm all 5 samples' unmapped FASTQs exist --
+#   ls -la /scratch/juno/maw210003/virome_vzv_hsv1_tg/star_unmapped/*.fastq.gz
+# (should already be there -- save_unmapped_reads=true was set on the main run)
+#
+# Launch command (from an interactive compute node on Juno):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run pathseq_verify.nf -profile slurm -params-file assets/config_pathseq_vzv_hsv1_tg.yaml
+
+samplesheet:     "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_pathseq_vzv_hsv1_tg.csv"
+outdir:          "/scratch/juno/maw210003/virome_pathseq_vzv_hsv1_tg"
+
+consensus_matrix: "/scratch/juno/maw210003/virome_vzv_hsv1_tg/results/db_comparison/consensus_matrix.tsv"
+
+# Fold in the main run's BLAST offshoot lifecycle calls too, if/when that's
+# been run for this cohort -- not yet, so left unset (null default, skipped
+# gracefully by AGGREGATE_PATHSEQ). Uncomment once available:
+# blast_lifecycle_dir: "/scratch/juno/maw210003/virome_blast_vzv_hsv1_tg/blast_verification"
+
+# --- PathSeq reference bundle -- same real paths confirmed working for
+#     cmv_fibroblast, no change needed ---
+pathseq_microbe_bwa_image: "/groups/tprice/pipelines/references/pathseq/pathseq_microbe.fa.img"
+pathseq_microbe_fasta:     "/groups/tprice/pipelines/references/pathseq/pathseq_microbe.fa"
+pathseq_taxonomy:          "/groups/tprice/pipelines/references/pathseq/pathseq_taxonomy.db"
+
+container_dir:   "/groups/tprice/pipelines/containers/virome"

@@ -15,8 +15,9 @@ systematic virome profiling in this context. k-mer classifiers such as Kraken2, 
 to viral-only reference databases, impose a closed-world assumption that, while enhancing 
 detection sensitivity, incurs an expected cost to specificity: every unclassified read
 is forced onto the nearest viral taxon, systematically inflating false positive rates. We
-present virome-pipeline to characterize this bias, resolve it via competitive classification,
-and establish a null baseline for future DRG virome studies.
+present virome-pipeline to characterize this sensitivity-forward bias, resolve it 
+via competitive classification with an emphasis on detection specificity,
+and establish a  baseline for future DRG virome studies.
 
 ## Methods
 

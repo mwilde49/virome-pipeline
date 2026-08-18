@@ -31,3 +31,13 @@ __pycache__/
 # Editor / OS
 .DS_Store
 *.swp
+~$*
+
+# Not virome-pipeline content — other projects/files sharing this working directory
+/HERVK/
+/Re_ Viral STTR.zip
+/UC Irvine/
+
+# Raw Prometheus FASTQ tree scrapes — transient working input; extracted
+# summaries live in docs/prometheus_fastq_inventory_*.md instead
+/fastqs.txt
