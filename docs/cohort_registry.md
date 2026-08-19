@@ -62,3 +62,39 @@ itself cannot be).
 above (cohort #3, n=5) still doesn't carry the duplicate-of-Donor1 caveat that's
 already documented in project memory and correctly excluded from the actual
 paper1 manuscript — worth fixing in this table separately from this batch.
+
+### PathSeq offshoot — full-cohort validation (planned, 2026-08-19)
+
+Scope decision: unlike every prior PathSeq run (`cmv_fibroblast`, `vzv_hsv1_tg`,
+`ebv_gm12878`, `iadorola_tg` — all targeted at specific Tier 1 candidates), this
+batch runs PathSeq on **every sample in all 11 launched cohorts** (161 samples —
+the 167 above minus `lumar_drg`'s 6, which stays excluded from both the main
+batch and this PathSeq batch) as a full third-opinion validation baseline, not a
+targeted follow-up. A deliberate, much larger compute commitment than PathSeq's
+routine use — see CLAUDE.md's "PathSeq verification offshoot" section for the
+per-task cost (200 GB / 32 cpu / up to 48h, `conf/base.config`) driving that
+choice, and this repo's own roadmap noting PathSeq was originally scoped as
+*not* routine per-cohort infrastructure.
+
+Prerequisite applied to all 11 `config_<cohort>_titan.yaml` files: added
+`save_unmapped_reads: true` so `${outdir}/star_unmapped/` actually gets
+populated (previously unset on every one of them — the flat files these were
+generated from never turned it on). For a cohort whose main run already
+completed before this was added, one more `-resume` pass against its real
+session ID is needed first — `STAR_HOST_REMOVAL` cache-hits instantly for every
+sample, this only adds the publish copy.
+
+11 new `config_pathseq_<cohort>.yaml` + `samplesheet_pathseq_<cohort>.csv` pairs
+built (mechanically derived from each cohort's existing main samplesheet — same
+sample IDs, paths rewritten to `${outdir}/star_unmapped/{sample}_unmapped_R{1,2}.fastq.gz`),
+plus `scripts/run_pathseq_config.sbatch` (sibling to `run_virome_config.sbatch`,
+for `pathseq_verify.nf`). Each PathSeq config's `consensus_matrix` points at its
+own cohort's `db_comparison/consensus_matrix.tsv` — this only curates which
+taxa `AGGREGATE_PATHSEQ` highlights in `pathseq_concordance.tsv` (every sample's
+full unmapped pool is scored taxonomy-wide regardless), and is harmless if that
+file doesn't exist yet when a cohort's PathSeq run is chained to launch
+immediately after its main run.
+
+Not yet launched — chain each cohort's PathSeq job with
+`--dependency=afterany:<that cohort's main-pipeline job ID>` once the main
+11-cohort batch clears the queue.

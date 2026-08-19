@@ -1,0 +1,9 @@
+sample,fastq_r1,fastq_r2
+2A-L,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/2A-L_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/2A-L_unmapped_R2.fastq.gz
+2A-R,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/2A-R_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/2A-R_unmapped_R2.fastq.gz
+3A-L,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/3A-L_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/3A-L_unmapped_R2.fastq.gz
+3A-R,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/3A-R_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/3A-R_unmapped_R2.fastq.gz
+4A-L,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/4A-L_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/4A-L_unmapped_R2.fastq.gz
+4A-R,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/4A-R_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/4A-R_unmapped_R2.fastq.gz
+5A-L,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/5A-L_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/5A-L_unmapped_R2.fastq.gz
+5A-R,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/5A-R_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/5A-R_unmapped_R2.fastq.gz

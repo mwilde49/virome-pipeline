@@ -1,0 +1,43 @@
+# PathSeq verification offshoot — osmcultured_juliet cohort (full-cohort, every sample)
+#
+# Scope decision (2026-08-19): unlike prior PathSeq runs (cmv_fibroblast,
+# vzv_hsv1_tg, ebv_gm12878, iadorola_tg — all targeted at specific Tier 1
+# candidates), this batch runs PathSeq on EVERY sample in every one of the
+# 11 gataca->Titan->scratch cohorts (167-6=161 samples total across the
+# batch, lumar_drg excluded per its recommend-exclude status) as a full
+# third-opinion validation baseline, not a targeted follow-up. This is a
+# deliberate, much larger compute commitment than PathSeq's routine use —
+# see CLAUDE.md's "PathSeq verification offshoot" section for the per-task
+# cost (200 GB / 32 cpu / up to 48h, conf/base.config) driving that choice.
+#
+# PREREQUISITE: assets/config_osmcultured_juliet_titan.yaml now sets
+# save_unmapped_reads: true. If the main osmcultured_juliet run already completed
+# before that flag was added, re-launch it once more with -resume against
+# its real session ID first -- STAR_HOST_REMOVAL cache-hits instantly for
+# every sample, this only adds the publish copy to ${outdir}/star_unmapped/.
+# Confirm before launching:
+#   ls /scratch/juno/maw210003/virome_osmcultured_juliet/star_unmapped/ | wc -l   # expect 12 (6 samples x R1/R2)
+#
+# Launch on Juno (from an interactive compute node, or via
+# scripts/run_pathseq_config.sbatch as a background SLURM job):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run pathseq_verify.nf -profile slurm -params-file assets/config_pathseq_osmcultured_juliet.yaml
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_pathseq_osmcultured_juliet.csv"
+outdir:      "/scratch/juno/maw210003/virome_pathseq_osmcultured_juliet"
+
+# --- PathSeq microbe/taxonomy reference bundle (RefSeq release 81, April 2017) ---
+pathseq_microbe_bwa_image: "/groups/tprice/pipelines/references/pathseq/pathseq_microbe.fa.img"
+pathseq_microbe_fasta:     "/groups/tprice/pipelines/references/pathseq/pathseq_microbe.fa"
+pathseq_taxonomy:          "/groups/tprice/pipelines/references/pathseq/pathseq_taxonomy.db"
+
+# Every sample's entire unmapped pool is scored taxonomy-wide regardless of
+# this setting (see pathseq_verify.nf's own docs) -- consensus_matrix here
+# only curates which taxa AGGREGATE_PATHSEQ highlights in
+# pathseq_concordance.tsv, pointing at this cohort's own dual-DB Tier 1
+# result. Harmless if db_comparison/ doesn't exist yet at launch time for a
+# cohort still mid-run -- falls back to reporting every taxon PathSeq itself
+# detected.
+consensus_matrix: "/scratch/juno/maw210003/virome_osmcultured_juliet/db_comparison/consensus_matrix.tsv"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"

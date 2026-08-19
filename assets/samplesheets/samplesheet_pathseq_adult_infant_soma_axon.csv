@@ -1,0 +1,11 @@
+sample,fastq_r1,fastq_r2
+366-1,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-1_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-1_unmapped_R2.fastq.gz
+366-10,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-10_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-10_unmapped_R2.fastq.gz
+366-2,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-2_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-2_unmapped_R2.fastq.gz
+366-3,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-3_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-3_unmapped_R2.fastq.gz
+366-4,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-4_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-4_unmapped_R2.fastq.gz
+366-5,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-5_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-5_unmapped_R2.fastq.gz
+366-6,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-6_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-6_unmapped_R2.fastq.gz
+366-7,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-7_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-7_unmapped_R2.fastq.gz
+366-8,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-8_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-8_unmapped_R2.fastq.gz
+366-9,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-9_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_adult_infant_soma_axon/star_unmapped/366-9_unmapped_R2.fastq.gz

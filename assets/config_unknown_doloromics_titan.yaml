@@ -46,3 +46,12 @@ trim_minlen:   36
 kraken2_confidence: 0.1
 bracken_read_len:   150
 bracken_level:      "S"
+
+# PathSeq offshoot prerequisite (2026-08-19): publish STAR-unmapped FASTQs so
+# pathseq_verify.nf's samplesheet (assets/samplesheets/samplesheet_pathseq_<cohort>.csv)
+# can point at them directly, per the "every sample, every cohort" full-cohort
+# PathSeq validation plan for this batch. ~2GB/sample added to outdir size.
+# Retroactive on an already-running/-completed cohort: re-launch with -resume
+# against that cohort's real session ID -- STAR_HOST_REMOVAL cache-hits
+# instantly for every sample, this only adds the publish copy.
+save_unmapped_reads: true

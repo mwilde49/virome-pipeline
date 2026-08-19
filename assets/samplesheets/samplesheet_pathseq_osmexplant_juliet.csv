@@ -1,0 +1,8 @@
+sample,fastq_r1,fastq_r2
+DRG-OSM-1,/scratch/juno/maw210003/virome_osmexplant_juliet/star_unmapped/DRG-OSM-1_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_osmexplant_juliet/star_unmapped/DRG-OSM-1_unmapped_R2.fastq.gz
+DRG-OSM-2,/scratch/juno/maw210003/virome_osmexplant_juliet/star_unmapped/DRG-OSM-2_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_osmexplant_juliet/star_unmapped/DRG-OSM-2_unmapped_R2.fastq.gz
+DRG-OSM-3,/scratch/juno/maw210003/virome_osmexplant_juliet/star_unmapped/DRG-OSM-3_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_osmexplant_juliet/star_unmapped/DRG-OSM-3_unmapped_R2.fastq.gz
+DRG-OSM-4,/scratch/juno/maw210003/virome_osmexplant_juliet/star_unmapped/DRG-OSM-4_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_osmexplant_juliet/star_unmapped/DRG-OSM-4_unmapped_R2.fastq.gz
+DRG-VEH-2,/scratch/juno/maw210003/virome_osmexplant_juliet/star_unmapped/DRG-VEH-2_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_osmexplant_juliet/star_unmapped/DRG-VEH-2_unmapped_R2.fastq.gz
+DRG-VEH-3,/scratch/juno/maw210003/virome_osmexplant_juliet/star_unmapped/DRG-VEH-3_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_osmexplant_juliet/star_unmapped/DRG-VEH-3_unmapped_R2.fastq.gz
+DRG-VEH-4,/scratch/juno/maw210003/virome_osmexplant_juliet/star_unmapped/DRG-VEH-4_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_osmexplant_juliet/star_unmapped/DRG-VEH-4_unmapped_R2.fastq.gz
