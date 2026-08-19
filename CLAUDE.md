@@ -6,6 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nextflow DSL2 pipeline for systematic profiling of the human dorsal root ganglion (DRG) virome from paired-end bulk RNA-seq data. Runs on the Juno HPC cluster (UT Dallas, TJP group) via SLURM and Apptainer. Lives as a git submodule at `containers/virome` within `github.com/mwilde49/hpc`.
 
+> **`docs/juno_hpc_operations_guide.md`** — general Nextflow/SLURM/Apptainer/Juno
+> operations knowledge (session-resume mechanics, QOS limits, dependency-chain
+> pitfalls, data-staging patterns, WSL2 git gotchas, monitoring recipes), written
+> from real production batch launches on this pipeline but **not specific to
+> virome** — applicable to any Nextflow pipeline on Juno (`psoma`, `bulkseq`,
+> `10x`, `longreads`, `dconvatac`, a new one). Read it before debugging an
+> HPC/SLURM/Nextflow issue anywhere in the `firebase2` workspace, not just here.
+
 Current version: **2.2.0** — pipeline-native run provenance (`${outdir}/provenance/`:
 `manifest.json`, `software_versions.yml`, `PROVENANCE_README.md`) for all three entry
 points, working identically under `tjp-launch`/SLURM or a bare `nextflow run` with no
