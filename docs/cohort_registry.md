@@ -47,7 +47,7 @@ itself cannot be).
 |---|---|---|---|---|
 | Watchmaker | `config_watchmaker_titan.yaml` | `samplesheet_watchmaker_titan.csv` | 24 | 30 found on Prometheus; MB1-6 (6 samples) confirmed 2026-08-18 as empty 23-byte gzip stubs on both Titan and the gataca source itself — excluded, not a transfer bug. See config comment |
 | DPN & RA Kulkarni (re-run) | `config_dpn_ra_kulkarni_titan.yaml` | `samplesheet_dpn_ra_kulkarni_titan.csv` | 25 | **Already run** (cohort #10) — uniform re-stage, separate outdir |
-| Thoracic DRG | `config_thoracic_drg_titan.yaml` | `samplesheet_thoracic_drg_titan.csv` | 24 | New |
+| Thoracic DRG | `config_thoracic_drg_titan.yaml` | `samplesheet_thoracic_drg_titan.csv` | 24 | New. 5/24 samples (`104T8R`, `101T5L`, `105T8R`, `105T8L`, `106T3R`) had essentially zero STAR-unmapped reads (all-`unclassified` Kraken2 report, see CLAUDE.md's Bracken gotcha) — `105T8L`+`105T8R` being the same donor/level suggests a shared library issue, not yet root-caused |
 | OSM Juliet (re-run) | `config_osm_juliet_titan.yaml` | `samplesheet_osm_juliet_titan.csv` | 18 | **Already run** (cohort #9) — path discrepancy vs. original config unresolved, see config comment |
 | REJOIN Jayden (likely re-run) | `config_rejoin_jayden_titan.yaml` | `samplesheet_rejoin_jayden_titan.csv` | 17 | Matches cohort #5 almost exactly — confirm before treating as new |
 | Adult/Infant Soma/Axon | `config_adult_infant_soma_axon_titan.yaml` | `samplesheet_adult_infant_soma_axon_titan.csv` | 10 | New. Sample-ID overlap risk with OSM cultured, see below |
