@@ -20,17 +20,28 @@ All biological sample collections processed through the virome pipeline, in chro
 
 **Total unique biological samples: 118** across skeletal muscle, DRG, and trigeminal ganglion.
 
-## Planned — Prometheus/gataca → Titan batch (not yet launched, 2026-08-18)
+## Planned — Prometheus/gataca → Titan → scratch batch (not yet launched, 2026-08-18)
 
 Config/samplesheet pairs built for 151 of the 157 confirmed-paired-end samples
 found in `docs/prometheus_fastq_inventory_2026-08-18.md` (6 more excluded after
 staging began, see Watchmaker row below), staged via gataca → the linux relay
-machine → `/titan/tprice/ingest/virome/<original_prometheus_folder_name>/`.
-One cohort = one config, per established convention. Transfer in progress as of
-2026-08-18 (real transfer, ~1.4TB/314 files, corrected mid-flight from an
-initial local-instead-of-remote-destination mistake — see chat log); the
-Titan-container-bind-mount risk (see each config's header comment) still needs
-validating on Juno before launch.
+machine → `/titan/tprice/ingest/virome/<original_prometheus_folder_name>/`
+(real transfer, ~1.4TB/314 files, corrected mid-flight from an initial
+local-instead-of-remote-destination mistake — see chat log). One cohort = one
+config, per established convention.
+
+**Resolved 2026-08-18 (was an open risk, now a known fact with a fix applied):**
+a real launch attempt against `config_watchmaker_titan.yaml` failed at
+`main.nf`'s samplesheet-parsing `checkIfExists` step — a plain Nextflow-host
+file check, before any Apptainer container was even involved — because Juno's
+**compute nodes do not have `/titan` mounted**, only login nodes do. This is a
+bigger issue than the originally-flagged container-bind-mount risk (would have
+blocked all 11 cohorts, not just one). Fix: every samplesheet now points at
+`/scratch/juno/$USER/gataca_fastq/<dataset>/` instead of `/titan/...` directly;
+`scripts/stage_titan_to_scratch_2026-08-18.sh` copies each cohort from Titan to
+that scratch location (run from a login node, e.g. via tmux — the transfer
+itself is a login-node-only operation, same reasoning as why the pipeline run
+itself cannot be).
 
 | Cohort | Config | Samplesheet | n | Notes |
 |---|---|---|---|---|

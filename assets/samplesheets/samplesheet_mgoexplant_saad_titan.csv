@@ -1,7 +1,7 @@
 sample,fastq_r1,fastq_r2
-Saad-1,/titan/tprice/ingest/virome/2022_MGOexplant_Saad/Saad-1_S19_L001_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_MGOexplant_Saad/Saad-1_S19_L001_R2_001.fastq.gz
-Saad-2,/titan/tprice/ingest/virome/2022_MGOexplant_Saad/Saad-2_S20_L001_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_MGOexplant_Saad/Saad-2_S20_L001_R2_001.fastq.gz
-Saad-3,/titan/tprice/ingest/virome/2022_MGOexplant_Saad/Saad-3_S21_L001_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_MGOexplant_Saad/Saad-3_S21_L001_R2_001.fastq.gz
-Saad-4,/titan/tprice/ingest/virome/2022_MGOexplant_Saad/Saad-4_S22_L001_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_MGOexplant_Saad/Saad-4_S22_L001_R2_001.fastq.gz
-Saad-5,/titan/tprice/ingest/virome/2022_MGOexplant_Saad/Saad-5_S23_L001_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_MGOexplant_Saad/Saad-5_S23_L001_R2_001.fastq.gz
-Saad-6,/titan/tprice/ingest/virome/2022_MGOexplant_Saad/Saad-6_S24_L001_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_MGOexplant_Saad/Saad-6_S24_L001_R2_001.fastq.gz
+Saad-1,/scratch/juno/maw210003/gataca_fastq/2022_MGOexplant_Saad/Saad-1_S19_L001_R1_001.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2022_MGOexplant_Saad/Saad-1_S19_L001_R2_001.fastq.gz
+Saad-2,/scratch/juno/maw210003/gataca_fastq/2022_MGOexplant_Saad/Saad-2_S20_L001_R1_001.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2022_MGOexplant_Saad/Saad-2_S20_L001_R2_001.fastq.gz
+Saad-3,/scratch/juno/maw210003/gataca_fastq/2022_MGOexplant_Saad/Saad-3_S21_L001_R1_001.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2022_MGOexplant_Saad/Saad-3_S21_L001_R2_001.fastq.gz
+Saad-4,/scratch/juno/maw210003/gataca_fastq/2022_MGOexplant_Saad/Saad-4_S22_L001_R1_001.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2022_MGOexplant_Saad/Saad-4_S22_L001_R2_001.fastq.gz
+Saad-5,/scratch/juno/maw210003/gataca_fastq/2022_MGOexplant_Saad/Saad-5_S23_L001_R1_001.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2022_MGOexplant_Saad/Saad-5_S23_L001_R2_001.fastq.gz
+Saad-6,/scratch/juno/maw210003/gataca_fastq/2022_MGOexplant_Saad/Saad-6_S24_L001_R1_001.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2022_MGOexplant_Saad/Saad-6_S24_L001_R2_001.fastq.gz

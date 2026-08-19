@@ -6,15 +6,15 @@
 # 7 samples.
 # Platform: Illumina, paired-end, 150 bp assumed (confirm read length from FastQC).
 #
-# PREREQUISITE: confirm the rsync from gataca -> Titan has landed at
-# /titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/ before launching --
-#   ls -la /titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/ | head
-# KNOWN OPEN RISK (flagged 2026-08-18, unresolved): the SLURM template's Apptainer
-# invocation may not bind /titan into the container (confirmed missing for psoma's
-# template as of 2026-08-09; virome's template not yet checked). virome's own
-# stageInMode='copy' + standard Nextflow `path` inputs stage files at the
-# Nextflow-host level before any container runs, which may already sidestep this --
-# but validate on ONE sample before trusting it across the full batch.
+# PREREQUISITE: FASTQs must be staged to scratch before launching -- Juno COMPUTE
+# nodes do not have /titan mounted (only login nodes do; confirmed 2026-08-18 via
+# a real launch attempt against config_watchmaker_titan.yaml, which failed at
+# main.nf's samplesheet-parsing checkIfExists step -- i.e. before any Apptainer
+# container was even involved, a plain Nextflow-host-level file check on whatever
+# compute node the SLURM job landed on). Stage from a login node (has /titan):
+#   rsync -a /titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/ /scratch/juno/$USER/gataca_fastq/2023_OSMexplant_doloromics.Juliet/
+# Confirm before launching:
+#   ls /scratch/juno/$USER/gataca_fastq/2023_OSMexplant_doloromics.Juliet/ | head
 
 samplesheet:      "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_osmexplant_juliet_titan.csv"
 outdir:           "/scratch/juno/maw210003/virome_osmexplant_juliet"

@@ -1,9 +1,9 @@
 sample,fastq_r1,fastq_r2
-2A-L,/titan/tprice/ingest/virome/2022_unknown_doloromics/2A-L_S1_L002_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_unknown_doloromics/2A-L_S1_L002_R2_001.fastq.gz
-2A-R,/titan/tprice/ingest/virome/2022_unknown_doloromics/2A-R_S2_L002_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_unknown_doloromics/2A-R_S2_L002_R2_001.fastq.gz
-3A-L,/titan/tprice/ingest/virome/2022_unknown_doloromics/3A-L_S3_L002_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_unknown_doloromics/3A-L_S3_L002_R2_001.fastq.gz
-3A-R,/titan/tprice/ingest/virome/2022_unknown_doloromics/3A-R_S4_L002_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_unknown_doloromics/3A-R_S4_L002_R2_001.fastq.gz
-4A-L,/titan/tprice/ingest/virome/2022_unknown_doloromics/4A-L_S5_L002_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_unknown_doloromics/4A-L_S5_L002_R2_001.fastq.gz
-4A-R,/titan/tprice/ingest/virome/2022_unknown_doloromics/4A-R_S6_L002_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_unknown_doloromics/4A-R_S6_L002_R2_001.fastq.gz
-5A-L,/titan/tprice/ingest/virome/2022_unknown_doloromics/5A-L_S7_L002_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_unknown_doloromics/5A-L_S7_L002_R2_001.fastq.gz
-5A-R,/titan/tprice/ingest/virome/2022_unknown_doloromics/5A-R_S8_L002_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_unknown_doloromics/5A-R_S8_L002_R2_001.fastq.gz
+2A-L,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/2A-L_S1_L002_R1_001.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/2A-L_S1_L002_R2_001.fastq.gz
+2A-R,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/2A-R_S2_L002_R1_001.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/2A-R_S2_L002_R2_001.fastq.gz
+3A-L,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/3A-L_S3_L002_R1_001.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/3A-L_S3_L002_R2_001.fastq.gz
+3A-R,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/3A-R_S4_L002_R1_001.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/3A-R_S4_L002_R2_001.fastq.gz
+4A-L,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/4A-L_S5_L002_R1_001.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/4A-L_S5_L002_R2_001.fastq.gz
+4A-R,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/4A-R_S6_L002_R1_001.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/4A-R_S6_L002_R2_001.fastq.gz
+5A-L,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/5A-L_S7_L002_R1_001.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/5A-L_S7_L002_R2_001.fastq.gz
+5A-R,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/5A-R_S8_L002_R1_001.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2022_unknown_doloromics/5A-R_S8_L002_R2_001.fastq.gz
