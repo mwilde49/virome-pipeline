@@ -30,6 +30,8 @@ include { HTSEQ_COUNT                         } from '../modules/htseq_count'
 include { AGGREGATE_HOST_COUNTS               } from '../modules/aggregate_host_counts'
 include { MULTIQC                             } from '../modules/multiqc'
 include { REPORT                              } from '../modules/report'
+include { CAPTURE_SOFTWARE_VERSIONS           } from '../modules/capture_software_versions'
+include { mainToolSpecs                       } from '../lib/provenance'
 
 workflow VIROME {
 
@@ -197,6 +199,14 @@ workflow VIROME {
         .collect()
 
     MULTIQC(ch_multiqc_inputs)
+
+    // -------------------------------------------------------------------------
+    // Provenance — real, live-queried container tool versions for
+    // ${params.outdir}/provenance/software_versions.yml. See lib/provenance.nf
+    // for the manifest.json / PROVENANCE_README.md half (written from this
+    // entry point's workflow.onComplete{} in main.nf).
+    // -------------------------------------------------------------------------
+    CAPTURE_SOFTWARE_VERSIONS(mainToolSpecs())
 
     REPORT(
         AGGREGATE_BRACKEN.out.matrix,

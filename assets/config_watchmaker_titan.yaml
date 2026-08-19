@@ -1,0 +1,53 @@
+# virome-pipeline run config — Watchmaker cohort (Asta/Jayden/Katherin/Alejandro)
+# Source: Prometheus z:\data\homo_sapiens\Dorsal_root_ganglia\bulk_rnaseq\2025_Watchmaker_Asta.Jayden.Katherin.Alejandro\
+#         staged to Titan at /titan/tprice/ingest/virome/2025_Watchmaker_Asta.Jayden.Katherin.Alejandro/ (see
+#         docs/prometheus_fastq_inventory_2026-08-18.md for the full inventory this
+#         was built from).
+# 24 samples (30 found on Prometheus, minus 6 excluded -- see below).
+# 3 sub-groups by researcher: JOA1-8 (Jayden), AO1-8 (Alejandro), AA1-8 (Asta).
+# MB1-6 (likely Katherin -- no per-researcher subfolder existed for these 6 on
+# Prometheus, sourced from the flowcell's raw bcl demux output instead) are
+# EXCLUDED: confirmed 2026-08-18, on both the Titan-staged copy AND the
+# gataca source itself, to be empty 23-byte gzip stubs (valid gzip, 0 reads --
+# not a transfer artifact). Owned root:root on gataca, unlike the real files
+# (maw210003:tprice) -- a second signal something failed in the original bcl
+# demux for exactly these 6 samples. Real data for Katherin's samples, if it
+# exists, wasn't found at this path; would need tracking down separately.
+# Platform: Illumina, paired-end, 150 bp assumed (confirm read length from FastQC).
+#
+# PREREQUISITE: confirm the rsync from gataca -> Titan has landed at
+# /titan/tprice/ingest/virome/2025_Watchmaker_Asta.Jayden.Katherin.Alejandro/ before launching --
+#   ls -la /titan/tprice/ingest/virome/2025_Watchmaker_Asta.Jayden.Katherin.Alejandro/ | head
+# KNOWN OPEN RISK (flagged 2026-08-18, unresolved): the SLURM template's Apptainer
+# invocation may not bind /titan into the container (confirmed missing for psoma's
+# template as of 2026-08-09; virome's template not yet checked). virome's own
+# stageInMode='copy' + standard Nextflow `path` inputs stage files at the
+# Nextflow-host level before any container runs, which may already sidestep this --
+# but validate on ONE sample before trusting it across the full batch.
+
+samplesheet:      "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_watchmaker_titan.csv"
+outdir:           "/scratch/juno/maw210003/virome_watchmaker"
+
+# References (pre-built on Juno)
+star_index:    "/groups/tprice/pipelines/references/star_index"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
+kraken2_db2:   "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+
+# Containers
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+# Filtering
+min_reads:     5
+artifact_list: "/groups/tprice/pipelines/containers/virome/assets/artifact_taxa.tsv"
+taxon_remap:   "/groups/tprice/pipelines/containers/virome/assets/taxon_remap.tsv"
+
+# Trimmomatic
+trim_adapters: "TruSeq3-PE"
+trim_leading:  3
+trim_trailing: 3
+trim_minlen:   36
+
+# Kraken2
+kraken2_confidence: 0.1
+bracken_read_len:   150
+bracken_level:      "S"

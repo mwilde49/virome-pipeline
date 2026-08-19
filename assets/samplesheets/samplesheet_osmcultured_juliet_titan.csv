@@ -1,0 +1,7 @@
+sample,fastq_r1,fastq_r2
+366-11,/titan/tprice/ingest/virome/2023_OSMcultured_doloromics.Juliet/366-11_S11_R1_001.fastq.gz,/titan/tprice/ingest/virome/2023_OSMcultured_doloromics.Juliet/366-11_S11_R2_001.fastq.gz
+366-12,/titan/tprice/ingest/virome/2023_OSMcultured_doloromics.Juliet/366-12_S12_R1_001.fastq.gz,/titan/tprice/ingest/virome/2023_OSMcultured_doloromics.Juliet/366-12_S12_R2_001.fastq.gz
+366-13,/titan/tprice/ingest/virome/2023_OSMcultured_doloromics.Juliet/366-13_S13_R1_001.fastq.gz,/titan/tprice/ingest/virome/2023_OSMcultured_doloromics.Juliet/366-13_S13_R2_001.fastq.gz
+366-14,/titan/tprice/ingest/virome/2023_OSMcultured_doloromics.Juliet/366-14_S14_R1_001.fastq.gz,/titan/tprice/ingest/virome/2023_OSMcultured_doloromics.Juliet/366-14_S14_R2_001.fastq.gz
+366-15,/titan/tprice/ingest/virome/2023_OSMcultured_doloromics.Juliet/366-15_S15_R1_001.fastq.gz,/titan/tprice/ingest/virome/2023_OSMcultured_doloromics.Juliet/366-15_S15_R2_001.fastq.gz
+366-16,/titan/tprice/ingest/virome/2023_OSMcultured_doloromics.Juliet/366-16_S16_R1_001.fastq.gz,/titan/tprice/ingest/virome/2023_OSMcultured_doloromics.Juliet/366-16_S16_R2_001.fastq.gz

@@ -19,3 +19,34 @@ All biological sample collections processed through the virome pipeline, in chro
 **Cohorts 1–5** were consolidated into the 38-sample full cohort (`all_cohort_pluspf`) for paper 1 analysis.
 
 **Total unique biological samples: 118** across skeletal muscle, DRG, and trigeminal ganglion.
+
+## Planned — Prometheus/gataca → Titan batch (not yet launched, 2026-08-18)
+
+Config/samplesheet pairs built for 151 of the 157 confirmed-paired-end samples
+found in `docs/prometheus_fastq_inventory_2026-08-18.md` (6 more excluded after
+staging began, see Watchmaker row below), staged via gataca → the linux relay
+machine → `/titan/tprice/ingest/virome/<original_prometheus_folder_name>/`.
+One cohort = one config, per established convention. Transfer in progress as of
+2026-08-18 (real transfer, ~1.4TB/314 files, corrected mid-flight from an
+initial local-instead-of-remote-destination mistake — see chat log); the
+Titan-container-bind-mount risk (see each config's header comment) still needs
+validating on Juno before launch.
+
+| Cohort | Config | Samplesheet | n | Notes |
+|---|---|---|---|---|
+| Watchmaker | `config_watchmaker_titan.yaml` | `samplesheet_watchmaker_titan.csv` | 24 | 30 found on Prometheus; MB1-6 (6 samples) confirmed 2026-08-18 as empty 23-byte gzip stubs on both Titan and the gataca source itself — excluded, not a transfer bug. See config comment |
+| DPN & RA Kulkarni (re-run) | `config_dpn_ra_kulkarni_titan.yaml` | `samplesheet_dpn_ra_kulkarni_titan.csv` | 25 | **Already run** (cohort #10) — uniform re-stage, separate outdir |
+| Thoracic DRG | `config_thoracic_drg_titan.yaml` | `samplesheet_thoracic_drg_titan.csv` | 24 | New |
+| OSM Juliet (re-run) | `config_osm_juliet_titan.yaml` | `samplesheet_osm_juliet_titan.csv` | 18 | **Already run** (cohort #9) — path discrepancy vs. original config unresolved, see config comment |
+| REJOIN Jayden (likely re-run) | `config_rejoin_jayden_titan.yaml` | `samplesheet_rejoin_jayden_titan.csv` | 17 | Matches cohort #5 almost exactly — confirm before treating as new |
+| Adult/Infant Soma/Axon | `config_adult_infant_soma_axon_titan.yaml` | `samplesheet_adult_infant_soma_axon_titan.csv` | 10 | New. Sample-ID overlap risk with OSM cultured, see below |
+| Unknown doloromics | `config_unknown_doloromics_titan.yaml` | `samplesheet_unknown_doloromics_titan.csv` | 8 | New. Folder literally named "unknown" — provenance TBD |
+| MGO explant Saad (trial1) | `config_mgoexplant_saad_titan.yaml` | `samplesheet_mgoexplant_saad_titan.csv` | 6 | New. Saad-6 not in the registered Saad DRG n=5 — status unconfirmed |
+| OSM explant Juliet | `config_osmexplant_juliet_titan.yaml` | `samplesheet_osmexplant_juliet_titan.csv` | 7 | New |
+| OSM cultured Juliet | `config_osmcultured_juliet_titan.yaml` | `samplesheet_osmcultured_juliet_titan.csv` | 6 | New. 366-10 excluded (R1-only orphan); shares "366" numbering with Adult/Infant Soma/Axon |
+| Lumar DRG (AIG1390) | `config_lumar_drg_titan.yaml` | `samplesheet_lumar_drg_titan.csv` | 6 | **Recommend excluding from the actual run** — 5/6 files are confirmed MD5-duplicates of Donor1 DRG (cohorts #2/#3); built for completeness only |
+
+**151 total** (157 found on Prometheus, minus the 6 confirmed-empty Watchmaker MB samples). Known open issue independent of this batch: the **AIG1390 DRG** row
+above (cohort #3, n=5) still doesn't carry the duplicate-of-Donor1 caveat that's
+already documented in project memory and correctly excluded from the actual
+paper1 manuscript — worth fixing in this table separately from this batch.

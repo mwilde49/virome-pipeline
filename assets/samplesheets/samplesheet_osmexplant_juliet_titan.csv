@@ -1,0 +1,8 @@
+sample,fastq_r1,fastq_r2
+DRG-OSM-1,/titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/DRG-OSM-1_S1_L001_R1_001.fastq.gz,/titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/DRG-OSM-1_S1_L001_R2_001.fastq.gz
+DRG-OSM-2,/titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/DRG-OSM-2_S2_L001_R1_001.fastq.gz,/titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/DRG-OSM-2_S2_L001_R2_001.fastq.gz
+DRG-OSM-3,/titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/DRG-OSM-3_S3_L001_R1_001.fastq.gz,/titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/DRG-OSM-3_S3_L001_R2_001.fastq.gz
+DRG-OSM-4,/titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/DRG-OSM-4_S4_L001_R1_001.fastq.gz,/titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/DRG-OSM-4_S4_L001_R2_001.fastq.gz
+DRG-VEH-2,/titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/DRG-VEH-2_S6_L001_R1_001.fastq.gz,/titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/DRG-VEH-2_S6_L001_R2_001.fastq.gz
+DRG-VEH-3,/titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/DRG-VEH-3_S7_L001_R1_001.fastq.gz,/titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/DRG-VEH-3_S7_L001_R2_001.fastq.gz
+DRG-VEH-4,/titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/DRG-VEH-4_S8_L001_R1_001.fastq.gz,/titan/tprice/ingest/virome/2023_OSMexplant_doloromics.Juliet/DRG-VEH-4_S8_L001_R2_001.fastq.gz

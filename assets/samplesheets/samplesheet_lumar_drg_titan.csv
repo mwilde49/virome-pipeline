@@ -1,0 +1,7 @@
+sample,fastq_r1,fastq_r2
+AIG1390-L1,/titan/tprice/ingest/virome/2022_LumarDRG_doloromics/AIG1390-L1_S9_L002_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_LumarDRG_doloromics/AIG1390-L1_S9_L002_R2_001.fastq.gz
+AIG1390-L2,/titan/tprice/ingest/virome/2022_LumarDRG_doloromics/AIG1390-L2_S10_L002_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_LumarDRG_doloromics/AIG1390-L2_S10_L002_R2_001.fastq.gz
+AIG1390-L3,/titan/tprice/ingest/virome/2022_LumarDRG_doloromics/AIG1390-L3_S11_L002_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_LumarDRG_doloromics/AIG1390-L3_S11_L002_R2_001.fastq.gz
+AIG1390-L4,/titan/tprice/ingest/virome/2022_LumarDRG_doloromics/AIG1390-L4_S12_L002_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_LumarDRG_doloromics/AIG1390-L4_S12_L002_R2_001.fastq.gz
+AIG1390-L5,/titan/tprice/ingest/virome/2022_LumarDRG_doloromics/AIG1390-L5_S13_L002_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_LumarDRG_doloromics/AIG1390-L5_S13_L002_R2_001.fastq.gz
+AIG1390-T12,/titan/tprice/ingest/virome/2022_LumarDRG_doloromics/AIG1390-T12_S14_L002_R1_001.fastq.gz,/titan/tprice/ingest/virome/2022_LumarDRG_doloromics/AIG1390-T12_S14_L002_R2_001.fastq.gz

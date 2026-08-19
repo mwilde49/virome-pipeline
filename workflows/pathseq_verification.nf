@@ -58,6 +58,8 @@ nextflow.enable.dsl = 2
 include { FASTQ_TO_UBAM     } from '../modules/fastq_to_ubam'
 include { PATHSEQ_SCORE     } from '../modules/pathseq_score'
 include { AGGREGATE_PATHSEQ } from '../modules/aggregate_pathseq'
+include { CAPTURE_SOFTWARE_VERSIONS } from '../modules/capture_software_versions'
+include { pathseqToolSpecs  } from '../lib/provenance'
 
 
 workflow PATHSEQ_VERIFICATION {
@@ -136,6 +138,11 @@ workflow PATHSEQ_VERIFICATION {
         ch_consensus_matrix,
         ch_blast_lifecycle_dir
     )
+
+    // Provenance — real, live-queried container tool versions. See
+    // lib/provenance.nf (manifest.json / PROVENANCE_README.md are written
+    // from pathseq_verify.nf's workflow.onComplete{}).
+    CAPTURE_SOFTWARE_VERSIONS(pathseqToolSpecs())
 
     emit:
     matrix      = AGGREGATE_PATHSEQ.out.matrix

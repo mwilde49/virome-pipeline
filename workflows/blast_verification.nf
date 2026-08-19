@@ -37,6 +37,8 @@ nextflow.enable.dsl = 2
 include { EXTRACT_KRAKEN2_READS } from '../modules/extract_kraken2_reads'
 include { BLAST_VERIFY          } from '../modules/blast_verify'
 include { BLAST_ANALYZE         } from '../modules/blast_analyze'
+include { CAPTURE_SOFTWARE_VERSIONS } from '../modules/capture_software_versions'
+include { blastToolSpecs        } from '../lib/provenance'
 
 
 // ---------------------------------------------------------------------------
@@ -132,6 +134,11 @@ workflow BLAST_VERIFICATION {
         ch_analyze_input.map { meta, blast, r1, r2 -> [ meta, r1, r2 ] },
         ch_viral_refs
     )
+
+    // Provenance — real, live-queried container tool versions. See
+    // lib/provenance.nf (manifest.json / PROVENANCE_README.md are written
+    // from blast_verify.nf's workflow.onComplete{}).
+    CAPTURE_SOFTWARE_VERSIONS(blastToolSpecs())
 
     emit:
     blast_summary    = BLAST_ANALYZE.out.blast_summary

@@ -1,0 +1,54 @@
+# virome-pipeline run config — Lumar DRG cohort (AIG1390)
+# Source: Prometheus z:\data\homo_sapiens\Dorsal_root_ganglia\bulk_rnaseq\2022_LumarDRG_doloromics\
+#         staged to Titan at /titan/tprice/ingest/virome/2022_LumarDRG_doloromics/ (see
+#         docs/prometheus_fastq_inventory_2026-08-18.md for the full inventory this
+#         was built from).
+# 6 samples.
+# *** STRONGLY RECOMMEND EXCLUDING THIS COHORT FROM THE RUN, NOT JUST FLAGGING ***
+# AIG1390-L1/L2/L3/L4/T12 are CONFIRMED byte-for-byte MD5-identical duplicates of
+# donor1_L1-L4/T12 (docs/cohort_registry.md cohorts #2/#3; see
+# project_hervk_findings memory for the original discovery). AIG1390-L5 has no
+# donor1 counterpart and is the only genuinely new file in this folder. Running
+# this cohort re-processes 5/6 files that are already known-duplicate data --
+# exactly the mistake that had to be manually corrected out of the HERV-K
+# cross-cohort stats once already (Early DRG n=16->11). Samplesheet is generated
+# here for completeness since the full batch was scoped as 'all 157', but confirm
+# this is really wanted before launching it.
+# Platform: Illumina, paired-end, 150 bp assumed (confirm read length from FastQC).
+#
+# PREREQUISITE: confirm the rsync from gataca -> Titan has landed at
+# /titan/tprice/ingest/virome/2022_LumarDRG_doloromics/ before launching --
+#   ls -la /titan/tprice/ingest/virome/2022_LumarDRG_doloromics/ | head
+# KNOWN OPEN RISK (flagged 2026-08-18, unresolved): the SLURM template's Apptainer
+# invocation may not bind /titan into the container (confirmed missing for psoma's
+# template as of 2026-08-09; virome's template not yet checked). virome's own
+# stageInMode='copy' + standard Nextflow `path` inputs stage files at the
+# Nextflow-host level before any container runs, which may already sidestep this --
+# but validate on ONE sample before trusting it across the full batch.
+
+samplesheet:      "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_lumar_drg_titan.csv"
+outdir:           "/scratch/juno/maw210003/virome_lumar_drg"
+
+# References (pre-built on Juno)
+star_index:    "/groups/tprice/pipelines/references/star_index"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
+kraken2_db2:   "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+
+# Containers
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+# Filtering
+min_reads:     5
+artifact_list: "/groups/tprice/pipelines/containers/virome/assets/artifact_taxa.tsv"
+taxon_remap:   "/groups/tprice/pipelines/containers/virome/assets/taxon_remap.tsv"
+
+# Trimmomatic
+trim_adapters: "TruSeq3-PE"
+trim_leading:  3
+trim_trailing: 3
+trim_minlen:   36
+
+# Kraken2
+kraken2_confidence: 0.1
+bracken_read_len:   150
+bracken_level:      "S"

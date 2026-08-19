@@ -6,7 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nextflow DSL2 pipeline for systematic profiling of the human dorsal root ganglion (DRG) virome from paired-end bulk RNA-seq data. Runs on the Juno HPC cluster (UT Dallas, TJP group) via SLURM and Apptainer. Lives as a git submodule at `containers/virome` within `github.com/mwilde49/hpc`.
 
-Current version: **2.1.0** — PathSeq verification offshoot productionized and validated
+Current version: **2.2.0** — pipeline-native run provenance (`${outdir}/provenance/`:
+`manifest.json`, `software_versions.yml`, `PROVENANCE_README.md`) for all three entry
+points, working identically under `tjp-launch`/SLURM or a bare `nextflow run` with no
+framework at all — see "Provenance output format" below. Config/samplesheet pairs
+built for 11 real cohorts (151 samples) staged gataca → Titan
+(`/titan/tprice/ingest/virome/`) ahead of a batch launch — one cohort = one config,
+per established convention, tracked in `docs/cohort_registry.md`'s new "Planned"
+section. New `scripts/run_virome_config.sbatch` (a `-params-file`-based sibling to
+the existing `scripts/run_virome.sbatch`) for submitting each cohort as its own
+unattended background SLURM job. One new output directory (`provenance/`) for
+existing users; no changes to any existing output file, matrix, or report.
+
+Previously, **2.1.0** — PathSeq verification offshoot productionized and validated
 end-to-end (`pathseq_verify.nf`, GATK `PathSeqPipelineSpark`) across 4 real public
 cohorts (`cmv_fibroblast`, `vzv_hsv1_tg`, `ebv_gm12878`, `iadorola_tg` batch1), with a
 literature-verified performance assessment against each cohort's source publication
@@ -18,7 +30,7 @@ per-taxon, taxonomic-lineage, multi-cohort, and per-sample variants; a cohort re
 ready-to-launch configs/samplesheets for `dpn_ra_kulkarni` and `osm_juliet`. No core
 pipeline logic changed — no rerun needed for existing `run_host_quant`/dual-DB users.
 
-Previously, **2.0.0** — optional host gene expression quantification arm added (dedup/filter + dual-count the GRCh38-mapped reads STAR_HOST_REMOVAL was previously discarding, via featureCounts and HTSeq), enabling host-vs-viral expression correlation (e.g. antiviral/ISG or neurodegeneration-pathway genes vs. HERV-K/HSV-1 signal). Ported from the `psoma`/`bulkseq` sibling bulk RNA-seq pipelines. Inactive by default (`params.run_host_quant = false`).
+Before that, **2.0.0** — optional host gene expression quantification arm added (dedup/filter + dual-count the GRCh38-mapped reads STAR_HOST_REMOVAL was previously discarding, via featureCounts and HTSeq), enabling host-vs-viral expression correlation (e.g. antiviral/ISG or neurodegeneration-pathway genes vs. HERV-K/HSV-1 signal). Ported from the `psoma`/`bulkseq` sibling bulk RNA-seq pipelines. Inactive by default (`params.run_host_quant = false`).
 
 Before that, **1.5.0** — BLAST verification offshoot pipeline added (`blast_verify.nf`); PD19 HSV-1 Tier 1 detection (first ever); min_reads sensitivity analysis; PD vs. non-PD DRG comparison report; pipeline design whitepaper (`docs/pipeline_design_whitepaper.md`).
 
@@ -258,6 +270,8 @@ DB2 branch is inactive by default (`params.kraken2_db2 = null`). One-line activa
 
 Host-quant branch is inactive by default (`params.run_host_quant = false`). See "Host gene expression quantification (optional)" above.
 
+The provenance/ output is always on (no toggle) for all three entry points — see "Provenance output format" below.
+
 BLAST and PathSeq offshoots are both separate entry-point scripts (`blast_verify.nf`,
 `pathseq_verify.nf`), not arms of `main.nf` — see their respective sections above.
 
@@ -299,6 +313,7 @@ Three tiers: **Tier 1** = shared (both DBs agree, high confidence); **Tier 2** =
 - `module load apptainer` is in `conf/slurm.config`'s `beforeScript` — required on Juno compute nodes.
 - Never run Nextflow from the login node — always use `srun` first to get an interactive compute node with guaranteed memory.
 - Nextflow is installed at `/groups/tprice/pipelines/bin/nextflow` (not a module).
+- `lib/` is a new top-level convention (first used for `lib/provenance.nf`) alongside `modules/`/`workflows/`: plain DSL2 `include`-able Groovy helper functions (no `process`/`workflow` blocks), for logic shared across more than one entry point. Functions there read the implicit `params`/`workflow`/`projectDir`/`log` bindings directly rather than receiving them as arguments — matching `workflows/blast_verification.nf`'s pre-existing `get_target_taxa()` pattern. This isn't just style: passing `workflow`/`params` as explicit positional args into a function called from inside a `workflow.onComplete {}` closure was tried first and failed at runtime (`params` resolved to `null` inside the callee, specifically on the early param-validation-failure path) — implicit access does not have this problem.
 
 **Samplesheet format** (CSV, required columns):
 ```
@@ -316,6 +331,23 @@ sample,fastq_r1,fastq_r2
 - `<sample>_htseq_reads` / `<sample>_htseq_rpm` — HTSeq raw + RPM
 - RPM uses the same STAR total-input-reads denominator as the viral matrices, so host gene RPM and viral taxon RPM are directly comparable/correlatable per sample.
 - Companion file `host_gene_expression_matrix_qc_summary.tsv`: per-sample featureCounts/HTSeq concordance (log1p Pearson r, Spearman r) — check this before trusting a sample's counts.
+
+**Provenance output format** (`${outdir}/provenance/`, always on, all three entry points — `main.nf`, `blast_verify.nf`, `pathseq_verify.nf`):
+Pipeline-native run provenance, produced identically whether launched via the
+`mwilde49/hpc` framework's `tjp-launch`/SLURM or a bare `nextflow run main.nf
+-profile standard` on a machine with no framework at all (e.g. a non-framework
+box like "gataca"). No dependency on the framework's own
+`bin/lib/provenance.sh`/`PROVENANCE_README.md`/`CONSOLE_LOG.txt` system (that
+one lives under `/work/$USER/pipelines/virome/runs/<timestamp>/`, only for
+`tjp-launch`-driven runs — see the `hpc` repo's own CLAUDE.md). Implementation:
+`lib/provenance.nf` (shared helpers, included by all three entry-point scripts
+and by `workflows/virome.nf` / `workflows/blast_verification.nf` /
+`workflows/pathseq_verification.nf`) + `modules/capture_software_versions.nf`
+(the `CAPTURE_SOFTWARE_VERSIONS` process).
+- `manifest.json` — machine-readable: git commit (`workflow.commitId`, falling back to `git rev-parse HEAD` for a plain local checkout — the normal case for this repo), Nextflow version/run name/session ID/command line/profile(s)/workDir, the fully resolved `params` map, samplesheet path + SHA-256 checksum, start/complete timestamps, duration, exit status, and success/failure boolean.
+- `software_versions.yml` — real tool version strings queried live from this run's own containers at execution time (`apptainer exec <container> <tool> --version`-style invocations run by `CAPTURE_SOFTWARE_VERSIONS`, not hardcoded). Scoped per entry point: `main.nf` probes `fastqc.sif`/`trimmomatic.sif`/`star.sif`/`kraken2.sif`/`bracken.sif`/`python.sif`/`multiqc.sif`, plus `host_quant.sif`'s six tools (sambamba/bedtools/samtools/R/Rsubread/HTSeq) when `params.run_host_quant` is true; `blast_verify.nf` probes `blast.sif`'s four tools (blastn/seqtk/minimap2/samtools); `pathseq_verify.nf` probes `pathseq.sif` (gatk/PathSeq).
+- `PROVENANCE_README.md` — human-readable Markdown assembled in a `workflow.onComplete{}` block (registered as the *first* statement in each entry point's `workflow {}` body, before any param-validation `error` call, so it still fires and produces a FAILED-status report even on a fast-fail run): run status/timing/exit code, key resolved params, the software-versions table, the exact invocation, the samplesheet path+checksum, and a signpost table of every other artifact directory expected under `${outdir}` for that entry point/active arms.
+- **Known, unavoidable limitation**: `provenance/` cannot include a full raw console-log transcript equivalent to the framework's `CONSOLE_LOG.txt` — Nextflow has no supported way to capture its own invoking shell's stdout/stderr from within itself (see `lib/provenance.nf`'s header comment). `PROVENANCE_README.md` itself documents this and recommends `nextflow run main.nf ... 2>&1 | tee ${outdir}/provenance/console_log.txt` as a manual workaround for gataca-side users who need one.
 
 **Artifact exclusion:**
 `assets/artifact_taxa.tsv` — curated TSV of taxon IDs to exclude from all samples. 24 entries covering: ruminant orthobunyaviruses, insect baculoviruses, phages, environmental metagenome viruses (DRG k-mer cross-mapping), avian herpesviruses, giant amoeba viruses, and hantaviruses (Orthohantavirus oxbowense 3052491 + Oxbow virus 660954 — confirmed k-mer cross-mapping artifact present in all tissue types). Enabled by default via `params.artifact_list`. Set to `null` to disable.
@@ -378,6 +410,22 @@ sample,fastq_r1,fastq_r2
   - `blast` / `minimap2` — narrower still: a new small `seqtk subseq` filter step taking only the read IDs that passed `blast_analyze.nf`'s pident/evalue thresholds (or the not-yet-built minimap2 arm's confirmed hits) out of the Kraken2-extracted FASTQ
   - `raw` — explicitly NOT planned yet. Would need PathSeq's own host-filter stage re-enabled (currently deliberately skipped), the ~26GB host k-mer/BWA bundle we currently skip entirely, and a redundant second host-removal pass alongside STAR's. Scientifically interesting (could catch viral reads STAR's aligner sequesters as host — integrated/endogenized sequences, human-similar regions) but the most expensive and most new-infrastructure mode; revisit only after the cheap modes (`kraken2`/`blast`) prove the tool's worth having at all.
   - **Caveat that applies to every narrower scope**: PathSeq's ~94.6GB microbe BWA index loads into memory regardless of input read count — narrowing scope buys wall-clock time and less redundant compute, not a smaller `PATHSEQ_SCORE` memory floor.
+- **Telescope locus-level HERV-K quantification offshoot (planned, not started, 2026-08-18)** —
+  intent: a `telescope_verify.nf` offshoot, structurally a sibling to `blast_verify.nf`/
+  `pathseq_verify.nf` (separate entry point, opt-in, post-hoc — not a routine per-cohort arm).
+  Agreed two-leg workflow: **Leg 1** stays exactly as today — Kraken2/PathSeq taxon-level HERV-K
+  detection (taxon `45617`) on every sample, no change to `main.nf`/`workflows/virome.nf`. **Leg 2**
+  runs Telescope (Bendall et al., Hammell lab) selectively, only on samples/cohorts where the
+  aggregate signal itself warrants locus-level resolution (e.g. HSV-1-positive donors, or cohorts
+  with an anomalous aggregate HERV-K reading), to produce a locus × sample count matrix instead of
+  one taxon-wide number. **Known blocker**: `modules/star_host_removal.nf` runs
+  `--outFilterMultimapNmax 1` (uniquely-mapped reads only) — the exact anti-pattern that discards
+  the multi-mapping reads Telescope needs (HML-2 loci share 85–95% sequence identity across ~90
+  full-length copies in GRCh38; most HML-2-derived reads are genuine multi-mappers). Leg 2 needs its
+  own STAR re-alignment (`--outFilterMultimapNmax 100 --outSAMmultNmax 100`), not a reuse of Leg 1's
+  host-removal BAM. Full technical spec and the broader thesis-project rationale:
+  `HERVK/experimental_roadmap.md` Phase 1 Experiment 1 (the project's own "gating experiment") and
+  `HERVK/background/hervk_biology.md` §7.
 - **Reference augmentation** — re-map Kraken2 hits back to viral reference genomes using minimap2 for depth-of-coverage validation; add human CMV strain diversity (Toledo, TB40/E) to database to fix HHV-5 cross-mapping at source
 - **Cohort-level statistical module** — DESeq2-style differential abundance testing between sample groups (neuropathy vs. control, donor vs. cultured)
 - **minimap2 alignment arm** (`params.run_minimap2`) — optional third classification arm running minimap2 (`-ax sr --secondary=no -q 10`) on STAR-unmapped reads against a vertebrate viral RefSeq panel (.mmi index), producing `minimap2_matrix.tsv` (RPKM-normalized) alongside the existing Kraken2 matrices. Recovers reads missed by k-mer ambiguity in the LAT region and similar AT-rich/complex viral loci. Validated against Iadorola TG cohort (LaPaglia 2017): binary detection equivalent to Kraken2, but quantification of HSV-1 burden expected to approach MAGIC pipeline's 80.3% viral read fraction. Full implementation plan in Claude memory (`project_minimap2_alignment_arm.md`). Juno reference setup: download NCBI vertebrate-infecting viral RefSeq → combined FASTA → `minimap2 -d` index at `/groups/tprice/pipelines/references/viral_refs_panel/`. New container: `minimap2.sif`. New module: `modules/minimap2_viral_align.nf`. New script: `bin/aggregate_minimap2.py`. ~4–6 days effort.

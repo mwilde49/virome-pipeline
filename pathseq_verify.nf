@@ -55,8 +55,16 @@
 nextflow.enable.dsl = 2
 
 include { PATHSEQ_VERIFICATION } from './workflows/pathseq_verification'
+include { generateProvenance } from './lib/provenance'
 
 workflow {
+
+    // Pipeline-native provenance report -- see lib/provenance.nf. Registered
+    // FIRST so it still fires (producing a FAILED-status provenance/ report)
+    // even if this run fails fast on a missing required param below.
+    workflow.onComplete {
+        generateProvenance('pathseq_verify')
+    }
 
     if (!params.samplesheet)               error "Please provide --samplesheet <path>"
     if (!params.outdir)                    error "Please provide --outdir <path>"
