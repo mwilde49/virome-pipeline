@@ -56,8 +56,9 @@ itself cannot be).
 | OSM explant Juliet | `config_osmexplant_juliet_titan.yaml` | `samplesheet_osmexplant_juliet_titan.csv` | 7 | New |
 | OSM cultured Juliet | `config_osmcultured_juliet_titan.yaml` | `samplesheet_osmcultured_juliet_titan.csv` | 6 | New. 366-10 excluded (R1-only orphan); shares "366" numbering with Adult/Infant Soma/Axon |
 | Lumar DRG (AIG1390) | `config_lumar_drg_titan.yaml` | `samplesheet_lumar_drg_titan.csv` | 6 | **Recommend excluding from the actual run** — 5/6 files are confirmed MD5-duplicates of Donor1 DRG (cohorts #2/#3); built for completeness only |
+| TG 2018 Emma NIH | `config_tg_2018_emma_nih_titan.yaml` | `samplesheet_tg_2018_emma_nih_titan.csv` | 16 | New, different gataca subtree (`Trigeminal_ganglia/bulk_rnaseq/2018_Emma_NIH/`, SRA `_1`/`_2` naming, SRR5850220-235). All 16 present and complete on gataca — no stub/incomplete-file issues found this time |
 
-**151 total** (157 found on Prometheus, minus the 6 confirmed-empty Watchmaker MB samples). Known open issue independent of this batch: the **AIG1390 DRG** row
+**167 total** (157 DRG found on Prometheus, minus the 6 confirmed-empty Watchmaker MB samples, plus 16 new TG samples). Known open issue independent of this batch: the **AIG1390 DRG** row
 above (cohort #3, n=5) still doesn't carry the duplicate-of-Donor1 caveat that's
 already documented in project memory and correctly excluded from the actual
 paper1 manuscript — worth fixing in this table separately from this batch.

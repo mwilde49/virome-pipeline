@@ -1,0 +1,17 @@
+sample,fastq_r1,fastq_r2
+SRR5850220,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850220_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850220_2.fastq.gz
+SRR5850221,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850221_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850221_2.fastq.gz
+SRR5850222,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850222_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850222_2.fastq.gz
+SRR5850223,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850223_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850223_2.fastq.gz
+SRR5850224,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850224_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850224_2.fastq.gz
+SRR5850225,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850225_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850225_2.fastq.gz
+SRR5850226,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850226_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850226_2.fastq.gz
+SRR5850227,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850227_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850227_2.fastq.gz
+SRR5850228,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850228_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850228_2.fastq.gz
+SRR5850229,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850229_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850229_2.fastq.gz
+SRR5850230,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850230_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850230_2.fastq.gz
+SRR5850231,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850231_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850231_2.fastq.gz
+SRR5850232,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850232_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850232_2.fastq.gz
+SRR5850233,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850233_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850233_2.fastq.gz
+SRR5850234,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850234_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850234_2.fastq.gz
+SRR5850235,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850235_1.fastq.gz,/scratch/juno/maw210003/gataca_fastq/2018_Emma_NIH/SRR5850235_2.fastq.gz
