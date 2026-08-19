@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=nextflow_virome
 #SBATCH --account=tprice
+#SBATCH --qos=juno-pri
 #SBATCH --partition=normal
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=4G
