@@ -194,6 +194,25 @@ identify which process holds a session lock that way. Use the history grep
 method above instead — it answers "which cohort does this session belong to,"
 which is usually the question that actually matters.
 
+**`.nextflow/history` itself can get corrupted by a concurrent-write race.**
+Launching several fresh pipeline invocations at the same instant (e.g. a
+handful of `sbatch` calls submitted back-to-back that all start their
+`nextflow run` within the same second) can produce two processes appending to
+`.nextflow/history` at once, with no newline between them — the result is one
+corrupted "line" containing two real entries concatenated together. This is
+dangerous specifically because it's silent: `grep <name> .nextflow/history`
+still finds a match (the corrupted line contains both cohorts' identifying
+text), and `awk -F'\t' '{print $6}'` still returns *a* session ID — just not
+reliably the right one, since field indexing on a doubled-up line depends on
+which entry happens to land in that position, not which cohort you searched
+for. Real symptom: grepping for two different, unrelated cohort names both
+return the *identical* session ID. That's not a coincidence to shrug off — it
+means the "line" you're reading is corrupted. Fix: drop `tail -1 | awk` and
+look at the *raw* matching lines in full (`grep <name> .nextflow/history`,
+no pipe) — the real, distinct session IDs are still there in the text, just
+missing their separating newline; read them out by eye rather than trusting
+any field-extraction one-liner on a merged line.
+
 ---
 
 ## 5. SLURM job management
@@ -269,6 +288,34 @@ current job IDs once everything is settled.
 ```bash
 scancel <jobid1> <jobid2> <jobid3> ...   # all at once, not sequentially
 ```
+
+**Cancelling a Nextflow orchestrator job does not cancel the child SLURM jobs
+it already submitted.** Nextflow's SLURM executor submits each task
+(`FASTQC`, `TRIMMOMATIC`, a sample's `STAR_HOST_REMOVAL`, etc.) as its own
+independent SLURM job — SLURM has no concept of a parent/child relationship
+here. `scancel`-ing the orchestrator kills the Nextflow JVM tracking
+everything, but any task it had already handed to `sbatch` keeps running or
+sitting queued on its own, now orphaned, with nothing left alive to ever
+collect its output. Left alone, these orphans keep burning real QOS slots
+indefinitely — including, concretely, blocking a freshly-submitted
+replacement job from ever getting a slot, since the orphans are still
+occupying them. After cancelling any orchestrator with in-flight child tasks,
+sweep for its orphans by name pattern (Nextflow's own SLURM child jobs are
+always named `nf-<PROCESS_NAME>_(...)`) rather than trying to hand-enumerate
+job IDs from a `squeue` listing — pattern-matching is both more reliable and
+can't silently miss one:
+
+```bash
+squeue -u $USER -h -o "%i %j" | awk '$2 ~ /^nf-VIROME_/ {print $1}' | xargs -r scancel
+```
+
+(Swap the process-name prefix for whatever this pipeline's workflow block is
+named — `VIROME` here, matching this repo's `workflow { ... }` name.) Safe to
+run any time none of your *own* orchestrators have live children of their own
+yet (e.g. right after cancelling, before a freshly-submitted replacement job
+has actually started and begun submitting its own real tasks) — run it too
+late, once a legitimate orchestrator has real children in flight, and it'll
+cancel those too.
 
 ### Building a multi-stage chain in one shot
 
