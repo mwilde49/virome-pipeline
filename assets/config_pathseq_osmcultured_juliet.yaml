@@ -38,6 +38,6 @@ pathseq_taxonomy:          "/groups/tprice/pipelines/references/pathseq/pathseq_
 # result. Harmless if db_comparison/ doesn't exist yet at launch time for a
 # cohort still mid-run -- falls back to reporting every taxon PathSeq itself
 # detected.
-consensus_matrix: "/scratch/juno/maw210003/virome_osmcultured_juliet/db_comparison/consensus_matrix.tsv"
+consensus_matrix: "/scratch/juno/maw210003/virome_osmcultured_juliet/results/db_comparison/consensus_matrix.tsv"
 
 container_dir: "/groups/tprice/pipelines/containers/virome"

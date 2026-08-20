@@ -78,7 +78,7 @@ pathseq_taxonomy:          "/groups/tprice/pipelines/references/pathseq/pathseq_
 # Option A: explicit comma-separated taxon IDs
 target_taxa: "3050292,10298"
 # Option B: pull all Tier 1 (consensus) taxa from a prior dual-DB main-pipeline run
-# consensus_matrix: "/scratch/juno/maw210003/virome_parkinson_2026/db_comparison/consensus_matrix.tsv"
+# consensus_matrix: "/scratch/juno/maw210003/virome_parkinson_2026/results/db_comparison/consensus_matrix.tsv"
 
 # --- Optional: three-way concordance with BLAST offshoot lifecycle calls ---
 # If set, AGGREGATE_PATHSEQ globs
