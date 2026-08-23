@@ -98,3 +98,71 @@ immediately after its main run.
 Not yet launched — chain each cohort's PathSeq job with
 `--dependency=afterany:<that cohort's main-pipeline job ID>` once the main
 11-cohort batch clears the queue.
+
+#### Results (2026-08-23) — batch complete, 10/11 succeeded
+
+Launched as a serialized `afterany` dependency chain (one cohort's PathSeq run
+at a time, given the per-task cost noted above). Two configs
+(`watchmaker`, `adult_infant_soma_axon`) hit a `consensus_matrix` path bug on
+first attempt (missing `results/` segment, fixed in `3d4fe29`) and were
+resubmitted individually ahead of the main chain; the main chain itself
+(`thoracic_drg` → `mgoexplant_saad` → `tg_2018_emma_nih` →
+`unknown_doloromics` → `osmexplant_juliet` → `osmcultured_juliet` →
+`dpn_ra_kulkarni` → `osm_juliet` → `rejoin_jayden`) also had four members hit
+that same pre-fix bug on their first attempt (all failed in ~3s each on
+2026-08-19); all were resubmitted as part of the chain and completed.
+
+**10 of 11 cohorts succeeded** (all except `unknown_doloromics`). Durations
+ranged from 12m (`osmexplant_juliet`) to 1d 17h (`thoracic_drg`), tracking each
+cohort's `star_unmapped/` data volume far more than its sample count —
+`unknown_doloromics` itself had by far the largest per-sample unmapped pool in
+the batch (30 GB / 8 samples ≈ 3.75 GB/sample, 2-8x every other remaining
+cohort), which is almost certainly why it's the one that failed.
+
+**`unknown_doloromics` failed** after 12h44m: 7 of 8 samples' `PATHSEQ_SCORE`
+tasks completed fine (one, `2A-R`, took 12h26m alone — a real outlier even
+within this already-slow cohort); the 8th (`4A-R`) terminated with exit 247
+after only 11 minutes, no application-level stack trace in the captured
+`.command.err` (just the GATK/Spark startup banner, then nothing) — consistent
+with an external kill (OOM or similar) rather than a GATK-internal error, though
+not confirmed via `sacct`'s own state field. Several of the 7 successful
+samples in this same cohort already peaked at 170-185 GB RSS against the
+200 GB/32cpu allocation in `conf/base.config`, so a memory-pressure kill on the
+8th is the leading explanation. `AGGREGATE_PATHSEQ` never ran (Nextflow's
+default `errorStrategy` aborted the whole run on the one task failure), so
+there is no `pathseq_abundance_matrix.tsv`/`pathseq_concordance.tsv` for this
+cohort despite 7/8 samples' individual `.pathseq_scores.tsv` files existing on
+disk. Not yet re-run; a straightforward retry (same config, unaffected samples
+will cache-hit via `-resume`) is the first thing to try, ahead of specific
+resource-limit tuning.
+
+**Update (2026-08-23): retried, OOM'd again, root-caused, `4A-R` excluded.**
+A same-session `-resume` with a one-off 340GB override
+(`assets/config_pathseq_highmem_override.config`, +70% over the standard
+200GB) still OOM-killed `4A-R` — barely later than the first attempt (12m30s
+vs. 11min), the tell that this wasn't a fixed "needs more RAM" shortfall.
+Checked `4A-R`'s own Kraken2 (bracken_raw) classification directly: **6.77M of
+6.82M total classified reads (99.3%) are three taxa already documented in
+`assets/artifact_taxa.tsv`** as reagent/cross-mapping contaminants
+(`Orthobunyavirus schmallenbergense` 3,960,024 reads, `Orthobunyavirus
+simbuense` 1,765,902 reads, `Betabaculovirus chofumiferanae` 1,046,551 reads)
+— real biology (HERV-K) is 3,513 reads underneath that noise. That's also why
+this one sample's unmapped pool was 9.3GB against 16MB-4GB for its
+cohort-mates. Kraken2's own pipeline already excludes these three via
+`artifact_taxa.tsv` (which is why `4A-R`'s Kraken2/filtered results, already
+in the tracking workbook, are fine as-is) — PathSeq has no equivalent
+pre-filter and pays the BWA-MEM alignment cost for millions of
+highly-repetitive contaminant reads before it can reach the real signal, a
+multi-mapping memory blowup rather than a proportional-to-input-size
+requirement (hence why +70% memory barely moved the failure point).
+
+`4A-R` is now removed from
+`assets/samplesheets/samplesheet_pathseq_unknown_doloromics.csv` (PathSeq-arm
+exclusion only, same treatment as `104T8R`/`Saad_2` elsewhere in this
+project — its Kraken2/filtered results are untouched) and the cohort is being
+re-run on its remaining 7 samples.
+
+Full cross-method (Kraken2 vs. PathSeq) results and per-cohort/per-taxon
+comparison: `docs/pathseq_full_cohort_comparison_2026-08-23.md`. Same data is
+also in `docs/neurotrophic_virus_tracking.xlsx` (`Summary`/`By Sample`/`PathSeq`
+sheets).

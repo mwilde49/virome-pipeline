@@ -18,6 +18,28 @@
 # Confirm before launching:
 #   ls /scratch/juno/maw210003/virome_unknown_doloromics/star_unmapped/ | wc -l   # expect 16 (8 samples x R1/R2)
 #
+# EXCLUSION (2026-08-23): sample 4A-R removed from
+# assets/samplesheets/samplesheet_pathseq_unknown_doloromics.csv (now 7
+# samples, not 8). PATHSEQ_SCORE OOM-killed on this sample twice -- once at
+# the standard 200GB (11 min in), once at a one-off 340GB override (12m30s
+# in, see assets/config_pathseq_highmem_override.config) -- barely any extra
+# runway despite +70% memory, which is the tell this isn't "needs more RAM."
+# Checked 4A-R's own Kraken2 (bracken_raw) classification directly: 6.77M of
+# 6.82M total classified reads (99.3%) are three taxa already documented in
+# assets/artifact_taxa.tsv as reagent/cross-mapping contaminants
+# (Orthobunyavirus schmallenbergense 3960024 reads, Orthobunyavirus
+# simbuense 1765902 reads, Betabaculovirus chofumiferanae 1046551 reads) --
+# real biology (HERV-K) is 3513 reads underneath that noise. Kraken2's own
+# pipeline already excludes these via artifact_taxa.tsv, which is exactly
+# why 4A-R's Kraken2/filtered results (already in the tracking workbook) are
+# fine; PathSeq has no equivalent pre-filter and pays the alignment cost for
+# millions of highly-repetitive contaminant reads before it can even get to
+# the real signal -- a multi-mapping memory blowup in BWA-MEM, not a fixed
+# "needs X GB" shortfall, hence more memory not helping proportionally.
+# 4A-R's own Kraken2/filtered results stand as-is; this exclusion is
+# PathSeq-arm-only, same treatment as 104T8R (thoracic_drg)/Saad_2
+# (mgoexplant_saad) elsewhere in this project.
+#
 # Launch on Juno (from an interactive compute node, or via
 # scripts/run_pathseq_config.sbatch as a background SLURM job):
 #   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
