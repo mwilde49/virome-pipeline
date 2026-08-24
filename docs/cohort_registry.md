@@ -159,8 +159,15 @@ requirement (hence why +70% memory barely moved the failure point).
 `4A-R` is now removed from
 `assets/samplesheets/samplesheet_pathseq_unknown_doloromics.csv` (PathSeq-arm
 exclusion only, same treatment as `104T8R`/`Saad_2` elsewhere in this
-project — its Kraken2/filtered results are untouched) and the cohort is being
-re-run on its remaining 7 samples.
+project — its Kraken2/filtered results are untouched), and the cohort is
+also dropped from `4A-R`'s entry in `docs/neurotrophic_virus_tracking.xlsx`
+entirely (not just the PathSeq columns).
+
+**Re-run on the remaining 7 samples succeeded** (same session, 1m2s — all 7
+cache-hit straight to `AGGREGATE_PATHSEQ`, exit 0). **All 11 cohorts are now
+complete.** Notable result: `2A-R`'s HSV-1 hit (279 Kraken2 reads, flagged
+earlier as a new candidate for this cohort) is now PathSeq-confirmed almost
+exactly — 276 reads, independently corroborating a genuinely new finding.
 
 Full cross-method (Kraken2 vs. PathSeq) results and per-cohort/per-taxon
 comparison: `docs/pathseq_full_cohort_comparison_2026-08-23.md`. Same data is
