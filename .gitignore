@@ -41,3 +41,12 @@ __pycache__/
 # Raw Prometheus FASTQ tree scrapes — transient working input; extracted
 # summaries live in docs/prometheus_fastq_inventory_*.md instead
 /fastqs.txt
+
+# Juno read-only inspection SSH keys (never commit — live only in ~/.ssh)
+id_ed25519_juno_inspect*
+id_ed25519_juno_pullonly*
+id_ed25519_juno_statusonly*
+
+# Threadripper read-only inspection SSH keys (never commit — live only in ~/.ssh)
+id_ed25519_threadripper_inspect*
+id_ed25519_threadripper_pullonly*
