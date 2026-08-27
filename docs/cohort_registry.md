@@ -6,10 +6,10 @@ All biological sample collections processed through the virome pipeline, in chro
 |---|---|---|---|---|---|
 | 1 | **Muscle** | Sample_19–23 | 5 | Skeletal muscle | First cohort; Sample_19 was the initial single-sample test |
 | 2 | **Donor1 DRG** | donor1_L1–L5, T12 | 6 | DRG | Single donor, 6 spinal levels |
-| 3 | **AIG1390 DRG** | AIG1390_L1–L4, T12 | 5 | DRG | Second donor, 5 spinal levels |
+| 3 | **AIG1390 DRG** | AIG1390_L1–L4, T12 | 5 | DRG | **Confirmed MD5-duplicate of Donor1 DRG (cohort #2)** — not a real second donor. Already excluded from the paper1 manuscript and from `results/hervk_cohort_comparison_all7.png`'s "Early DRG" grouping (n=16→11 correction, 2026-08-20). Exclude from any new cohort-level analysis; do not treat as independent data. Caveat applied to this table 2026-08-27 (previously flagged 2026-03/04, 2026-07-15, and in this doc's own note below without being applied to the row itself). |
 | 4 | **Saad DRG** | Saad_1–5 | 5 | DRG | Saad_1: QC outlier (10× depth, extreme contamination); Saad_2: known library failure — both retained deliberately for pipeline assessment |
 | 5 | **REJOIN Jayden** | 473-1–473-17 | 17 | DRG | 2025 cohort; completes the 38-sample full cohort used for paper 1 |
-| 6 | **Parkinson 2026** | PD2–PD20, 023–028 | 20 | DRG | 14 PD patients + 6 controls; sequenced by Psomagen (AN00028264); PD1/7/8/11/12/13 absent from delivery; PD19 = first HSV-1 Tier 1 detection |
+| 6 | **Parkinson 2026** | PD2–PD20, 023–028 | 20 | DRG | 14 confirmed PD patients (PD2–PD20). **"023–028 = controls" is UNCONFIRMED** — the original 2026-04-04 intake report (`reports/2026-04-04_parkinson_intake.md`) explicitly labels these 6 as "Unclassified" (tissue type and disease status were never verified with the provider); treat any PD-vs-"control" comparison as provisional, not a clean case-control design, until resolved. Sequenced by Psomagen (AN00028264); PD1/7/8/11/12/13 absent from delivery; PD19 = first HSV-1 Tier 1 detection. Caveat applied to this table 2026-08-27. |
 | 7 | **BLAST verify PD19** | PD19 | 1 | DRG | Offshoot (`blast_verify.nf`) to confirm HSV-1 identity and latency phase in PD19 |
 | 8 | **Iadorola TG** | TG1–TG22 (non-contiguous) | 16 | Trigeminal ganglion | Public benchmark; LaPaglia et al. 2017 (SRP113004); post-mortem; HSV-1 detected in 5/16 samples — pipeline validation run |
 | 9 | **OSM Juliet** | D1–D3 × O/V × rep1–3 | 18 | DRG | 2026; OSM-treated vs vehicle control; 3 donors × 2 conditions × 3 replicates |
@@ -58,10 +58,15 @@ itself cannot be).
 | Lumar DRG (AIG1390) | `config_lumar_drg_titan.yaml` | `samplesheet_lumar_drg_titan.csv` | 6 | **Recommend excluding from the actual run** — 5/6 files are confirmed MD5-duplicates of Donor1 DRG (cohorts #2/#3); built for completeness only |
 | TG 2018 Emma NIH | `config_tg_2018_emma_nih_titan.yaml` | `samplesheet_tg_2018_emma_nih_titan.csv` | 16 | New, different gataca subtree (`Trigeminal_ganglia/bulk_rnaseq/2018_Emma_NIH/`, SRA `_1`/`_2` naming, SRR5850220-235). All 16 present and complete on gataca — no stub/incomplete-file issues found this time |
 
-**167 total** (157 DRG found on Prometheus, minus the 6 confirmed-empty Watchmaker MB samples, plus 16 new TG samples). Known open issue independent of this batch: the **AIG1390 DRG** row
+**167 total** (157 DRG found on Prometheus, minus the 6 confirmed-empty Watchmaker MB samples, plus 16 new TG samples). ~~Known open issue independent of this batch: the **AIG1390 DRG** row
 above (cohort #3, n=5) still doesn't carry the duplicate-of-Donor1 caveat that's
 already documented in project memory and correctly excluded from the actual
-paper1 manuscript — worth fixing in this table separately from this batch.
+paper1 manuscript — worth fixing in this table separately from this batch.~~
+**Fixed 2026-08-27** — row 3's own entry now carries the caveat directly (see
+above); the Parkinson 2026 row (#6) got the same treatment for its unconfirmed
+"023–028 = controls" label at the same time. See `RESTART_CLAUDE.md` for why
+this had been flagged repeatedly (2026-03/04, 2026-07-15) without ever being
+applied to the table itself.
 
 ### PathSeq offshoot — full-cohort validation (planned, 2026-08-19)
 

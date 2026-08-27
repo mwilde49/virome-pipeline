@@ -1,5 +1,20 @@
 # Publication Modus Operandi — DRG Virome
 
+> **SUPERSEDED 2026-04-18, kept as historical record, not deleted.** The PI
+> directed abandoning this two-paper strategy in favor of a single, full
+> research article (~5,000–6,000 words) balancing methods and results — see
+> `RESTART_CLAUDE.md` and Claude memory `project_single_paper_strategy.md`.
+> Under the current strategy: no "paper 2" as a future separate paper (future
+> work is framed as clinical stratification + targeted enrichment in the
+> Discussion section instead), target journal is **mSystems** (ASM) first,
+> **Viruses** (MDPI) as fallback, HERV-K is an elevated primary result rather
+> than supplementary, and the pipeline becomes Methods-section content rather
+> than the paper's primary contribution. The blocking-items tables below
+> (AIG1390, taxon remap, hantavirus BLAST, data deposition) are still
+> substantively useful checklists — most of that work streams into the single
+> paper too — but read them through that lens, not as two separate papers in
+> progress. Do not use this file's two-paper framing in new writing.
+
 ## Two-Paper Strategy
 
 A methods paper followed by a primary research paper is a well-established and appropriate strategy here. The pipeline itself is the novel contribution right now; the biology requires more samples. Publishing the methods paper first:
