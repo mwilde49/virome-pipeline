@@ -156,21 +156,33 @@ pattern below).
 
 ## Uncommitted working-tree state
 
-As of this file's write date, `git status --short` shows:
-```
- M docs/neurotrophic_virus_tracking.xlsx
-?? docs/presentations/
-```
-- `docs/neurotrophic_virus_tracking.xlsx` has an uncommitted binary diff
-  (27,049 → 29,330 bytes) whose cause was **not identified** during this
-  consolidation — could be a legitimate incremental Excel save, or could be
-  nothing of substance. An `~$neurotrophic_virus_tracking.xlsx` Excel lock
-  file was also present alongside it, suggesting the file may have been open
-  in Excel recently. **Check with the user before committing or discarding
-  this** — don't assume either way.
-- `docs/presentations/` (the pptx deck above) is new and untracked — fine to
-  commit whenever the user confirms the deck's content is final; ask before
-  committing binary presentation files by default.
+**Update 2026-09-02**: `docs/presentations/` (the pptx deck) has since been
+committed. `docs/neurotrophic_virus_tracking.xlsx` was investigated cell-by-cell
+(HEAD vs. working tree, `openpyxl`, `data_only=True`, all 5 sheets) and is
+**still uncommitted — still needs the user's decision, not resolved**:
+- Genuine improvement: `Summary`/`PathSeq`/`By Cohort`/`Agreement` all gained
+  real cached formula values (percentages) that read as `None` in the HEAD
+  version — HEAD was apparently committed before the file was ever opened in
+  Excel, so its formulas had no cached results. `Summary` also gained a new
+  TOTAL row (160 samples, 35 total detections) not present in HEAD.
+  `By Sample` is byte-identical in content (only sheet with zero diff).
+- **Concerning, looks like real content loss, not just a resave**: the sheet
+  title cells shrank or vanished — `Summary`'s A1 went from
+  "Neurotrophic Virus Screen — Summary (total unique detections, by method)"
+  to just "Neurotrophic Virus Screen"; `PathSeq` and `By Cohort`'s A1 titles
+  went to blank entirely. Worse: **the `Agreement` sheet's entire 8-row Notes
+  section is gone** (methodology notes on PathSeq's RefSeq-81 taxon IDs, the
+  4A-R exclusion, and the "BLAST-verify Rhadinovirus/Molluscum before trusting
+  either method alone" caveat — all deleted, not just reformatted).
+  A plain Excel open→recalculate→save cycle does not rewrite cell text like
+  this on its own, so this doesn't look like an inert resave.
+- Net: this diff is a **mix of a real improvement (cached formulas, new
+  total) and what looks like real, accidental content deletion** (titles,
+  the entire Agreement Notes section). **Do not commit or discard without
+  the user looking at it directly** (Excel/LibreOffice) — if the notes
+  section is confirmed gone for good, it should be re-added (the deleted
+  text is preserved verbatim above and in this session's investigation) before
+  committing, not silently dropped.
 - Everything else found uncommitted at the start of this consolidation task
   (`.gitignore` SSH-key-protection entries, `scripts/pull_bracken_raw_batch.sh`)
   has already been committed (commit `40d39bb`).
