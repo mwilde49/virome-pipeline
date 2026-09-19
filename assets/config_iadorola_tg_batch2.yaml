@@ -1,0 +1,53 @@
+# virome-pipeline run config — Iadorola et al. human trigeminal ganglia cohort
+# BATCH 2: the remaining 11 samples never run through main.nf (TG1, TG5-TG11,
+# TG14, TG16, TG22) -- batch1 (TG13, TG3, TG2, TG12, TG4) already completed
+# 2026-08-16. Run as an independent job with its own outdir, NOT a -resume
+# against batch1's outdir -- avoids the shared-launch-directory -resume trap
+# documented in docs/juno_hpc_operations_guide.md (resume needs the same
+# Nextflow work dir tied to the original launch, which `submit`'s
+# fresh-timestamped run directories don't preserve). The main pipeline's
+# per-sample outputs are independent across samples regardless of outdir, so
+# this produces a second, separate viral_abundance_matrix.tsv covering these
+# 11 samples, to be merged with batch1's locally rather than relying on
+# Nextflow-level resume/merge.
+#
+# Motivation: batch1's HSV-1 (taxon 3050292) detection data was the only
+# thing blocking a full n=16 Experiment 2 regression (HERVK/
+# experimental_roadmap.md Phase 1 Experiment 2) -- the Telescope offshoot
+# already has all 16 samples' locus-level data (v2.11.0+), this batch fills
+# in the missing HSV-1/viral half for the other 11.
+#
+# Source: BioProject SRP113004 (PMID 28264986); NIMH Human Brain Collection Core
+# Platform: Illumina HiSeq 2500, 125 bp paired-end, ~33M spots/sample
+# Same params as config_iadorola_tg_batch1.yaml throughout, for comparability.
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_iadorola_tg_batch2_juno.csv"
+outdir:      "/scratch/juno/maw210003/virome_iadorola_tg_batch2"
+
+# References (pre-built on Juno) -- identical to batch1
+star_index:    "/groups/tprice/pipelines/references/star_index"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
+kraken2_db2:   "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+
+# Containers
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+# Filtering
+min_reads:     5
+artifact_list: "/groups/tprice/pipelines/containers/virome/assets/artifact_taxa.tsv"
+taxon_remap:   "/groups/tprice/pipelines/containers/virome/assets/taxon_remap.tsv"
+
+# Trimmomatic
+trim_adapters: "TruSeq3-PE"
+trim_leading:  3
+trim_trailing: 3
+trim_minlen:   36
+
+# Kraken2
+kraken2_confidence: 0.1
+bracken_read_len:   125
+bracken_level:      "S"
+
+# Publish intermediate files needed for the pathseq_verify.nf offshoot
+save_kraken2_output: true
+save_unmapped_reads: true
