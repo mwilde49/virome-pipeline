@@ -1,0 +1,42 @@
+# Telescope verification offshoot — Iadorola TG cohort, full cohort run
+#
+# Phase 3 (expand) of the rollout plan: all 16 real samples from the
+# Iadorola et al. human trigeminal ganglia cohort (BioProject SRP113004,
+# PMID 28264986) -- TG1-TG14, TG16, TG22 (non-contiguous numbering; all
+# female except TG3/TG11; ages 18-64). Follows the single-sample TG12 pilot
+# (v2.11.0, config_telescope_iadorola_tg12_pilot.yaml), which validated the
+# whole path end-to-end on real data, including finding and fixing two real
+# bugs (a resource-allocation gap and a genuine unresolved upstream
+# Telescope crash, mlbendall/telescope#9).
+#
+# One combined samplesheet/job for the full cohort (not 16 separate
+# submissions) -- matches this repo's own established batch convention
+# (tjp-batch: "one SLURM job for all rows... Nextflow handles per-sample
+# parallelism", conf/slurm.config's queueSize already throttles concurrent
+# sub-jobs) and means AGGREGATE_TELESCOPE produces one properly-merged
+# 16-sample locus matrix directly, rather than 16 single-sample matrices
+# needing a manual merge afterward.
+#
+# Prerequisites confirmed 2026-09-18:
+#   - containers/telescope.sif: v2.11.0 build (includes the mlbendall/
+#     telescope#9 cached-mate patch), already on Juno
+#   - All 16 samples' FASTQ pairs confirmed present on Juno scratch
+#     (~2.3-3.3GB each, ~88GB total)
+#   - telescope_annotation (HERV_rmsk.hg38.v2/transcripts.gtf) already
+#     staged on Juno (pushed during the TG12 pilot prep)
+#   - virome-telescope registered and live in allowed_pipelines.conf --
+#     launched via `submit virome-telescope <config>` (dark-write key),
+#     not the manual sbatch wrapper the TG12 pilot needed.
+#
+# Launch (direct nextflow invocation, if not using `submit virome-telescope`):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run telescope_verify.nf -profile slurm -params-file assets/config_telescope_iadorola_tg_full.yaml
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_iadorola_tg_juno.csv"
+outdir:      "/scratch/juno/maw210003/virome_telescope_iadorola_tg_full"
+
+star_index: "/groups/tprice/pipelines/references/star_index"
+
+telescope_annotation: "/groups/tprice/pipelines/references/telescope_annotation/HERV_rmsk.hg38.v2.transcripts.gtf"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"
