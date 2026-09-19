@@ -69,6 +69,55 @@ From: condaforge/miniforge3:latest
     mv /opt/aggregate_telescope.py /opt/conda/envs/telescope/bin/aggregate_telescope.py
     chmod +x /opt/conda/envs/telescope/bin/aggregate_telescope.py
 
+    # Patch a real, currently-unresolved upstream bug -- confirmed by the
+    # TG12 pilot's real run, 2026-09-18 (job 411985): `telescope assign`
+    # crashed ~4 minutes in with `ValueError: invalid literal for int() with
+    # base 10: 'cached'`. Root cause verified directly against source
+    # (telescope/utils/alignment.py, both the installed 1.0.3 and current git
+    # master -- identical, unfixed either place): fetch_pairs_sorted()'s own
+    # `#TODO: deal with these somehow` comment marks leftover read-pair mates
+    # that never got matched within one per-chromosome-region processing pass
+    # -- yielded with the placeholder string 'cached' instead of a numeric
+    # alignment code, which model.py's _mapping_fromfiles() then can't
+    # int()-parse. This is a known, open, zero-reply upstream issue
+    # (mlbendall/telescope#9, filed Nov 2019). It is NOT a rare fluke here:
+    # multi-mapping reads -- exactly what this offshoot turns on
+    # (--outFilterMultimapNmax 100 etc.) -- commonly have one alignment
+    # instance's mate land on a different chromosome than another instance's,
+    # orphaning per-region cache entries at chromosome boundaries. Expect it
+    # on every real multi-locus sample, not just this one.
+    #
+    # Patch: skip these leftover entries instead of yielding an unparseable
+    # placeholder. Conservative by design -- this excludes a small,
+    # upstream-author-acknowledged-ambiguous class of reads from the count
+    # rather than crashing outright or inventing "correct" semantics the
+    # maintainer never decided on themselves in 6+ years. Verified via
+    # assert against the exact live-installed source text; build fails
+    # loudly rather than silently no-op if bioconda's 1.0.3 source ever
+    # differs from what was checked here.
+    /opt/conda/envs/telescope/bin/python3 - <<'PYEOF'
+import telescope.utils.alignment as m
+path = m.__file__
+old = """    for aln in readcache.values():
+        #TODO: deal with these somehow
+        yield ('cached', AlignedPair(aln))
+"""
+new = """    # PATCHED (TJP lab, 2026-09-18) -- see containers/telescope.def.
+    # Upstream (mlbendall/telescope#9, open since 2019) yields these with an
+    # unparseable 'cached' placeholder that crashes model.py's
+    # _mapping_fromfiles(). Skipped instead of yielded.
+    pass
+"""
+text = open(path).read()
+assert old in text, (
+    f"telescope.def patch target not found verbatim in {path} -- "
+    f"upstream source changed, re-verify against mlbendall/telescope#9 "
+    f"before assuming this is still needed or still correct."
+)
+open(path, 'w').write(text.replace(old, new))
+print(f"Patched {path}: leftover cached-mate entries now skipped instead of crashing")
+PYEOF
+
 %files
     # Pipeline script baked in at build time.
     # Always run apptainer build from the repo root.
