@@ -1,0 +1,67 @@
+# Telescope verification offshoot — example/template params file
+#
+# Locus-level HML-2 (HERV-K) quantification via Telescope (Bendall et al.
+# 2019, mlbendall/telescope). This is the HERV-K thesis project's "gating
+# experiment" — HERVK/experimental_roadmap.md, Phase 1 Experiment 1. Post-hoc
+# offshoot, structurally a sibling to blast_verify.nf/pathseq_verify.nf.
+#
+# IMPORTANT — samplesheet is the SAME shape as main.nf's (original/trimmed
+# FASTQs), NOT blast_verify.nf's/pathseq_verify.nf's (those take the
+# STAR-unmapped pool). See workflows/telescope_verification.nf's header for
+# why: HML-2 reads map to GRCh38 and are exactly what the main pipeline's
+# uniquely-mapped-only host removal throws away, so this offshoot re-aligns
+# the original reads itself, multi-mapper-permissive.
+#
+# ROLLOUT PLAN (do not skip straight to a full cohort):
+#   1. Synthetic/toy smoke test first — tiny reference + synthetic reads,
+#      local WSL2 (-profile standard), to catch mechanics bugs cheaply. This
+#      offshoot has never been run even once; several design choices below
+#      (BAM sort order into telescope assign, exact STAR multimap params)
+#      are informed-but-unverified until a real run happens.
+#   2. One real sample — recommended: Iadorola TG cohort, since that's where
+#      the aggregate HERV-K-HSV-1 relationship (R^2=0.459, p=0.0039) was
+#      already established, making it the most informative single test of
+#      whether locus-level resolution adds anything.
+#   3. Expand — rest of Iadorola TG, then the other 3 roadmap cohorts (OSM
+#      Juliet, Parkinson's, muscle; ~75 samples total), then eventually all
+#      samples, per project direction.
+#
+# Launch (once past the synthetic stage, on Juno from an interactive compute node):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run telescope_verify.nf -profile slurm -params-file assets/config_telescope_<cohort>.yaml
+
+# --- Required ---
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheet_telescope_<cohort>.csv"
+outdir:      "/scratch/juno/maw210003/virome_telescope_<cohort>"
+
+# Samplesheet CSV format (sample,fastq_r1,fastq_r2 — original/trimmed reads):
+#   sample,fastq_r1,fastq_r2
+#   TG3,/path/to/TG3_R1.fastq.gz,/path/to/TG3_R2.fastq.gz
+
+star_index: "/groups/tprice/pipelines/references/star_index"
+
+# --- Telescope HML-2/TE annotation ---
+# One-time setup on Juno — pull the HERV-only build (NOT retro.hg38.v1, which
+# also bundles ~28.5k LINE-1 loci this project doesn't need):
+#   mkdir -p /groups/tprice/pipelines/references/telescope_annotation
+#   curl -L -o /groups/tprice/pipelines/references/telescope_annotation/HERV_rmsk.hg38.v2.transcripts.gtf \
+#     https://github.com/mlbendall/telescope_annotation_db/raw/master/builds/HERV_rmsk.hg38.v2/transcripts.gtf
+#
+# CORRECTION to HERVK/experimental_roadmap.md: that doc names this
+# "RetroSpective v2, from Hammell lab GitHub" — verified 2026-09-18 that
+# Telescope and its annotation db are both mlbendall (Weill Cornell), not
+# Hammell lab (likely a mix-up with the separate TEtranscripts tool, also
+# CSHL), and there is no "v2" of the combined retro build — only
+# retro.hg38.v1 (HERV + L1 combined, ~28.5k loci). HERV_rmsk.hg38.v2 is the
+# HERV-only build and the better fit for this project's HML-2 focus.
+telescope_annotation: "/groups/tprice/pipelines/references/telescope_annotation/HERV_rmsk.hg38.v2.transcripts.gtf"
+
+# --- Optional tuning (defaults shown; see modules/star_realign_multimap.nf
+#     and modules/telescope_assign.nf for full reasoning) ---
+# telescope_star_multimap_nmax: 100
+# telescope_star_sam_mult_nmax: 100
+# telescope_star_anchor_multimap_nmax: 100
+# telescope_reassign_mode: "exclude"   # telescope's own default; other options: choose, average, conf, unique
+
+# --- Containers ---
+container_dir: "/groups/tprice/pipelines/containers/virome"

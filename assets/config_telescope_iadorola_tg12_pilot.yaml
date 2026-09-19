@@ -1,0 +1,35 @@
+# Telescope verification offshoot — Iadorola TG cohort, single-sample pilot
+#
+# Phase 2 of the rollout plan (synthetic -> single sample -> expand): TG12,
+# one real sample from the Iadorola et al. human trigeminal ganglia cohort
+# (BioProject SRP113004, PMID 28264986). TG12 is explicitly named in
+# HERVK/experimental_roadmap.md's Telescope planned-work section as one of
+# the two prioritized HSV-1-positive samples in this cohort (the other is
+# TG3) -- this is also the cohort where the aggregate HERV-K-HSV-1
+# relationship (R^2=0.459, p=0.0039) was first established, making it the
+# most informative single test of whether locus-level resolution adds
+# anything real.
+#
+# Prerequisites confirmed 2026-09-18:
+#   - containers/telescope.sif: built, self-test passing, pushed to Juno
+#   - TG12_1/2.fastq.gz: confirmed present on Juno scratch (~2.9GB each,
+#     ~33M read pairs, Illumina HiSeq 2500 125bp PE)
+# Prerequisite NOT yet done:
+#   - telescope_annotation (HERV_rmsk.hg38.v2/transcripts.gtf) is not yet
+#     staged at the path below -- pulled locally
+#     (scratch/telescope_phase2/HERV_rmsk.hg38.v2.transcripts.gtf, 88,560
+#     lines, real mlbendall/telescope_annotation_db content confirmed) but
+#     needs pushing to Juno before this config can actually launch.
+#
+# Launch (once the annotation is staged, on Juno from an interactive compute node):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run telescope_verify.nf -profile slurm -params-file assets/config_telescope_iadorola_tg12_pilot.yaml
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_telescope_iadorola_tg12_pilot.csv"
+outdir:      "/scratch/juno/maw210003/virome_telescope_iadorola_tg12_pilot"
+
+star_index: "/groups/tprice/pipelines/references/star_index"
+
+telescope_annotation: "/groups/tprice/pipelines/references/telescope_annotation/HERV_rmsk.hg38.v2.transcripts.gtf"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"

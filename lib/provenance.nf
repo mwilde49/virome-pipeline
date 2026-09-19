@@ -109,6 +109,14 @@ def pathseqToolSpecs() {
     ]
 }
 
+def telescopeToolSpecs() {
+    def dir = params.container_dir
+    return [
+        [ 'STAR (star.sif)',          "${dir}/star.sif",      'STAR --version' ],
+        [ 'Telescope (telescope.sif)', "${dir}/telescope.sif", 'telescope --version' ],
+    ]
+}
+
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
@@ -197,6 +205,10 @@ def provenanceSignposts(entryPoint) {
         rows << [ 'pathseq_verification/<sample>/',                    'Per-sample raw PathSeq output' ]
         rows << [ 'pathseq_verification/pathseq_abundance_matrix.tsv', 'Taxonomy-wide abundance matrix, all samples merged' ]
         rows << [ 'pathseq_verification/pathseq_concordance.tsv',      'Kraken2 / BLAST / PathSeq concordance table' ]
+        rows << [ 'pipeline_info/', 'Nextflow execution_report.html / execution_timeline.html / pipeline_dag.html / execution_trace.tsv' ]
+        rows << [ 'provenance/',    'This directory -- manifest.json, software_versions.yml, PROVENANCE_README.md' ]
+    } else if (entryPoint == 'telescope_verify') {
+        rows << [ 'telescope_verification/telescope_locus_matrix.tsv', 'Locus x sample HML-2/TE count matrix (+ RPM where a STAR log was available), input to downstream DESeq2/edgeR' ]
         rows << [ 'pipeline_info/', 'Nextflow execution_report.html / execution_timeline.html / pipeline_dag.html / execution_trace.tsv' ]
         rows << [ 'provenance/',    'This directory -- manifest.json, software_versions.yml, PROVENANCE_README.md' ]
     }
@@ -301,7 +313,8 @@ def writeProvenanceReadme(entryPoint, manifest) {
     [ 'samplesheet', 'outdir', 'container_dir', 'star_index', 'kraken2_db', 'kraken2_db2',
       'run_host_quant', 'save_kraken2_output', 'save_unmapped_reads',
       'blast_db_dir', 'consensus_matrix', 'target_taxa',
-      'pathseq_microbe_bwa_image', 'pathseq_microbe_fasta', 'pathseq_taxonomy' ].each { k ->
+      'pathseq_microbe_bwa_image', 'pathseq_microbe_fasta', 'pathseq_taxonomy',
+      'telescope_annotation', 'telescope_reassign_mode' ].each { k ->
         if (params.containsKey(k) && params[k] != null) {
             sb << "| ${k} | ${params[k]} |\n"
         }

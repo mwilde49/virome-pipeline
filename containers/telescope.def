@@ -1,0 +1,90 @@
+Bootstrap: docker
+# condaforge/miniforge3 (ships mamba) confirmed available on Docker Hub.
+#
+# Switched from a pip+git install to bioconda 2026-09-18 after SIX real local
+# build failures via `pip install git+https://github.com/mlbendall/telescope.git`
+# exposed two independent, genuine problems in telescope's git-master source,
+# not something fixable by tweaking this container alone:
+#   1. setup.py's `cythonize(extensions)` call has no include_path, so Cython
+#      can't resolve calignment.pyx's bare `cimport calignment` against its
+#      own sibling calignment.pxd ("calignment.pxd not found") -- a packaging
+#      bug, itself a known open upstream issue (mlbendall/telescope#57).
+#   2. Once that's patched around, Cython then rejects the actual code on two
+#      real semantic errors -- a `cpdef` method declared in the .pxd but never
+#      defined in the .pyx, and an "undeclared name" on a plain Python import
+#      referenced inside a cdef class property -- reproduced IDENTICALLY under
+#      both Cython 0.29.36 and 3.3.0, so these are not a Cython-version
+#      regression, they are real bugs in the current pip-installable source.
+# Patching Cython-level semantic errors in someone else's compiled extension
+# via sed, blind, is a correctness risk (silently-wrong locus assignment is
+# exactly the kind of bug that would NOT announce itself later) -- not
+# something to route around the same way as the include_path packaging bug.
+# bioconda instead ships an actual prebuilt, tested package
+# (bioconda.github.io/recipes/telescope/README.html) -- the maintainers' own
+# environment.yml already implied conda, not pip+git, was the intended
+# install path -- so this sidesteps the broken build entirely.
+From: condaforge/miniforge3:latest
+
+%labels
+    maintainer  mwilde49
+    description Telescope (locus-level HML-2/TE quantification, bioconda build) for virome-pipeline Telescope verification offshoot
+    version     2.0.0
+
+%post
+    apt-get update -y && apt-get install -y --no-install-recommends procps \
+        && rm -rf /var/lib/apt/lists/*
+
+    # condaforge/miniforge3's BASE env pins python=3.14 (its own
+    # /opt/conda/conda-meta/pinned, standard miniforge convention to keep
+    # users from accidentally upgrading base) -- confirmed by a real build
+    # failure, 2026-09-18: bioconda's telescope package only has builds for
+    # Python 3.6-3.10, so `mamba install ... telescope` straight into base
+    # can't solve. Fixed by creating a separate named env with an explicit
+    # compatible Python instead (a fresh env has its own conda-meta, not
+    # constrained by base's pin) -- python=3.10 matches one of the solver's
+    # own reported viable combinations (telescope 1.0.3, python >=3.10,<3.11).
+    #
+    # click+pandas for the aggregation script baked in below (same pattern as
+    # containers/pathseq.def); samtools kept for interactive BAM inspection
+    # even though no module script here shells out to it directly.
+    # numpy MUST be pinned <1.24 -- confirmed by a real synthetic-data run,
+    # 2026-09-18: `telescope assign` got past BAM loading and alignment
+    # scoring, then crashed building the likelihood model with
+    # `AttributeError: module 'numpy' has no attribute 'int'`. Telescope's
+    # own source (telescope/utils/model.py) uses the `np.int` alias, which
+    # NumPy deprecated in 1.20 and removed outright in 1.24 -- bioconda's
+    # telescope 1.0.3 recipe doesn't pin numpy tightly enough to avoid this
+    # on its own, so it's pinned explicitly here instead.
+    mamba create -y -n telescope -c bioconda -c conda-forge python=3.10 telescope samtools click pandas 'numpy<1.24' \
+        && mamba clean -afy
+
+    # Move the staged script into place now that the env's bin/ exists.
+    # NOTE: %files runs BEFORE %post in Apptainer's build order (confirmed by
+    # a real build failure, 2026-09-18: staging straight into
+    # /opt/conda/envs/telescope/bin/ up front pre-created that path as a
+    # stray non-conda file before `mamba create` ran, and mamba refused to
+    # build into a prefix with existing non-conda content -- "Non-conda
+    # folder exists at prefix - aborting"). Staging to a neutral path that
+    # already exists in the base image sidesteps this ordering conflict.
+    mv /opt/aggregate_telescope.py /opt/conda/envs/telescope/bin/aggregate_telescope.py
+    chmod +x /opt/conda/envs/telescope/bin/aggregate_telescope.py
+
+%files
+    # Pipeline script baked in at build time.
+    # Always run apptainer build from the repo root.
+    bin/aggregate_telescope.py  /opt/aggregate_telescope.py
+
+%environment
+    export LC_ALL=C
+    # No `conda activate` machinery -- the telescope env's bin dir is just
+    # prepended to PATH, so `telescope`/`samtools`/`python3` (with
+    # click+pandas installed) all resolve from it directly under `apptainer
+    # exec`, which doesn't source conda's activation hooks.
+    export PATH=/opt/conda/envs/telescope/bin:$PATH
+
+%test
+    telescope --version
+    telescope assign --help 2>&1 | head -5
+    samtools --version | head -1
+    python3 -c "import pysam, numpy, scipy, click, pandas; print('Python deps OK')"
+    aggregate_telescope.py --help
