@@ -30,6 +30,20 @@
  * --ncpu is passed for forward-compatibility but per telescope's own
  * argparse help text ("Multiple cores not supported yet") is currently a
  * no-op -- do not expect this process to actually parallelize internally.
+ *
+ * Zero-overlap edge case (confirmed by a real thoracic_drg run, 2026-09-19,
+ * sample 116TR5 -- a known near-empty library, 549 total fragments):
+ * `telescope assign` exits 0 and prints "No alignments overlapping
+ * annotation" / "telescope assign complete" -- but simply does NOT write
+ * the report file at all in this case. Nextflow then fails the task on a
+ * missing declared output, even though the underlying command "succeeded".
+ * A genuinely near-empty sample should produce a correctly-formatted
+ * zero-count result, not a pipeline crash -- the script below synthesizes a
+ * minimal valid report (just the `__no_feature` row) when telescope itself
+ * doesn't write one, matching the exact format bin/aggregate_telescope.py
+ * already parses (it already handles a `__no_feature`-only report
+ * gracefully, treating it as zero counts across all loci -- no changes
+ * needed there).
  */
 
 process TELESCOPE_ASSIGN {
@@ -61,5 +75,14 @@ process TELESCOPE_ASSIGN {
         --reassign_mode ${reassign_mode} \\
         ${bam} \\
         ${telescope_annotation}
+
+    if [ ! -f "${meta.id}-telescope_report.tsv" ]; then
+        echo "telescope assign produced no report file -- synthesizing a minimal zero-count one (see module header)" >&2
+        {
+            echo -e "## RunInfo\\tno_overlapping_annotations:true"
+            echo -e "transcript\\ttranscript_length\\tfinal_count\\tfinal_conf\\tfinal_prop\\tinit_aligned\\tunique_count\\tinit_best\\tinit_best_random\\tinit_best_avg\\tinit_prop"
+            echo -e "__no_feature\\t0\\t0\\t0.00\\t0\\t0\\t0\\t0\\t0\\t0.00\\t0"
+        } > "${meta.id}-telescope_report.tsv"
+    fi
     """
 }
