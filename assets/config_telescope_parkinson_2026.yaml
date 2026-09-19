@@ -1,0 +1,43 @@
+# Telescope verification offshoot — Parkinson's 2026 cohort, full cohort run
+#
+# Phase 3 (expand) of the rollout plan: all 20 real samples from the
+# Parkinson's 2026 DRG cohort (14 confirmed PD patients PD2-PD6/PD9/PD10/
+# PD14-PD20, plus 6 samples 023-028). Third of the 4 HERVK/
+# experimental_roadmap.md Phase 1 cohorts.
+#
+# CAVEAT, unresolved as of 2026-09-18 (verbatim from
+# reports/2026-04-04_parkinson_intake.md): samples 023-028 are explicitly
+# labeled "Unclassified" -- "are these healthy DRG controls, a different
+# disease group, or a different tissue? Must be confirmed before grouping in
+# any comparative analysis." Running all 20 through Telescope quantification
+# itself doesn't require resolving this (locus-level counting doesn't care
+# about disease-group labels) -- but any downstream PD-vs-control comparison
+# using this cohort's output must NOT treat 023-028 as clean controls until
+# this is resolved.
+#
+# NOTE: config_parkinson_2026.yaml (the main-pipeline config) has a path bug
+# -- it references assets/samplesheet_parkinson_2026_juno.csv (flat), but the
+# real file only exists at assets/samplesheets/samplesheet_parkinson_2026_juno.csv
+# (with the samplesheets/ directory). This config uses the correct real path
+# directly; the main-pipeline config's bug is unrelated to this offshoot and
+# left unfixed here (out of scope for this launch).
+#
+# Prerequisites confirmed 2026-09-18:
+#   - containers/telescope.sif: v2.11.0 build, already on Juno
+#   - All 20 samples' FASTQ pairs confirmed present at
+#     /groups/tprice/data/2026_ParkinsonsDRG/ (not scratch -- MD5-verified
+#     per the intake report)
+#   - telescope_annotation and star_index already staged (shared across all
+#     Telescope cohort runs)
+#
+# Launch: `submit virome-telescope <this config, staged in a write root>`
+# via the dark-write key, same pattern as the Iadorola TG full-cohort run.
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_parkinson_2026_juno.csv"
+outdir:      "/scratch/juno/maw210003/virome_telescope_parkinson_2026"
+
+star_index: "/groups/tprice/pipelines/references/star_index"
+
+telescope_annotation: "/groups/tprice/pipelines/references/telescope_annotation/HERV_rmsk.hg38.v2.transcripts.gtf"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"

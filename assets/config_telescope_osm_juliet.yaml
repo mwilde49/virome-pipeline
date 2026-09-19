@@ -1,0 +1,35 @@
+# Telescope verification offshoot — OSM Juliet cohort, full cohort run
+#
+# Phase 3 (expand) of the rollout plan: all 18 real samples from the OSM
+# Juliet DRG cohort (3 donors x 2 conditions [OSM-treated/vehicle] x 3
+# replicates). Second of the 4 HERVK/experimental_roadmap.md Phase 1
+# cohorts, following the validated Iadorola TG full-cohort run (v2.11.0+).
+#
+# Uses the Titan re-run samplesheet (samplesheet_osm_juliet_titan.csv), NOT
+# the original (samplesheet_osm_juliet_juno.csv) -- verified 2026-09-18: the
+# original's FASTQ path is completely empty on Juno (0 files), while the
+# Titan-rescraped path has all 36 files present and real. NOTE: there is an
+# unresolved data-provenance caveat on this samplesheet (see
+# config_osm_juliet_titan.yaml's own comment) -- the original path cited
+# P:\...\2026_OSM_Juliet\fastq_files\ while this Titan scrape came from
+# z:\...\bulk_rnaseq\OSM_Juliet\Ish\ (different drive/year/folder), never
+# confirmed to be the identical 18 samples, just assumed. Flagging, not
+# resolving -- these are the only real files available to run against.
+#
+# Prerequisites confirmed 2026-09-18:
+#   - containers/telescope.sif: v2.11.0 build, already on Juno
+#   - All 18 samples' FASTQ pairs confirmed present at the Titan-rescrape path
+#   - telescope_annotation and star_index already staged (shared across all
+#     Telescope cohort runs)
+#
+# Launch: `submit virome-telescope <this config, staged in a write root>`
+# via the dark-write key, same pattern as the Iadorola TG full-cohort run.
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_osm_juliet_titan.csv"
+outdir:      "/scratch/juno/maw210003/virome_telescope_osm_juliet"
+
+star_index: "/groups/tprice/pipelines/references/star_index"
+
+telescope_annotation: "/groups/tprice/pipelines/references/telescope_annotation/HERV_rmsk.hg38.v2.transcripts.gtf"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"
