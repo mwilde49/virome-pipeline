@@ -1,0 +1,48 @@
+# Telescope verification offshoot — Thoracic DRG (doloromics) cohort, full run
+#
+# Real DRG tissue with a CONFIRMED, statistically-tested multi-sample HSV-1
+# finding at the aggregate Kraken2 level (R^2=0.241, p=0.0148, n=24 --
+# project memory, 2026-08-19 batch), independently replicating the TG-level
+# HSV-1-HERV-K relationship (Iadorola TG / tg_2018_emma_nih, R^2=0.459) in
+# real dorsal root ganglion tissue. This is the natural next test of
+# whether the LOCUS-SPECIFIC pattern found in Iadorola TG (HML2_1q22 and
+# HML2_7p22.1 tracking HSV-1; HML2_3q12.3 flat/constitutive) also replicates
+# outside trigeminal ganglion.
+#
+# 24 samples. Known data-quality issues, carried over from this cohort's
+# main-pipeline history (docs/cohort_registry.md, CLAUDE.md "Known issues"):
+#   - 104T8R: genuine library failure, ~92 total reads (FASTQ is ~215KB,
+#     confirmed 2026-09-19 -- tiny relative to the ~3-15GB of most samples)
+#   - 116TR5: too few reads to clear Bracken's own threshold in the main
+#     pipeline (unrelated failure mode here -- Telescope doesn't use
+#     Bracken at all, so this won't crash the run, just produce a
+#     near-empty result for this sample)
+#   - 113T2R, 118T8R, 85T3L: also confirmed tiny FASTQs (150KB-22MB) during
+#     this session's pre-launch check -- not previously documented as
+#     library failures, but the same likely explanation. Left in the run
+#     deliberately (same convention as e.g. Saad_2 elsewhere in this
+#     project: real library failures are kept, not silently excluded, and
+#     should surface as real near-zero signal rather than a pipeline crash).
+#   - 106T3R: NOT a library failure -- unusually high (74.5%) multi-mapping
+#     rejection rate in the main pipeline's unique-only STAR step, but a
+#     normal ~47M-read unmapped pool. Worth watching in the Telescope
+#     output given this offshoot's whole point is multi-mapper retention.
+#
+# Prerequisites confirmed 2026-09-19:
+#   - containers/telescope.sif: v2.11.0+ build, already on Juno
+#   - All 24 samples' FASTQ pairs confirmed staged at
+#     /scratch/juno/maw210003/gataca_fastq/2022_ThoracicDRG_doloromics/
+#   - telescope_annotation and star_index already staged (shared across all
+#     Telescope cohort runs)
+#
+# Launch: `submit virome-telescope <this config, staged in a write root>`
+# via the dark-write key.
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_thoracic_drg_titan.csv"
+outdir:      "/scratch/juno/maw210003/virome_telescope_thoracic_drg"
+
+star_index: "/groups/tprice/pipelines/references/star_index"
+
+telescope_annotation: "/groups/tprice/pipelines/references/telescope_annotation/HERV_rmsk.hg38.v2.transcripts.gtf"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"
