@@ -24,6 +24,16 @@
 samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_iadorola_tg_batch2_juno.csv"
 outdir:      "/scratch/juno/maw210003/virome_iadorola_tg_batch2"
 
+# tjp-launch's own config validator requires these two -- discovered
+# 2026-09-19: config_iadorola_tg_batch1.yaml (this config's basis) never went
+# through tjp-launch validation, since batch1 was originally launched via a
+# direct `nextflow run` invocation before these dark-write dispatch keys
+# existed. project_name is just a label; adapters mirrors
+# templates/virome/config.yaml in the hpc repo exactly (verified against
+# that real template before adding this).
+project_name: "iadorola_tg_batch2"
+adapters:     "/groups/tprice/pipelines/containers/virome/assets/NexteraPE-PE.fa"
+
 # References (pre-built on Juno) -- identical to batch1
 star_index:    "/groups/tprice/pipelines/references/star_index"
 kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
