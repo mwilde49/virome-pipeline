@@ -51,3 +51,15 @@ bracken_level:      "S"
 # against that cohort's real session ID -- STAR_HOST_REMOVAL cache-hits
 # instantly for every sample, this only adds the publish copy.
 save_unmapped_reads: true
+
+# Added 2026-09-20 -- needed to run blast_verify.nf against this cohort's
+# candidate taxa (Molluscum contagiosum 10279 / AAV 1511891 in 109T3;
+# Simplexvirus atelinealpha1 3050138 in 111T9R/115T8L/114T12R) flagged in
+# docs/hervk_findings_comprehensive_2026-08-27.md and the deleted Agreement-
+# sheet notes. Re-launch with an EXPLICIT session ID (learned the hard way,
+# 2026-09-19: bare -resume in this shared launch directory silently resumes
+# the wrong pipeline's most-recent session, not this cohort's) --
+# 6fc6127f-cbae-48ae-a7a6-2c4b87ede978 (main.nf, session "admiring_miescher",
+# completed OK 2026-08-19). KRAKEN2_CLASSIFY/_DB2 should cache-hit instantly;
+# this only adds the publish copy.
+save_kraken2_output: true

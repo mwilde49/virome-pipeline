@@ -55,3 +55,12 @@ bracken_level:      "S"
 # against that cohort's real session ID -- STAR_HOST_REMOVAL cache-hits
 # instantly for every sample, this only adds the publish copy.
 save_unmapped_reads: true
+
+# Added 2026-09-20 -- needed to run blast_verify.nf against candidate taxa
+# in this cohort (per the same 2026-08-27 findings doc survey). Re-launch
+# with an EXPLICIT session ID (bare -resume in this shared launch directory
+# can silently resume the wrong pipeline's most-recent session) --
+# 47d3d837-c3fa-4a07-8287-149bea3420ae (main.nf, session "insane_baekeland",
+# completed OK 2026-08-20). Heavy steps should cache-hit instantly; this
+# only adds the publish copy.
+save_kraken2_output: true
