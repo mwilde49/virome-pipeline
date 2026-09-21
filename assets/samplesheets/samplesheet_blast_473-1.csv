@@ -1,0 +1,2 @@
+sample,kraken2_output,fastq_r1,fastq_r2
+473-1,/scratch/juno/maw210003/virome_rejoin_jayden/kraken2_output/473-1.kraken2.output,/scratch/juno/maw210003/virome_rejoin_jayden/star_unmapped/473-1_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_rejoin_jayden/star_unmapped/473-1_unmapped_R2.fastq.gz

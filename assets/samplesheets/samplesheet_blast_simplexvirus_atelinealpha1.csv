@@ -1,0 +1,4 @@
+sample,kraken2_output,fastq_r1,fastq_r2
+111T9R,/scratch/juno/maw210003/virome_thoracic_drg/kraken2_output/111T9R.kraken2.output,/scratch/juno/maw210003/virome_thoracic_drg/star_unmapped/111T9R_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_thoracic_drg/star_unmapped/111T9R_unmapped_R2.fastq.gz
+115T8L,/scratch/juno/maw210003/virome_thoracic_drg/kraken2_output/115T8L.kraken2.output,/scratch/juno/maw210003/virome_thoracic_drg/star_unmapped/115T8L_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_thoracic_drg/star_unmapped/115T8L_unmapped_R2.fastq.gz
+114T12R,/scratch/juno/maw210003/virome_thoracic_drg/kraken2_output/114T12R.kraken2.output,/scratch/juno/maw210003/virome_thoracic_drg/star_unmapped/114T12R_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_thoracic_drg/star_unmapped/114T12R_unmapped_R2.fastq.gz

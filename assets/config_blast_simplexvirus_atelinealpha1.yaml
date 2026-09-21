@@ -1,0 +1,36 @@
+# BLAST verification run — Simplexvirus atelinealpha1 (3050138), thoracic_drg
+# Cross-species HSV/HHV-8-adjacent candidate flagged in
+# docs/hervk_findings_comprehensive_2026-08-27.md as "not yet resolved as
+# artifact vs. real signal" -- generically covered as "HHV-8-like" in the
+# SfN abstract since neither locus has been BLAST-confirmed.
+# 3 samples, all carrying this taxon per the cohort survey: 111T9R, 115T8L,
+# 114T12R.
+#
+# Prerequisites confirmed 2026-09-20: kraken2.output + star_unmapped FASTQs
+# both present for all 3 samples (save_kraken2_output/save_unmapped_reads
+# resume, this session).
+#
+# Launch (from an interactive compute node on Juno):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run blast_verify.nf -profile slurm -params-file assets/config_blast_simplexvirus_atelinealpha1.yaml
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_blast_simplexvirus_atelinealpha1.csv"
+outdir:      "/scratch/juno/maw210003/virome_blast_simplexvirus_atelinealpha1"
+
+target_taxa: "3050138"
+
+blast_db_dir:  "/groups/tprice/pipelines/references/blast_nt"
+blast_db_name: "nt"
+viral_refs_dir: "/groups/tprice/pipelines/references/viral_refs"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+blast_evalue:           1e-5
+blast_max_targets:      10
+blast_word_size:        28
+blast_perc_identity:    80
+blast_max_reads:        0
+
+blast_pident_threshold: 90.0
+blast_evalue_threshold: 1e-5
+blast_include_genus:    true

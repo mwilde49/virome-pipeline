@@ -1,0 +1,34 @@
+# BLAST verification run — 473-10 (rejoin_jayden)
+# Target: Rhadinovirus saimiriinegamma2 (3050350) -- HHV-8-adjacent candidate
+# flagged in docs/hervk_findings_comprehensive_2026-08-27.md and the deleted
+# Agreement-sheet Notes ("BLAST-verify Rhadinovirus/Molluscum before trusting
+# either method alone"), covered generically as "HHV-8-like" in the SfN
+# abstract pending BLAST confirmation.
+#
+# Prerequisites confirmed 2026-09-20: kraken2.output + star_unmapped FASTQs
+# both present (save_kraken2_output/save_unmapped_reads resume, this session).
+#
+# Launch (from an interactive compute node on Juno):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run blast_verify.nf -profile slurm -params-file assets/config_blast_473-10.yaml
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_blast_473-10.csv"
+outdir:      "/scratch/juno/maw210003/virome_blast_473-10"
+
+target_taxa: "3050350"
+
+blast_db_dir:  "/groups/tprice/pipelines/references/blast_nt"
+blast_db_name: "nt"
+viral_refs_dir: "/groups/tprice/pipelines/references/viral_refs"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+blast_evalue:           1e-5
+blast_max_targets:      10
+blast_word_size:        28
+blast_perc_identity:    80
+blast_max_reads:        0
+
+blast_pident_threshold: 90.0
+blast_evalue_threshold: 1e-5
+blast_include_genus:    true

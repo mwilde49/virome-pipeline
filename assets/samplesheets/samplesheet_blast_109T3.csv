@@ -1,0 +1,2 @@
+sample,kraken2_output,fastq_r1,fastq_r2
+109T3,/scratch/juno/maw210003/virome_thoracic_drg/kraken2_output/109T3.kraken2.output,/scratch/juno/maw210003/virome_thoracic_drg/star_unmapped/109T3_unmapped_R1.fastq.gz,/scratch/juno/maw210003/virome_thoracic_drg/star_unmapped/109T3_unmapped_R2.fastq.gz
