@@ -1,0 +1,41 @@
+# BLAST verification run — 106T3L (thoracic_drg)
+# Target: Molluscum contagiosum virus (10279) -- second-independent-sample
+# check alongside 109T3 (same cohort, same taxon) -- see
+# docs/hervk_findings_comprehensive_2026-08-27.md sec.8: flagged as "this
+# project's least reliable target taxon" (promiscuous correlation with
+# unrelated phages, only 4/14 Kraken2-positive calls corroborated by PathSeq
+# cross-validation). 106T3L was NOT part of the PathSeq-validated subset
+# (thoracic_drg wasn't one of the 4 PathSeq cohorts), so this is the first
+# independent read-level check for this specific sample.
+#
+# Raw Kraken2 direct read count for taxon 10279 in this sample: 111 reads
+# (comparable to 109T3's 109 reads) -- a small extraction/BLAST job.
+#
+# Prerequisites confirmed 2026-09-25: kraken2.output + star_unmapped FASTQs
+# both present (save_kraken2_output/save_unmapped_reads staged during the
+# earlier thoracic_drg BLAST-prep resume).
+#
+# Launch (from an interactive compute node on Juno):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run blast_verify.nf -profile slurm -params-file assets/config_blast_106T3L.yaml
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_blast_106T3L.csv"
+outdir:      "/scratch/juno/maw210003/virome_blast_106T3L"
+
+target_taxa: "10279"
+
+blast_db_dir:  "/groups/tprice/pipelines/references/blast_nt"
+blast_db_name: "nt"
+viral_refs_dir: "/groups/tprice/pipelines/references/viral_refs"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+blast_evalue:           1e-5
+blast_max_targets:      10
+blast_word_size:        28
+blast_perc_identity:    80
+blast_max_reads:        0
+
+blast_pident_threshold: 90.0
+blast_evalue_threshold: 1e-5
+blast_include_genus:    true
