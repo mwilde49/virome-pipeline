@@ -2,6 +2,7 @@
 #SBATCH --job-name=finish_blast_nt_db
 #SBATCH --partition=normal
 #SBATCH --account=tprice
+#SBATCH --qos=juno-pri
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=24:00:00
