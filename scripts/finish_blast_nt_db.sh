@@ -37,9 +37,22 @@
 # attempt) that fooled a plain `-f` check into skipping the real build
 # entirely. That run also died partway (likely OOM at the old 16GB request,
 # from page-cache pressure decompressing ~1.6TB) -- bumped to 32GB.
+#
+# Two more real bugs found 2026-09-25, both now fixed:
+#   (1) `for f in *.tar.gz` with no `nullglob` iterates ONCE on the literal
+#       string "*.tar.gz" when the glob matches zero files (e.g. after all
+#       archives were deleted post-extraction to reclaim disk quota) --
+#       produced a phantom "volume" and a failed tar invocation. Fixed with
+#       `shopt -s nullglob`.
+#   (2) `blastdb_aliastool -dblist "<383 space-separated names>"` segfaults
+#       on this build (ncbi/blast:2.15.0) -- the ~3000+ char single argument
+#       is apparently too much for it. Fixed by writing the list to a file
+#       (one name per line) and using `-dblist_file` instead, which is what
+#       blastdb_aliastool documents this exact flag for.
 # =============================================================================
 
 set -uo pipefail  # NOT -e: a single volume's tar failure shouldn't kill the whole batch
+shopt -s nullglob
 
 module load apptainer
 
@@ -79,10 +92,13 @@ if [ ! -s nt.nal ]; then
     else
         echo "nt.nal not found -- building via blastdb_aliastool"
     fi
-    VOLUMES=$(ls nt.*.nin 2>/dev/null | sed -E 's/\.nin$//' | sort | tr '\n' ' ')
-    VOL_COUNT=$(echo "${VOLUMES}" | wc -w)
+    ls nt.*.nin 2>/dev/null | sed -E 's/\.nin$//' | sort > "/tmp/blast_nt_volumes_${SLURM_JOB_ID}.txt"
+    VOL_COUNT=$(wc -l < "/tmp/blast_nt_volumes_${SLURM_JOB_ID}.txt")
     echo "Found ${VOL_COUNT} volume index sets to alias together"
-    apptainer exec "${CONTAINER}" blastdb_aliastool -dblist "${VOLUMES}" -dbtype nucl -out nt -title "nt"
+    apptainer exec "${CONTAINER}" blastdb_aliastool -dblist_file "/tmp/blast_nt_volumes_${SLURM_JOB_ID}.txt" -dbtype nucl -out nt -title "nt"
+    ALIASTOOL_STATUS=$?
+    rm -f "/tmp/blast_nt_volumes_${SLURM_JOB_ID}.txt"
+    echo "blastdb_aliastool exit status: ${ALIASTOOL_STATUS}"
 else
     echo "nt.nal already present and non-empty -- leaving as-is"
 fi
