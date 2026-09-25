@@ -56,7 +56,18 @@ process BLAST_VERIFY {
         QUERY_FA=query_all.fa
     fi
 
-    READ_COUNT=\$(grep -c '>' "\${QUERY_FA}" || echo 0)
+    # `grep -c` already prints "0" on zero matches -- it just also exits 1,
+    # which under `set -e` would abort the script on a legitimate empty-input
+    # case. `|| echo 0` (the original guard here) is the wrong fix: it
+    # appends a SECOND "0" on top of grep's own "0" output (since `||` does
+    # not suppress the left-hand command's stdout), producing a two-line
+    # "0\n0" value that breaks the `-eq 0` comparison below with a syntax
+    # error -- and because that `[[ ]]` is an `if` condition, `set -e`
+    # doesn't treat its failure as fatal, so execution silently falls
+    # through to the blastn branch even when there are truly 0 reads
+    # (caught 2026-09-25: 106T3L/109T3 taxon 10279, real Juno run). `|| true`
+    # neutralizes the exit status without adding output.
+    READ_COUNT=\$(grep -c '>' "\${QUERY_FA}" || true)
     echo "BLASTing \${READ_COUNT} reads for ${meta.id} taxon ${meta.taxon_id}" >&2
 
     if [[ "\${READ_COUNT}" -eq 0 ]]; then
