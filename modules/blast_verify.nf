@@ -61,7 +61,7 @@ process BLAST_VERIFY {
     # case. `|| echo 0` (the original guard here) is the wrong fix: it
     # appends a SECOND "0" on top of grep's own "0" output (since `||` does
     # not suppress the left-hand command's stdout), producing a two-line
-    # "0\n0" value that breaks the `-eq 0` comparison below with a syntax
+    # "0" / "0" value that breaks the `-eq 0` comparison below with a syntax
     # error -- and because that `[[ ]]` is an `if` condition, `set -e`
     # doesn't treat its failure as fatal, so execution silently falls
     # through to the blastn branch even when there are truly 0 reads
