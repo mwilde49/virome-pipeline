@@ -1,10 +1,20 @@
+# Moved off pinned 2.15.0 to :latest, 2026-09-28: real, reproducible
+# segfaults on this project's 383-volume nt database in TWO separate
+# BLAST+ 2.15.0 tools -- blastdb_aliastool (crashed after writing a
+# structurally valid nt.nal) and blastn itself (crashed on a real 16-read
+# query, 109T3 taxon 1511891, 3 retries, same exit 139 every time). Two
+# independent tools from the same toolkit both crashing around this one
+# large multi-volume database looks like a 2.15.0-specific bug, not data
+# corruption. Pin to a specific newer tag once one's confirmed working
+# here, rather than staying on :latest indefinitely -- :latest is a
+# deliberate short-term unblock, not a long-term reproducibility choice.
 Bootstrap: docker
-From: ncbi/blast:2.15.0
+From: ncbi/blast:latest
 
 %labels
     maintainer  mwilde49
     description BLAST + seqtk + minimap2 + samtools for virome-pipeline BLAST verification offshoot
-    version     1.0.0
+    version     1.1.0
 
 %post
     apt-get update -y && apt-get install -y --no-install-recommends \

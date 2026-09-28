@@ -183,7 +183,19 @@ def confirm_identity(hits, target_taxon_id, pident_threshold=90.0, evalue_thresh
     Returns a dict with confirmation status and summary stats.
     """
     if not hits:
-        return {'confirmed': False, 'reason': 'No BLAST hits', 'n_hits': 0}
+        return {
+            'confirmed':        False,
+            'reason':           'No BLAST hits',
+            'n_hits':           0,
+            'n_total_reads':    0,
+            'n_passing':        0,
+            'pct_passing':      0.0,
+            'mean_pident':      0.0,
+            'mean_aln_len':     0.0,
+            'on_target_hits':   0,
+            'pident_threshold': pident_threshold,
+            'evalue_threshold': evalue_threshold,
+        }
 
     total = len(hits)
     # Filter by thresholds
