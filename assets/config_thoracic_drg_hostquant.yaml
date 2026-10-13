@@ -1,0 +1,82 @@
+# virome-pipeline run config — Host gene expression quantification
+# Thoracic DRG cohort (doloromics), all 24 samples.
+#
+# Otherwise identical to assets/config_thoracic_drg_titan.yaml (same
+# samplesheet, same references, same filtering/trim/kraken2 params) plus
+# run_host_quant enabled.
+#
+# No single-sample pilot run for this cohort specifically -- the
+# run_host_quant arm's real-genome-scale technical correctness was already
+# validated on Juno three times over (Iadorola TG12 single-sample pilot,
+# the 4-sample TG3/4/8/10 batch, and the 16-sample full Iadorola TG cohort,
+# all 2026-10-13, all exit 0, all with strong featureCounts/HTSeq
+# concordance). There's no new technical unknown here -- same STAR index,
+# same GTF/blacklist/exclude BEDs, same host_quant.sif container -- just a
+# different cohort's FASTQs, so piloting again would just delay the same
+# outcome. (The original staged-rollout discipline was "pilot a NEW
+# capability before trusting it," not "pilot every cohort that uses an
+# already-validated capability.")
+#
+# Known data quirk to expect, not a pipeline bug (documented in CLAUDE.md's
+# "Known issues / gotchas"): 104T8R has only ~92 total STAR input reads (a
+# genuine library failure) -- its featureCounts/HTSeq rows will be
+# near-empty and its QC concordance row may look degenerate (low/undefined
+# correlation from near-zero counts on both sides). 116TR5 and 106T3R have
+# their own documented oddities (marginal Bracken read counts; unusually
+# high multimapping rate) but those are Kraken2/Bracken-side and don't
+# bear on host-quant.
+#
+# Fresh launch (no -resume) against the SAME outdir as the original
+# completed viral-side run -- same reasoning applied to the Iadorola TG
+# full-cohort launch: the original session's cache technically still
+# exists, but it's in the same shared nf_work workDir every other run in
+# this project has used, which is exactly the "shared-launch-directory
+# -resume trap" this project has been bitten by before (thoracic_drg's own
+# ORIGINAL run needed multiple explicit-session-ID resume attempts to get
+# right, per .nextflow/history -- not a workDir to trust a bare resume
+# against a second time). publishDir overwrites are fine; this just means
+# STAR/Kraken2/Bracken get redone for all 24 samples alongside the new
+# host-quant steps.
+#
+# Launch (from an interactive compute node on Juno, or via
+# scripts/run_virome_config.sbatch):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run main.nf -profile slurm -params-file assets/config_thoracic_drg_hostquant.yaml
+
+samplesheet:      "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_thoracic_drg_titan.csv"
+outdir:           "/scratch/juno/maw210003/virome_thoracic_drg"
+
+# References (pre-built on Juno)
+star_index:    "/groups/tprice/pipelines/references/star_index"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
+kraken2_db2:   "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+
+# Containers
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+# Filtering
+min_reads:     5
+artifact_list: "/groups/tprice/pipelines/containers/virome/assets/artifact_taxa.tsv"
+taxon_remap:   "/groups/tprice/pipelines/containers/virome/assets/taxon_remap.tsv"
+
+# Trimmomatic
+trim_adapters: "TruSeq3-PE"
+trim_leading:  3
+trim_trailing: 3
+trim_minlen:   36
+
+# Kraken2
+kraken2_confidence: 0.1
+bracken_read_len:   150
+bracken_level:      "S"
+
+# Carried over from config_thoracic_drg_titan.yaml -- publishes intermediate
+# files needed by the BLAST/PathSeq offshoots already run against this cohort.
+save_unmapped_reads: true
+save_kraken2_output: true
+
+# --- Host gene expression quantification (the point of this run) ---
+run_host_quant: true
+gtf:            "/groups/tprice/pipelines/references/gencode.v48.primary_assembly.annotation.gtf"
+blacklist_bed:  "/groups/tprice/pipelines/references/blacklist.bed"
+exclude_bed:    "/groups/tprice/pipelines/references/filter.bed"
