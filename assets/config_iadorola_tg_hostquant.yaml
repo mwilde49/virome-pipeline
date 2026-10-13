@@ -1,0 +1,65 @@
+# virome-pipeline run config — Host gene expression quantification, FULL COHORT
+# Iadorola et al. human trigeminal ganglia cohort, all 16 samples (TG1-TG22).
+#
+# DO NOT LAUNCH until assets/config_iadorola_tg12_hostquant_pilot.yaml's
+# single-sample pilot has completed and its host_gene_expression_matrix.tsv
+# + QC summary (featureCounts/HTSeq concordance) have been checked and look
+# sane -- run_host_quant has never been exercised at real genome scale
+# before that pilot. Staged rollout (single sample -> full cohort), same
+# discipline this project applied to the Telescope offshoot.
+#
+# Otherwise identical to assets/config_iadorola_tg.yaml (same samplesheet,
+# same references, same filtering/trim/kraken2 params) plus run_host_quant
+# enabled. Uses the SAME outdir as the original completed run -- since
+# run_host_quant only ADDS new output files/processes and changes nothing
+# about the existing kraken2/bracken/aggregate outputs, resuming the
+# original session+workdir (once you have its ID) should let Nextflow
+# reuse the already-completed STAR/Kraken2/Bracken work and only execute
+# the new host-quant steps. If that resume doesn't cleanly apply (stale
+# cache, mismatched workDir -- check `.nextflow/history` for the real
+# session ID and workDir pair, don't guess), a fresh run is the safe
+# fallback; it just re-does the upstream steps too.
+#
+# Launch (resume, once you have the original run's real session ID):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run main.nf -profile slurm -params-file assets/config_iadorola_tg_hostquant.yaml \
+#       -resume <original-session-id> -work-dir <original-workdir>
+#
+# Launch (fresh, if resume isn't viable):
+#   nextflow run main.nf -profile slurm -params-file assets/config_iadorola_tg_hostquant.yaml
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_iadorola_tg_juno.csv"
+outdir:      "/scratch/juno/maw210003/virome_iadorola_tg"
+
+# References (pre-built on Juno)
+star_index:    "/groups/tprice/pipelines/references/star_index"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
+kraken2_db2:   "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+
+# Containers
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+# Filtering
+min_reads:     5
+artifact_list: "/groups/tprice/pipelines/containers/virome/assets/artifact_taxa.tsv"
+taxon_remap:   "/groups/tprice/pipelines/containers/virome/assets/taxon_remap.tsv"
+
+# Trimmomatic
+trim_adapters: "TruSeq3-PE"
+trim_leading:  3
+trim_trailing: 3
+trim_minlen:   36
+
+# Kraken2
+kraken2_confidence: 0.1
+bracken_read_len:   125
+bracken_level:      "S"
+
+save_kraken2_output: true
+save_unmapped_reads: true
+
+# --- Host gene expression quantification (the point of this run) ---
+run_host_quant: true
+gtf:            "/groups/tprice/pipelines/references/gencode.v48.primary_assembly.annotation.gtf"
+blacklist_bed:  "/groups/tprice/pipelines/references/blacklist.bed"
+exclude_bed:    "/groups/tprice/pipelines/references/filter.bed"

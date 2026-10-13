@@ -1,0 +1,60 @@
+# virome-pipeline run config — Host gene expression quantification PILOT
+# Single sample (TG12), Iadorola et al. human trigeminal ganglia cohort.
+#
+# Host-quant (run_host_quant arm: DEDUP_FILTER_HOST -> FEATURECOUNTS +
+# HTSEQ_COUNT -> AGGREGATE_HOST_COUNTS) was built and smoke-tested locally
+# in WSL2 against a toy chr21 reference in 2026-07, two real bugs found and
+# fixed, but has NEVER been run on Juno or at real genome scale (full
+# GRCh38 GTF, real ~30GB STAR index, full-depth real FASTQs) until now.
+# Per this project's staged-rollout convention (synthetic -> single sample
+# -> full cohort, same discipline applied to the Telescope offshoot),
+# this is the single-sample real-scale validation step before enabling
+# run_host_quant across the full 16-sample Iadorola TG cohort.
+#
+# TG12 chosen for consistency with this project's established pilot sample
+# (same one used throughout the Telescope offshoot's own single-sample
+# validation step).
+#
+# A fresh, dedicated outdir/run is used rather than resuming the original
+# 16-sample config_iadorola_tg.yaml run -- deliberately avoids the
+# session-ID/workDir resume pitfalls this project hit repeatedly with the
+# Telescope offshoot. STAR/Kraken2/Bracken for one sample are cheap enough
+# to just redo cleanly rather than risk a resume mismatch.
+#
+# Launch (from an interactive compute node on Juno, or via
+# scripts/run_virome_config.sbatch):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run main.nf -profile slurm -params-file assets/config_iadorola_tg12_hostquant_pilot.yaml
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_iadorola_tg12_hostquant_pilot.csv"
+outdir:      "/scratch/juno/maw210003/virome_iadorola_tg12_hostquant_pilot"
+
+# References (pre-built on Juno)
+star_index:    "/groups/tprice/pipelines/references/star_index"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
+kraken2_db2:   "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+
+# Containers
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+# Filtering
+min_reads:     5
+artifact_list: "/groups/tprice/pipelines/containers/virome/assets/artifact_taxa.tsv"
+taxon_remap:   "/groups/tprice/pipelines/containers/virome/assets/taxon_remap.tsv"
+
+# Trimmomatic
+trim_adapters: "TruSeq3-PE"
+trim_leading:  3
+trim_trailing: 3
+trim_minlen:   36
+
+# Kraken2
+kraken2_confidence: 0.1
+bracken_read_len:   125
+bracken_level:      "S"
+
+# --- Host gene expression quantification (the point of this run) ---
+run_host_quant: true
+gtf:            "/groups/tprice/pipelines/references/gencode.v48.primary_assembly.annotation.gtf"
+blacklist_bed:  "/groups/tprice/pipelines/references/blacklist.bed"
+exclude_bed:    "/groups/tprice/pipelines/references/filter.bed"
