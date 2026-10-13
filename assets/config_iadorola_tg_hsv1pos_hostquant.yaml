@@ -1,0 +1,55 @@
+# virome-pipeline run config — Host gene expression quantification
+# Iadorola TG, HSV-1-positive samples only: TG3, TG4, TG8, TG10.
+# (TG12 -- the 5th HSV-1-positive sample, 467 reads, the highest of the
+# five -- deliberately excluded here: it's already running as the
+# single-sample real-scale pilot, assets/config_iadorola_tg12_hostquant_pilot.yaml.
+# No need to duplicate that compute.)
+#
+# HSV-1 positivity (taxon 3050292) confirmed directly against
+# results/iadorola_tg/results/bracken_raw_matrix.tsv, 2026-10-13:
+#   TG12: 467 reads, TG3: 392, TG8: 33, TG10: 14, TG4: 11
+#   (all other 11 samples: 0 reads)
+#
+# Launched alongside the TG12 pilot (not strictly after it validates) --
+# user's explicit call, flagged the staged-rollout tradeoff first.
+#
+# Fresh, dedicated outdir per sample set, same reasoning as the TG12 pilot
+# config: avoids resuming the original 16-sample run's session/workdir.
+#
+# Launch (from an interactive compute node on Juno, or via
+# scripts/run_virome_config.sbatch):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run main.nf -profile slurm -params-file assets/config_iadorola_tg_hsv1pos_hostquant.yaml
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_iadorola_tg_hsv1pos_hostquant.csv"
+outdir:      "/scratch/juno/maw210003/virome_iadorola_tg_hsv1pos_hostquant"
+
+# References (pre-built on Juno)
+star_index:    "/groups/tprice/pipelines/references/star_index"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
+kraken2_db2:   "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+
+# Containers
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+# Filtering
+min_reads:     5
+artifact_list: "/groups/tprice/pipelines/containers/virome/assets/artifact_taxa.tsv"
+taxon_remap:   "/groups/tprice/pipelines/containers/virome/assets/taxon_remap.tsv"
+
+# Trimmomatic
+trim_adapters: "TruSeq3-PE"
+trim_leading:  3
+trim_trailing: 3
+trim_minlen:   36
+
+# Kraken2
+kraken2_confidence: 0.1
+bracken_read_len:   125
+bracken_level:      "S"
+
+# --- Host gene expression quantification (the point of this run) ---
+run_host_quant: true
+gtf:            "/groups/tprice/pipelines/references/gencode.v48.primary_assembly.annotation.gtf"
+blacklist_bed:  "/groups/tprice/pipelines/references/blacklist.bed"
+exclude_bed:    "/groups/tprice/pipelines/references/filter.bed"
