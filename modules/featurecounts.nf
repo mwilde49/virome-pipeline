@@ -29,13 +29,13 @@ process FEATURECOUNTS {
     # matrix still covers the full cohort. No R-script change, no container
     # rebuild -- pure shell logic in this process script.
     # Column names in featurecounts_raw.csv come from Rsubread as the FULL
-    # input filename (e.g. "104T8L.filt.bam"); bin/aggregate_host_counts.py
-    # strips the ".filt.bam" suffix centrally (re.sub(r'\.filt\.bam$', ...)).
-    # The synthesized column for an excluded sample must use that same full
-    # filename, not a pre-stripped sample ID, or it silently fails to match
-    # up with the HTSeq columns downstream (confirmed: an earlier version of
-    # this fix produced "118T8R.filt_fc_reads" instead of "118T8R_fc_reads",
-    # and no RPM column at all, since the RPM step keys off the same name).
+    # input filename, e.g. 104T8L dot filt dot bam -- bin/aggregate_host_counts.py
+    # strips that trailing dot-filt-dot-bam suffix off centrally. The synthesized
+    # column for an excluded sample must use that same full filename, not a
+    # pre-stripped sample ID, or it silently fails to match up with the HTSeq
+    # columns downstream -- confirmed: an earlier version of this fix produced
+    # a mismatched column name and no RPM column at all for the excluded sample,
+    # since the RPM step keys off the same name.
     mkdir -p excluded_bams
     : > excluded_samples.txt
     for bam in *.bam; do
