@@ -1,0 +1,89 @@
+# virome-pipeline run config — Host gene expression quantification
+# Parkinson's 2026 DRG cohort, all 20 samples (14 PD + 6 samples labeled
+# "023"-"028" -- see caveat below).
+#
+# Otherwise identical to assets/config_parkinson_2026.yaml (same samplesheet,
+# same references, same filtering/trim/kraken2 params) plus run_host_quant
+# enabled.
+#
+# No single-sample pilot for this cohort specifically -- the run_host_quant
+# arm's real-genome-scale technical correctness was already validated on
+# Juno multiple times (Iadorola TG12 pilot, TG3/4/8/10 batch, full 16-sample
+# Iadorola TG cohort, full 24-sample Thoracic DRG cohort, all exit 0 with
+# strong featureCounts/HTSeq concordance). Same STAR index, same
+# GTF/blacklist/exclude BEDs, same host_quant.sif container -- just a
+# different cohort's FASTQs.
+#
+# UNLIKE the Thoracic/Iadorola host-quant add-on runs, this is NOT a
+# resume-against-an-already-completed-run launch. Verified 2026-10-14/15 via
+# the read-only inspect key: the original Parkinson's 2026 main-pipeline
+# output directory (/scratch/juno/maw210003/virome_parkinson_2026) is 0
+# bytes across every subdirectory (results/, kraken2_output/, star_unmapped/,
+# multiqc/, pipeline_info/) -- not a failed/incomplete run, but routine
+# periodic /scratch cleanup (the directories date to Apr/Jun 2026, ~4-6
+# months old; the Telescope offshoot's separate output directory survived
+# because it's from Sept 19 2026, much more recent). The original run's
+# Nextflow session/workDir is very likely gone for the same reason and was
+# not chased further. This launch therefore redoes STAR/Trimmomatic/
+# Kraken2(dual-DB)/Bracken from scratch for all 20 samples alongside the new
+# host-quant steps, into the same (currently empty) outdir -- there is
+# nothing to collide with.
+#
+# CAVEAT, unresolved (verbatim from the original intake report,
+# reports/2026-04-04_parkinson_intake.md, and carried into
+# assets/config_telescope_parkinson_2026.yaml's own comment): samples
+# "023"-"028" are explicitly labeled "Unclassified" in the intake report --
+# whether they are healthy DRG controls, a different disease group, or a
+# different tissue has NOT been confirmed. Running them through this
+# pipeline (viral detection + host-quant) doesn't require resolving this,
+# but any downstream PD-vs-control comparison using this cohort's output
+# must NOT treat 023-028 as clean controls until that's resolved.
+#
+# Samplesheet path: using the git-tracked assets/samplesheets/ path (not the
+# flat assets/samplesheet_parkinson_2026_juno.csv some earlier session
+# placed directly on the live Juno deployment outside of git -- both exist
+# and are byte-identical as of 2026-10-15, but only the nested one is
+# actually version-controlled).
+#
+# Launch (from an interactive compute node on Juno, or via
+# scripts/run_virome_config.sbatch):
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run main.nf -profile slurm -params-file assets/config_parkinson_2026_hostquant.yaml
+
+samplesheet:      "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_parkinson_2026_juno.csv"
+outdir:           "/scratch/juno/maw210003/virome_parkinson_2026"
+
+# References (pre-built on Juno)
+star_index:    "/groups/tprice/pipelines/references/star_index"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
+kraken2_db2:   "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+
+# Containers
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+# Filtering
+min_reads:     5
+artifact_list: "/groups/tprice/pipelines/containers/virome/assets/artifact_taxa.tsv"
+taxon_remap:   "/groups/tprice/pipelines/containers/virome/assets/taxon_remap.tsv"
+
+# Trimmomatic
+trim_adapters: "TruSeq3-PE"
+trim_leading:  3
+trim_trailing: 3
+trim_minlen:   36
+
+# Kraken2
+kraken2_confidence: 0.1
+bracken_read_len:   150
+bracken_level:      "S"
+
+# Publish intermediates for parity with other cohorts (enables BLAST/PathSeq
+# offshoots later without re-running the main pipeline).
+save_unmapped_reads: true
+save_kraken2_output: true
+
+# --- Host gene expression quantification (the point of this run) ---
+run_host_quant: true
+gtf:            "/groups/tprice/pipelines/references/gencode.v48.primary_assembly.annotation.gtf"
+blacklist_bed:  "/groups/tprice/pipelines/references/blacklist.bed"
+exclude_bed:    "/groups/tprice/pipelines/references/filter.bed"
