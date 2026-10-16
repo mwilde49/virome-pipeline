@@ -49,6 +49,34 @@
 # scripts/run_virome_config.sbatch):
 #   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
 #   nextflow run main.nf -profile slurm -params-file assets/config_parkinson_2026_hostquant.yaml
+#
+# project_name / adapters added 2026-10-16 to satisfy tjp-launch's stricter
+# `submit` validator (required_keys in hpc/bin/lib/validate.sh's
+# _validate_virome: project_name, samplesheet, outdir, star_index,
+# kraken2_db, adapters, container_dir -- none of this project's other
+# cohort configs actually carry these, because they were all written for
+# direct `nextflow run -params-file` invocation, not tjp-launch submission).
+#
+# IMPORTANT, found while fixing this: `trim_adapters` (set in 27 of this
+# project's cohort configs, including the original config_parkinson_2026.yaml)
+# is NEVER READ by any pipeline code -- grepped every .nf/.config file, zero
+# hits. The only param modules/trimmomatic.nf and nextflow.config actually
+# consume is a literal `adapters` FILE PATH, defaulting to NexteraPE-PE.fa.
+# So every cohort this pipeline has ever run was trimmed against Nextera
+# adapters regardless of what trim_adapters claimed. For THIS cohort
+# specifically, that default happens to be empirically correct anyway --
+# verified directly against real reads (not assumed): partial-downloaded
+# PD9_1.fastq.gz and 023_1.fastq.gz via the read-only inspect key and
+# searched for literal adapter read-through k-mers. PD9: 25.8% of reads
+# contain the Nextera fragment (CTGTCTCTTATACACATCT), 0% contain the
+# TruSeq3 fragment (AGATCGGAAGAGC). Sample 023 (one of the "unclassified"
+# group): 43.4% Nextera, 0% TruSeq3. Keeping NexteraPE-PE.fa below is a
+# verified-correct choice for this cohort, not an unexamined default --
+# but the dead `trim_adapters` field across the other 26 configs is a real,
+# separate, project-wide issue worth fixing independently of this run.
+
+project_name:     "parkinson_2026_drg_hostquant"
+adapters:         "/groups/tprice/pipelines/containers/virome/assets/NexteraPE-PE.fa"
 
 samplesheet:      "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_parkinson_2026_juno.csv"
 outdir:           "/scratch/juno/maw210003/virome_parkinson_2026"
