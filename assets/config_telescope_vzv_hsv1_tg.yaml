@@ -1,0 +1,38 @@
+# Telescope verification offshoot — VZV+HSV-1 trigeminal ganglia cohort
+# (Depledge et al. Nat Commun 2018, PRJEB23238), scoped to TG3-TG7 (5 donors,
+# same 5-sample scope as config_vzv_hsv1_tg.yaml / config_vzv_hsv1_tg_hostquant.yaml).
+#
+# Rationale for including this cohort in the Telescope/HERV-K locus-level
+# rollout: real human ganglion tissue, independent of the Iadorola/LaPaglia TG
+# cohort already run through Telescope, and already a confirmed HSV-1-positive
+# cohort (Tier-1 in all 5 donors per docs/pathseq_validation_results_2026-08-15.md)
+# -- exactly the kind of HSV-1-positive donor set the planned two-leg HERV-K
+# workflow (CLAUDE.md "Telescope locus-level HERV-K quantification offshoot")
+# calls out as warranting locus-level resolution, not just the aggregate
+# taxon-level HERV-K reading the main pipeline already produces.
+#
+# CAVEAT: bait-capture (VZV+HSV-1) enriched library prep, not standard
+# unbiased bulk -- the enrichment targets viral sequence, not host/HERV-K
+# loci, so no reason to expect it distorts HERV-K locus quantification
+# specifically, but flagging since it's a real methodological difference from
+# every other Telescope cohort run so far (all standard unbiased bulk).
+#
+# Prerequisites confirmed 2026-11-04 (same references as every other
+# Telescope cohort run -- shared, not cohort-specific):
+#   - containers/telescope.sif already on Juno
+#   - star_index and telescope_annotation already staged
+#   - samplesheet_vzv_hsv1_tg_juno.csv (5 real donor samples, ERR2182863-67)
+#     already tracked in git and already live on Juno
+#
+# Launch: `submit virome-telescope <this config, staged in a write root>` via
+# the dark-write key, same pattern as the Parkinson's 2026 / Iadorola TG
+# full-cohort Telescope runs.
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_vzv_hsv1_tg_juno.csv"
+outdir:      "/scratch/juno/maw210003/virome_telescope_vzv_hsv1_tg"
+
+star_index: "/groups/tprice/pipelines/references/star_index"
+
+telescope_annotation: "/groups/tprice/pipelines/references/telescope_annotation/HERV_rmsk.hg38.v2.transcripts.gtf"
+
+container_dir: "/groups/tprice/pipelines/containers/virome"

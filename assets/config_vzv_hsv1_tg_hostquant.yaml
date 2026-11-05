@@ -1,0 +1,153 @@
+# virome-pipeline run config — VZV+HSV-1 human trigeminal ganglia cohort,
+# combined main-pipeline rerun + Host gene expression quantification
+#
+# Source: Depledge et al. Nat Commun 2018 (PRJEB23238), scoped to TG3-TG7 (5
+# donors, single clean library prep each -- TG1/TG2 excluded, 4 preps each;
+# ARPE-19 cell-line controls also excluded). Bait-capture (VZV+HSV-1) enriched
+# RNA-seq, NOT standard unbiased bulk -- expect inflated apparent viral read
+# fraction relative to Kraken2-style unbiased classification. See
+# docs/pathseq_and_test_datasets_2026-08-14.md for full dataset provenance.
+#
+# This cohort's main pipeline already ran successfully once before
+# (session d938db1b-595b-44cf-a364-465fde59c904, run name "grave_banach",
+# 2026-08-15, OK, 4h28m; documented in
+# docs/pathseq_validation_results_2026-08-15.md: "vzv_hsv1_tg | 5 | main
+# pipeline 50/50, 4h28m | Both HSV-1 and VZV confirmed Tier-1 in all 5
+# donors") -- real, strong, literature-reproducing signal, not a first look.
+#
+# THIS IS A RESUME, NOT A FULL RERUN -- unlike Parkinson's 2026, verified
+# 2026-11-04 via the read-only inspect key that this cohort's Nextflow
+# workDir (/scratch/juno/maw210003/nf_work/) still has real cached task
+# directories for all 5 samples (raw/trimmed FASTQs, kraken2 outputs/reports,
+# unmapped FASTQs, unaligned BAMs), and the session's own cache DB
+# (/groups/tprice/pipelines/containers/virome/.nextflow/cache/d938db1b-.../db)
+# is intact. Only the final aggregate matrices under results/ (and
+# provenance/, which didn't exist yet at the time of this run) are gone --
+# aged out under periodic /scratch cleanup while the upstream task dirs,
+# apparently refreshed by the same-day PathSeq offshoot run consuming
+# star_unmapped/, survived.
+#
+# MUST use an explicit session ID, never a bare `-resume` -- confirmed via
+# `.nextflow/history` in the launch directory
+# (/groups/tprice/pipelines/containers/virome) that this is a SHARED launch
+# directory used by many other cohorts' main-pipeline invocations (see
+# docs/juno_hpc_operations_guide.md §4, "the most dangerous gotcha here" --
+# a bare `-resume` can silently grab a different cohort's more-recent
+# session). Launch command:
+#   cd /groups/tprice/pipelines/containers/virome
+#   export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#   nextflow run main.nf -profile slurm -params-file assets/config_vzv_hsv1_tg_hostquant.yaml \
+#     -resume d938db1b-595b-44cf-a364-465fde59c904
+#
+# Every param below that could affect an upstream task's hash (samplesheet
+# path, adapters, trim_*, kraken2_confidence, bracken_read_len/level,
+# min_reads, artifact_list, taxon_remap, star_index, kraken2_db,
+# kraken2_db2) is unchanged from the original config_vzv_hsv1_tg.yaml, so
+# FASTQC/TRIMMOMATIC/STAR_HOST_REMOVAL/KRAKEN2_CLASSIFY(x2)/BRACKEN(x2)/
+# KRAKEN2_FILTER(x2) should all CACHE-hit. `project_name` and `adapters`
+# (added below only to satisfy tjp-launch's validator) resolve to the exact
+# same literal file the implicit default already pointed at and are
+# confirmed never read by any pipeline module (grepped every .nf/.config,
+# zero hits) -- neither can invalidate a task hash. Only
+# AGGREGATE/COMPARE_DATABASES/REPORT (outputs swept, cheap to redo) and the
+# entirely new host-quant arm should actually execute.
+#
+# Combined into one launch (not a separate main + host-quant pair) only
+# because that's simplest for a resume against one session -- unlike
+# Parkinson's 2026, this one WILL mostly cache-hit rather than redo real
+# compute.
+#
+# host_quant arm: no prior run on this cohort. Same STAR index, same
+# GTF/blacklist/exclude BEDs, same host_quant.sif container already validated
+# on Thoracic DRG / Iadorola TG / Parkinson's 2026 -- just a different
+# cohort's FASTQs. No cell-line (ARPE-19) vs. real-ganglion host expression
+# comparison intended here -- ARPE-19 samples were never ingested into this
+# cohort's samplesheet in the first place (5-donor scope predates this run).
+#
+# Adapter chemistry: `trim_adapters: "TruSeq3-PE"` below is carried over from
+# the original config_vzv_hsv1_tg.yaml but is DEAD CODE (see
+# config_parkinson_2026_hostquant.yaml's comment for the full project-wide
+# finding -- trim_adapters is never read by any pipeline module; the real
+# consumed param is the literal `adapters` FASTA path, defaulting to
+# NexteraPE-PE.fa). Not re-verified empirically for this specific cohort via
+# a fresh k-mer check the way Parkinson's 2026 was -- but the original run's
+# real, literature-reproducing HSV-1/VZV Tier-1 result was already produced
+# under this exact same Nextera-default behavior, so there's no open
+# correctness question blocking this rerun. The dead `trim_adapters` field
+# remains a separate, project-wide issue, unfixed here.
+#
+# project_name / adapters added to satisfy tjp-launch's stricter `submit`
+# validator (required_keys in hpc/bin/lib/validate.sh's _validate_virome):
+# project_name, samplesheet, outdir, star_index, kraken2_db, adapters,
+# container_dir.
+#
+# IMPORTANT CAVEAT ON THE RESUME PLAN ABOVE: `tjp-launch`'s `submit` always
+# launches from a fresh, per-run timestamped directory under
+# /work/maw210003/pipelines/virome/runs/ (confirmed from the Parkinson's 2026
+# audit log) -- it has no `.nextflow/history`/cache from
+# /groups/tprice/pipelines/containers/virome and no way to pass `-resume
+# <id>`, so `submit virome <this config>` CANNOT perform the resume
+# described above -- it would do a full rerun, same as Parkinson's 2026.
+# A real resume needs a direct `nextflow run ... -resume
+# d938db1b-595b-44cf-a364-465fde59c904` invocation from
+# /groups/tprice/pipelines/containers/virome on an interactive compute node,
+# which is outside what any currently-available automated key can do
+# (dark_write's `submit` only drives tjp-launch; dark_run is jailed to the
+# 4 SBOX roots, doesn't reach /groups/tprice/pipelines, and is capped at 2h).
+# Two real options, pick one:
+#   (a) Full rerun via `submit virome <config staged in a write root>`,
+#       same mechanism as Parkinson's 2026 -- executable end-to-end via the
+#       dark keys, costs re-running STAR/Trimmomatic/Kraken2(dual-DB)/Bracken
+#       for 5 samples (modest; the original full run was 4h28m total before
+#       any caching existed).
+#   (b) True resume -- maximally efficient, but requires running this
+#       directly from an interactive Juno session (not available to Claude):
+#         cd /groups/tprice/pipelines/containers/virome
+#         export NXF_JVM_ARGS="-Xms512m -Xmx2g"
+#         nextflow run main.nf -profile slurm \
+#           -params-file assets/config_vzv_hsv1_tg_hostquant.yaml \
+#           -resume d938db1b-595b-44cf-a364-465fde59c904
+#
+# DECISION 2026-11-04: option (a), full rerun via `submit virome`, chosen.
+
+project_name: "vzv_hsv1_tg_hostquant"
+adapters:     "/groups/tprice/pipelines/containers/virome/assets/NexteraPE-PE.fa"
+
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_vzv_hsv1_tg_juno.csv"
+outdir:      "/scratch/juno/maw210003/virome_vzv_hsv1_tg"
+
+# References (pre-built on Juno)
+star_index:    "/groups/tprice/pipelines/references/star_index"
+kraken2_db:    "/groups/tprice/pipelines/references/kraken2_viral_db"
+kraken2_db2:   "/groups/tprice/pipelines/references/kraken2_pluspf_db"
+
+# Containers
+container_dir: "/groups/tprice/pipelines/containers/virome"
+
+# Filtering
+min_reads:     5
+artifact_list: "/groups/tprice/pipelines/containers/virome/assets/artifact_taxa.tsv"
+taxon_remap:   "/groups/tprice/pipelines/containers/virome/assets/taxon_remap.tsv"
+
+# Trimmomatic -- read lengths vary by sample per the source paper; 151 matches
+# TG3-TG7 (the real donor ganglia actually in this samplesheet)
+trim_adapters: "TruSeq3-PE"
+trim_leading:  3
+trim_trailing: 3
+trim_minlen:   36
+
+# Kraken2
+kraken2_confidence: 0.1
+bracken_read_len:   151
+bracken_level:      "S"
+
+# Publish intermediates -- same as the original run, keeps PathSeq offshoot
+# re-runnable against this pass without extra setup
+save_unmapped_reads: true
+save_kraken2_output: true
+
+# --- Host gene expression quantification (the new part of this run) ---
+run_host_quant: true
+gtf:            "/groups/tprice/pipelines/references/gencode.v48.primary_assembly.annotation.gtf"
+blacklist_bed:  "/groups/tprice/pipelines/references/blacklist.bed"
+exclude_bed:    "/groups/tprice/pipelines/references/filter.bed"
