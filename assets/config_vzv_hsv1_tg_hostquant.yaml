@@ -109,11 +109,30 @@
 #           -resume d938db1b-595b-44cf-a364-465fde59c904
 #
 # DECISION 2026-11-04: option (a), full rerun via `submit virome`, chosen.
+#
+# POST-LAUNCH FAILURE, 2026-11-04 (jobs 495272/495273, confirmed 2026-11-09):
+# both failed within ~25s on `main.nf`'s samplesheet-parsing `checkIfExists`
+# step -- "No such file or directory:
+# /titan/tprice/ingest/virus/vzv_hsv1_tg/ERR2182863_1.fastq.gz". `submit`
+# dispatches to a SLURM compute node, and Titan is mounted on Juno login
+# nodes only (docs/juno_hpc_operations_guide.md's own documented gotcha) --
+# this is the risk this config's own comments flagged as unresolved when
+# first written, now confirmed to apply. No available Claude-held key can
+# fix this: `dark_write`'s Titan jail root is the narrow
+# `/titan/tprice/ingest/SBOX` staging area, not this cohort's real path, and
+# `dark_run`'s own 2026-09-18 testing notes record Titan as unreachable from
+# inside its jail outright. Fix (matching the same pattern already used for
+# the 2026-08-18 batch): the user runs one `rsync` from a Juno login node to
+# stage these 5 FASTQ pairs onto scratch, and `samplesheet` below now points
+# at that scratch copy instead of Titan directly --
+# `assets/samplesheets/samplesheet_vzv_hsv1_tg_scratch.csv`. No other param
+# changed; the original `..._juno.csv` (Titan-direct) samplesheet is left
+# alone since other configs still reference it.
 
 project_name: "vzv_hsv1_tg_hostquant"
 adapters:     "/groups/tprice/pipelines/containers/virome/assets/NexteraPE-PE.fa"
 
-samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_vzv_hsv1_tg_juno.csv"
+samplesheet: "/groups/tprice/pipelines/containers/virome/assets/samplesheets/samplesheet_vzv_hsv1_tg_scratch.csv"
 outdir:      "/scratch/juno/maw210003/virome_vzv_hsv1_tg"
 
 # References (pre-built on Juno)
